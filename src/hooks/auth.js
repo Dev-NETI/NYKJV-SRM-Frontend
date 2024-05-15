@@ -59,35 +59,43 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   };
 
   const login = async ({ setErrors, setStatus, ...props }) => {
-    await csrf();
-
     setErrors([]);
     setStatus(null);
 
-    await axios
-      .post("/login", props)
-      .then(() => {
-        toast({
-          variant: "secondary",
-          title: "Login Successful",
-          description: "You have successfully logged in.",
-        });
-      })
-      .then(() => mutate())
-      .catch((error) => {
-        if (error.response.status !== 422) throw error;
-        // console.log(error.response.data.errors);
-        const errorMessages = Object.values(error.response.data.errors).map(
-          (errorMessage) => <li key={errorMessage}>{errorMessage}</li>
-        );
+    try {
+      await csrf();
 
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: <ul>{errorMessages}</ul>,
+      await axios
+        .post("/login", props)
+        .then(() => {
+          toast({
+            variant: "secondary",
+            title: "Login Successful",
+            description: "You have successfully logged in.",
+          });
+        })
+        .then(() => mutate())
+        .catch((error) => {
+          if (error.response.status !== 422) throw error;
+          // console.log(error.response.data.errors);
+          const errorMessages = Object.values(error.response.data.errors).map(
+            (errorMessage) => <li key={errorMessage}>{errorMessage}</li>
+          );
+
+          toast({
+            variant: "destructive",
+            title: "Uh oh! Something went wrong.",
+            description: <ul>{errorMessages}</ul>,
+          });
+          setErrors(error.response.data.errors);
         });
-        setErrors(error.response.data.errors);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Authentication are not working. Please try again.",
       });
+    }
   };
 
   const forgotPassword = async ({ setErrors, setStatus, email }) => {
