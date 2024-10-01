@@ -51,7 +51,7 @@ function LoginOtp() {
 
   const onSubmit = async (data) => {
     axios
-      .post("/verify-otp", { otp: data.pin, temp_otp: tempt_otp })
+      .post("/api/verify-otp", { otp: data.pin, temp_otp: tempt_otp })
       .then((response) => {
         toast({
           title: "Successfully Verified",
@@ -74,7 +74,7 @@ function LoginOtp() {
   async function generateOtp() {
     console.log(user);
     await axios
-      .post("/authenticating", { temp_otp: tempt_otp })
+      .post("/api/authenticating", { temp_otp: tempt_otp })
       .then((response) => {
         console.log(response.data.status);
       })
@@ -84,7 +84,7 @@ function LoginOtp() {
   }
 
   useEffect(() => {
-    axios.get("/checking-status-otp").then((response) => {
+    axios.get("/api/checking-status-otp").then((response) => {
       if (response.data.status === true) {
         router.push("/dashboard");
         console.log("Verified");
