@@ -19,7 +19,9 @@ import { z } from "zod";
 
 const FormSchema = z
   .object({
-    name: z.string().nonempty(),
+    f_name: z.string().nonempty(),
+    m_name: z.string().nonempty(),
+    l_name: z.string().nonempty(),
     email: z.string().email({
       message: "Invalid email format.",
     }),
@@ -39,7 +41,9 @@ const Page = () => {
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: "",
+      f_name: "",
+      m_name: "",
+      l_name: "",
       email: "",
       password: "",
       passwordConfirmation: "",
@@ -50,7 +54,9 @@ const Page = () => {
 
   const submitForm = async (data) => {
     register({
-      name: data.name,
+      f_name: data.f_name,
+      m_name: data.m_name,
+      l_name: data.l_name,
       email: data.email,
       password: data.password,
       password_confirmation: data.passwordConfirmation,
@@ -78,10 +84,36 @@ const Page = () => {
           >
             <FormField
               control={form.control}
-              name="name"
+              name="f_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>First name</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="m_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Middle name</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="l_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last name</FormLabel>
                   <FormControl>
                     <Input type="text" placeholder="Name" {...field} />
                   </FormControl>
