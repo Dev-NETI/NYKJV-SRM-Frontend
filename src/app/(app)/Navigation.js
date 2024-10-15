@@ -36,6 +36,27 @@ const Navigation = ({ user }) => {
               >
                 Dashboard
               </NavLink>
+
+              <NavLink
+                href="/category"
+                active={usePathname() === "/category"}
+              >
+                Category
+              </NavLink>
+
+              <NavLink
+                href="/brand"
+                active={usePathname() === "/brand"}
+              >
+                Brand
+              </NavLink>
+
+              <NavLink
+                href="/product"
+                active={usePathname() === "/product"}
+              >
+                Product
+              </NavLink>
             </div>
           </div>
 
@@ -114,6 +135,26 @@ const Navigation = ({ user }) => {
             >
               Dashboard
             </ResponsiveNavLink>
+              <ResponsiveNavLink
+                href="/category"
+                active={usePathname() === "/category"}
+              >
+                Category
+              </ResponsiveNavLink>
+
+              <ResponsiveNavLink
+                href="/brand"
+                active={usePathname() === "/brand"}
+              >
+                Brand
+              </ResponsiveNavLink>
+
+              <ResponsiveNavLink
+                href="/product"
+                active={usePathname() === "/product"}
+              >
+                Product
+              </ResponsiveNavLink>
           </div>
 
           {/* Responsive Settings Options */}
