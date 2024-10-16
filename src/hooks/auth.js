@@ -163,29 +163,37 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     window.location.pathname = "/login";
   };
 
-  const [verified, setVerified] = useState(false);
+  const checkVerified = async ({ user, path }) => {
+    try {
+      const response = await axios.get("api/checking-status-otp");
+      const currentPath = path;
 
-  const verifiedOtpSuccess = () => {
-    // Cookies.set("isVerified", "true", { secure: true, sameSite: "strict" });
-    // if (verified === true) {
-    //   router.push("/dashboard");
-    // } else {
-    console.log(verified);
-    router.push("/login-otp"); // Add a leading slash to the route path
-    //   console.log("Not verified");
-    // }
-  };
+      console.log("Current Path:", currentPath);
 
-  const checkVerified = async () => {
-    // await axios.get("/checking-status-otp").then((response) => {
-    //   if (response.data.status === true) {
-    //     router.push("/dashboard");
-    //     console.log("Verified");
-    //   } else {
-    //     router.push("/login-otp");
-    //     console.log("Not Verified");
-    //   }
-    // });
+      const roles = user?.roles; // Ensure user is defined
+
+      // Check if user is verified
+      if (response.data.status === true) {
+        // Allow access only if the currentPath matches one of the roles or if user has any roles
+        if (roles && roles.length > 0) {
+          const hasRoleForPath = roles.some(
+            (role) => currentPath === "/" + role.url // Check against the current path
+          );
+
+          if (!hasRoleForPath) {
+            router.push("/unauthorized"); // Redirect to unauthorized if no role matches
+          }
+        }
+      } else {
+        // If user is not verified, restrict access to login-otp only
+        if (currentPath !== "/login-otp") {
+          router.push("/login-otp"); // Redirect to login-otp
+        }
+      }
+    } catch (error) {
+      console.error("Error checking verification status:", error);
+      // Handle the error accordingly, e.g., redirect or notify user
+    }
   };
 
   useEffect(() => {

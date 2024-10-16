@@ -72,7 +72,7 @@ function LoginOtp() {
   };
 
   async function generateOtp() {
-    console.log(user);
+    // console.log(user);
     await axios
       .post("/api/authenticating", { temp_otp: tempt_otp })
       .then((response) => {
@@ -87,7 +87,6 @@ function LoginOtp() {
     axios.get("/api/checking-status-otp").then((response) => {
       if (response.data.status === true) {
         router.push("/dashboard");
-        console.log("Verified");
       } else {
         generateOtp();
       }
