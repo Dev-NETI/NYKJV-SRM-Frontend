@@ -5,36 +5,68 @@ import DocumentListComponent from "@/components/supplier-document/DocumentListCo
 import DocumentListNavigationComponent from "@/components/supplier-document/DocumentListNavigationComponent";
 import DialogComponent from "@/components/material-ui/DialogComponent";
 import DocumentFormComponent from "@/components/supplier-document/DocumentFormComponent";
+import { Snackbar } from "@mui/material";
+import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 
 function page() {
-  const [open, setOpen] = useState(false);
+  const [supplierDocumentState, setSupplierDocumentState] = useState({
+    modal: false,
+    snackbar: false,
+    snackbarMessage: "",
+    snackbarVertical: "top",
+    snackbarHorizontal: "right",
+    reload: true,
+  });
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setSupplierDocumentState((prevState) => ({ ...prevState, modal: true }));
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setSupplierDocumentState((prevState) => ({ ...prevState, modal: false }));
   };
 
   return (
-    <div className="p-4">
-      <Header title="Documents" />
-      <div className="flex flex-col md:flex-row lg:flex-row gap-4 mt-4">
-        <DocumentListNavigationComponent
-          handleOpenFileUploadModal={handleClickOpen}
-        />
-        <DocumentListComponent />
-      </div>
+    <SupplierDocumentContext.Provider
+      value={{ supplierDocumentState, setSupplierDocumentState }}
+    >
+      <div className="p-4">
+        <Header title="Documents" />
+        <div className="flex flex-col md:flex-row lg:flex-row gap-4 mt-4">
+          <DocumentListNavigationComponent
+            handleOpenFileUploadModal={handleClickOpen}
+          />
+          <DocumentListComponent />
+        </div>
 
-      <DialogComponent
-        open={open}
-        handleClose={handleClose}
-        title="New file upload"
-      >
-        <DocumentFormComponent />
-      </DialogComponent>
-    </div>
+        <DialogComponent
+          open={supplierDocumentState.modal}
+          handleClose={handleClose}
+          title="New file upload"
+        >
+          <DocumentFormComponent setSnackbarMethod={setSupplierDocumentState} />
+        </DialogComponent>
+
+        <Snackbar
+          anchorOrigin={{
+            vertical: supplierDocumentState.snackbarVertical,
+            horizontal: supplierDocumentState.snackbarHorizontal,
+          }}
+          open={supplierDocumentState.snackbar}
+          onClose={() =>
+            setSupplierDocumentState((prevState) => ({
+              ...prevState,
+              snackbar: false,
+            }))
+          }
+          message={supplierDocumentState.snackbarMessage}
+          key={
+            supplierDocumentState.snackbarVertical +
+            supplierDocumentState.snackbarHorizontal
+          }
+        />
+      </div>
+    </SupplierDocumentContext.Provider>
   );
 }
 
