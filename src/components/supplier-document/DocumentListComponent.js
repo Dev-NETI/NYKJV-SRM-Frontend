@@ -9,7 +9,8 @@ import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 
 function DocumentListComponent() {
   const { user } = useAuth({ middleware: "auth" });
-  const { show } = useSupplierDocument();
+  const { showWith2Parameter: getSupplierDocument } =
+    useSupplierDocument("show-documents");
   const [documentListState, setDocumentListState] = useState({
     documentData: [],
     filteredData: [],
@@ -20,7 +21,10 @@ function DocumentListComponent() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await show(user.supplier_id);
+      const { data } = await getSupplierDocument(
+        user.supplier_id,
+        supplierDocumentState.activePage
+      );
       setDocumentListState((prevState) => ({
         ...prevState,
         documentData: data,
@@ -61,8 +65,8 @@ function DocumentListComponent() {
         </Space>
       </div>
       <div
-        className="rounded-xl bg-stone-200 border-gray-500
-    grid grid-cols-1 md:grid-cols-6 lg:grid-cols-6 
+        className="rounded-xl bg-white border-gray-500
+    grid grid-cols-1 md:grid-cols-5 lg:grid-cols-5 
     gap-4 p-4"
       >
         {documentListState.filteredData.length > 0
