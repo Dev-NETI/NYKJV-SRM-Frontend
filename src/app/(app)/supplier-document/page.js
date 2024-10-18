@@ -7,6 +7,7 @@ import DialogComponent from "@/components/material-ui/DialogComponent";
 import DocumentFormComponent from "@/components/supplier-document/DocumentFormComponent";
 import { Snackbar } from "@mui/material";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
+import Alert from "@mui/material/Alert";
 
 function page() {
   const [supplierDocumentState, setSupplierDocumentState] = useState({
@@ -15,7 +16,9 @@ function page() {
     snackbarMessage: "",
     snackbarVertical: "top",
     snackbarHorizontal: "right",
+    snackBarSeverity: "success",
     reload: true,
+    activePage: 1, //1 - documents, 0 - trash
   });
 
   const handleClickOpen = () => {
@@ -59,12 +62,25 @@ function page() {
               snackbar: false,
             }))
           }
-          message={supplierDocumentState.snackbarMessage}
           key={
             supplierDocumentState.snackbarVertical +
             supplierDocumentState.snackbarHorizontal
           }
-        />
+        >
+          <Alert
+            onClose={() =>
+              setSupplierDocumentState((prevState) => ({
+                ...prevState,
+                snackbar: false,
+              }))
+            }
+            severity={supplierDocumentState.snackBarSeverity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {supplierDocumentState.snackbarMessage}
+          </Alert>
+        </Snackbar>
       </div>
     </SupplierDocumentContext.Provider>
   );
