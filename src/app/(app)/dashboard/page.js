@@ -3,39 +3,41 @@ import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import Header from "@/app/(app)/Header";
 import Button from "@/components/Button";
+import { Alert } from "@mui/material";
 import { useRouter } from "next/navigation";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-//Import Table
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-//Import Skeleton
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
+import BasicModal from "@/components/Modal"; // Modal component
 
 const Dashboard = () => {
   const router = useRouter();
   const [suppliers, setSuppliers] = useState([]);
-  const [filteredSuppliers, setFilteredSuppliers] = useState([]); // For filtered data
-  const [searchQuery, setSearchQuery] = useState(""); // Search query state
+  const [success, setSuccess] = useState("");
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10; // Set the number of items per page
+  const itemsPerPage = 10;
 
-  // Fetch suppliers from the API
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   useEffect(() => {
     const fetchSuppliers = async () => {
       try {
         const response = await axios.get("/dashboard");
         const supplierData = response.data.suppliers || [];
         setSuppliers(supplierData);
-        setFilteredSuppliers(supplierData); // Initially set filteredSuppliers to all suppliers
+        setFilteredSuppliers(supplierData);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching suppliers:", error);
@@ -47,7 +49,6 @@ const Dashboard = () => {
     fetchSuppliers();
   }, []);
 
-  // Handle search query update
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
@@ -62,7 +63,11 @@ const Dashboard = () => {
   };
 
   // Calculate total pages
-  const totalPages = Math.ceil(filteredSuppliers.length / itemsPerPage);
+  // Calculate total pages
+  const totalPages = Math.max(
+    Math.ceil(filteredSuppliers.length / itemsPerPage),
+    1
+  );
 
   // Slice filtered suppliers for the current page
   const currentSuppliers = filteredSuppliers.slice(
@@ -71,8 +76,35 @@ const Dashboard = () => {
   );
 
   const handleEditClick = (id) => {
-    router.push(`/dashboard/${id}/edit`); 
-    console.log("Editting supplier with ID", id); // Logs the ID for debugging
+    router.push(`/dashboard/${id}/edit`);
+    console.log("Editing supplier with ID", id);
+  };
+
+  // Function to open delete confirmation modal
+  const handleDeleteClick = (id) => {
+    setSelectedSupplierId(id);
+    setIsModalOpen(true);
+  };
+
+  // Function to delete supplier after confirmation
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`/dashboard/${selectedSupplierId}`);
+      setSuppliers((prev) =>
+        prev.filter((supplier) => supplier.id !== selectedSupplierId)
+      );
+      setFilteredSuppliers((prev) =>
+        prev.filter((supplier) => supplier.id !== selectedSupplierId)
+      );
+      setIsModalOpen(false);
+      setSuccess("Supplier deleted successfully");
+      setTimeout(() => {
+        setSuccess("");
+      }, 2000);
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      alert("Failed to delete supplier");
+    }
   };
 
   return (
@@ -127,7 +159,6 @@ const Dashboard = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell className="text-center">ID</TableCell>
                   <TableCell className="text-center">Name</TableCell>
                   <TableCell className="text-center">Island ID</TableCell>
                   <TableCell className="text-center">Province ID</TableCell>
@@ -141,9 +172,7 @@ const Dashboard = () => {
                 {currentSuppliers.length > 0
                   ? currentSuppliers.map((supplier) => (
                       <TableRow key={supplier.id}>
-                        <TableCell className="text-center">
-                          {supplier.id}
-                        </TableCell>
+
                         <TableCell className="text-center">
                           {supplier.name}
                         </TableCell>
@@ -169,6 +198,11 @@ const Dashboard = () => {
                             >
                               Edit
                             </Button>
+                            <Button
+                              onClick={() => handleDeleteClick(supplier.id)}
+                            >
+                              Delete
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -182,10 +216,24 @@ const Dashboard = () => {
                     )}
               </TableBody>
             </Table>
-            {/* Pagination controls */}
           </div>
         </div>
       </div>
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          {success && <Alert severity="success">{success}</Alert>}
+        </div>
+      </div>
+      {/* Modal for delete confirmation */}
+      {isModalOpen && (
+        <BasicModal
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={confirmDelete}
+          title="Confirm Deletion"
+          description="Are you sure you want to delete this supplier?"
+        />
+      )}
     </>
   );
 };

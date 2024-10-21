@@ -1,284 +1,181 @@
-'use client';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+"use client";
 import { useEffect, useState } from "react";
-import axios from "@/lib/axios"; // Import Axios
-import { useRouter } from "next/navigation"; // Import useRouter
-import { usePathname } from "next/navigation"; // Import usePathname
+import { useParams } from "next/navigation";
+import axios from "@/lib/axios";
+import { TextField, Button, Grid, Typography, Alert } from "@mui/material";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
 
-// Define the schema for form validation
-const FormSchema = z
-  .object({
-    name: z.string().nonempty({ message: "Name is required." }),
-    island_id: z
-      .number()
-      .int({ message: "Island ID must be an integer." })
-      .max(100, { message: "Island ID must be 100 or fewer." }),
-    province_id: z
-      .number()
-      .int({ message: "Province ID must be an integer." })
-      .max(100, { message: "Province ID must be 100 or fewer." }),
-    municipality_id: z
-      .number()
-      .int({ message: "Municipality ID must be an integer." })
-      .max(100, { message: "Municipality ID must be 100 or fewer." }),
-    brgy_id: z
-      .number()
-      .int({ message: "Barangay ID must be an integer." })
-      .max(100, { message: "Barangay ID must be 100 or fewer." }),
-    street_address: z.string().nonempty({ message: "Street Address is required." }),
-    is_active: z.boolean().optional(),
-  })
-  .strict();
+const FormSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  island_id: z
+    .number()
+    .max(100, { message: "Island ID must be a positive number" }),
+  province_id: z
+    .number()
+    .max(100, { message: "Province ID must be a positive number" }),
+  municipality_id: z
+    .number()
+    .max(100, { message: "Municipality ID must be a positive number" }),
+  brgy_id: z
+    .number()
+    .max(100, { message: "Barangay ID must be a positive number" }),
+  street_address: z.string().min(1, { message: "Street Address is required" }),
+});
 
 const EditSupplier = () => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [supplier, setSupplier] = useState(null);
+  const { id } = useParams();
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-
-  const form = useForm({
+  const [success, setSuccess] = useState("");
+  const [display, setDisplay] = useState(true)
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      name: "",
-      island_id: 0,
-      province_id: 0,
-      municipality_id: 0,
-      brgy_id: 0,
-      street_address: "",
-      is_active: false,
-    },
   });
-
-  // Fetch supplier data when the component mounts
   useEffect(() => {
     const fetchSupplier = async () => {
+      if (!id) return;
       try {
-        const segments = pathname.split("/");
-        const id = segments[segments.length - 2];
-
-        if (id) {
-          const response = await axios.get(`/dashboard/${id}/edit`);
-          if (response.status === 200) {
-            setSupplier(response.data);
-            form.reset({
-              ...response.data,
-              island_id: Number(response.data.island_id),
-              province_id: Number(response.data.province_id),
-              municipality_id: Number(response.data.municipality_id),
-              brgy_id: Number(response.data.brgy_id),
-            });
-          } else {
-            setError("Supplier not found");
-          }
-        } else {
-          setError("Supplier ID is not available");
-        }
-      } catch (error) {
-        setError("Error fetching supplier data: " + error.message);
-        console.error(error);
+        const response = await axios.get(`/api/dashboard/${id}`);
+        const supplierData = response.data;
+        // Populate form with fetched data
+        setValue("name", supplierData.name);
+        setValue("island_id", supplierData.island_id);
+        setValue("province_id", supplierData.province_id);
+        setValue("municipality_id", supplierData.municipality_id);
+        setValue("brgy_id", supplierData.brgy_id);
+        setValue("street_address", supplierData.street_address);
+      } catch (err) {
+        console.error(
+          "Error fetching supplier data:",
+          err.response ? err.response.data : err.message
+        );
+        setError(
+          "Error fetching supplier data. Please check the console for details."
+        );
       } finally {
         setLoading(false);
       }
     };
-
     fetchSupplier();
-  }, [pathname, form]);
-
-  const submitForm = async (data) => {
-    if (!supplier) return;
-  
-    const segments = pathname.split("/");
-    const id = segments[segments.length - 2];
-  
-    const numericData = {
-      name: data.name,
-      street_address: data.street_address,
-      island_id: Number(data.island_id),
-      province_id: Number(data.province_id),
-      municipality_id: Number(data.municipality_id),
-      brgy_id: Number(data.brgy_id),
-      is_active: data.is_active,
-    };
-  
+  }, [id, setValue]);
+  const onSubmit = async (data) => {
+    setError("");
+    setSuccess("");
     try {
-      const response = await axios.put(`/dashboard/${id}`, numericData);
-  
-      if (response.status === 204) {
-        setSuccess("Supplier updated successfully!");
-        setError(null);
-        setSupplier({ ...supplier, ...numericData });
-        form.reset(numericData);
-        router.push("/dashboard");
-      } else {
-        setError("Update failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error during update:", error);
-      if (error.response) {
-        // Display validation errors
-        if (error.response.status === 422) {
-          const validationErrors = error.response.data.errors;
-          setError(`Validation errors: ${JSON.stringify(validationErrors)}`);
-        } else {
-          setError(`Failed to update supplier: ${error.response.data.message}`);
-        }
-      } else {
-        setError("Failed to update supplier due to a network error");
-      }
+      const response = await axios.put(`/api/dashboard/${id}`, data);
+      setSuccess('Supplier updated successfully');
+      setTimeout(() => {
+        setSuccess('')
+      }, 2000)
+    } catch (err) {
+      console.error(
+        "Error updating supplier:",
+        err.response ? err.response.data : err.message
+      );
+      setError(
+        "Error updating supplier. Please check the console for details."
+      );
     }
   };
-  
-
-  const onSubmit = (data) => {
-    submitForm(data);
-  };
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-
-  return (
-    <div className="py-12">
-      <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div className="overflow-hidden shadow-sm sm:rounded-lg">
-          <div className="flex min-h-full flex-1 flex-col justify-center items-center px-6 py-12 lg:px-8">
-            <h1 className="mt-10 mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-              Edit Supplier
-            </h1>
-            <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
-              {/* Name Field */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input type="text" placeholder="Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Island ID Field */}
-              <FormField
-                control={form.control}
-                name="island_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Island ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Island ID"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(Number(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Province ID Field */}
-              <FormField
-                control={form.control}
-                name="province_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Province ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Province ID"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(Number(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Municipality ID Field */}
-              <FormField
-                control={form.control}
-                name="municipality_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Municipality ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Municipality ID"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(Number(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Barangay ID Field */}
-              <FormField
-                control={form.control}
-                name="brgy_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Barangay ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Barangay ID"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(Number(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Street Address Field */}
-              <FormField
-                control={form.control}
-                name="street_address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Street Address</FormLabel>
-                    <FormControl>
-                      <Input type="text" placeholder="Street Address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button className="mt-5" type="submit">
-                Update
-              </Button>
-            </Form>
-            {success && <div className="text-green-500 mt-4">{success}</div>}
-          </div>
-        </div>
+  if (loading) {
+    return (
+      <div className="w-full h-screen">
+        <Box className="w-full h-full p-[2em]">
+          <Skeleton />
+          <Skeleton animation="wave" />
+          <Skeleton animation={false} />
+        </Box>
       </div>
+    );
+  }
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+  return (
+    <div className="flex min-h-full flex-1 flex-col justify-center items-center px-6 py-12 lg:px-8">
+      <Typography variant="h4" gutterBottom>
+        Edit Supplier
+      </Typography>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <TextField
+              label="Name"
+              fullWidth
+              {...register("name")}
+              error={!!errors.name}
+              helperText={errors.name?.message}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Island ID"
+              fullWidth
+              type="number"
+              {...register("island_id", { valueAsNumber: true })}
+              error={!!errors.island_id}
+              helperText={errors.island_id?.message}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Province ID"
+              fullWidth
+              type="number"
+              {...register("province_id", { valueAsNumber: true })}
+              error={!!errors.province_id}
+              helperText={errors.province_id?.message}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Municipality ID"
+              fullWidth
+              type="number"
+              {...register("municipality_id", { valueAsNumber: true })}
+              error={!!errors.municipality_id}
+              helperText={errors.municipality_id?.message}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Barangay ID"
+              fullWidth
+              type="number"
+              {...register("brgy_id", { valueAsNumber: true })}
+              error={!!errors.brgy_id}
+              helperText={errors.brgy_id?.message}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Street Address"
+              fullWidth
+              {...register("street_address")}
+              error={!!errors.street_address}
+              helperText={errors.street_address?.message}
+            />
+          </Grid>
+        </Grid>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ mt: 3 }}
+        >
+          Update Supplier
+        </Button>
+      </form>
+      {success && <Alert severity="success">{success}</Alert>}
     </div>
   );
 };
