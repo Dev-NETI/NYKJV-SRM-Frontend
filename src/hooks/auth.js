@@ -177,15 +177,15 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   };
 
   const checkVerified = async () => {
-    await axios.get("/checking-status-otp").then((response) => {
-      if (response.data.status === true) {
-        router.push("/dashboard");
-        console.log("Verified");
-      } else {
-        router.push("/login-otp");
-        console.log("Not Verified");
-      }
-    });
+    // await axios.get("/checking-status-otp").then((response) => {
+    //   if (response.data.status === true) {
+    //     router.push("/dashboard");
+    //     console.log("Verified");
+    //   } else {
+    //     router.push("/login-otp");
+    //     console.log("Not Verified");
+    //   }
+    // });
   };
 
   useEffect(() => {
