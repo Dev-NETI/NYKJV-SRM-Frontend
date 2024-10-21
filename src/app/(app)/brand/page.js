@@ -4,11 +4,14 @@ import Header from '../Header';
 import { useBrand } from '@/hooks/api/brand';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Box, Container, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Grid2 } from '@mui/material';
+import { Box, Container, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Grid2, IconButton, } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const BrandComponent = () => {
-  const { index: showBrand, store, update: updateBrand, deleteBrand } = useBrand();
+  const { index: showBrand, store, update: updateBrand, destroy : deactivateBrand } = useBrand();
   const [brands, setBrand] = useState([]);
   const [open, setOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -41,14 +44,37 @@ const BrandComponent = () => {
     { field: 'updated_at', headerName: 'Updated At', width: 180 },
     { field: 'created_at', headerName: 'Created At', width: 180 },
     {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 240,
+      field: "actions",
+      headerName: "Actions",
+      width: 150,
       renderCell: (params) => (
         <>
-          <Button variant="outlined" color="primary" size="small" onClick={() => handleEdit(params.row)}>Edit</Button>
-          <Button variant="outlined" color="info" size="small" onClick={() => handleView(params.row)} sx={{ ml: 1 }}>View</Button>
-          <Button variant="outlined" color="error" size="small" onClick={() => handleDelete(params.row.id)} sx={{ ml: 1 }}>Delete</Button>
+          <IconButton
+            aria-label="edit"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(params.row)}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            aria-label="view"
+            color="info"
+            size="small"
+            onClick={() => handleView(params.row)}
+            sx={{ ml: 1 }}
+          >
+            <VisibilityIcon />
+          </IconButton>
+          <IconButton
+            aria-label="deactivate"
+            color="error"
+            size="small"
+            onClick={() => handleDeactivate(params.row.id)}
+            sx={{ ml: 1 }}
+          >
+            <DeleteIcon />
+          </IconButton>
         </>
       ),
     },
@@ -102,31 +128,31 @@ const BrandComponent = () => {
     setViewOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDeactivate = async (id) => {
     try {
-      await deleteBrand(id);
+      await deactivateBrand(id);
       setBrand(brands.filter((brand) => brand.id !== id));
-      toast.success("Brand deleted successfully!");
+      toast.success("Brand deactivated successfully!");
     } catch (error) {
       console.error("Error deleting brand:", error);
-      toast.error("Failed to delete brand. Please try again.");
+      toast.error("Failed to deactivate brand. Please try again.");
     }
   };
-
+  
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const object = Object.fromEntries(formData.entries());
-
+    
     const validationErrors = validateForm(object);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    
+
     try {
       if (editingBrandId) {
-        await updateBrand(editingBrandId, object);
+        await updateBrand(editingBrandId, object); // object now contains correct data
         toast.success("Brand updated successfully!");
       } else {
         await store(object);
@@ -141,15 +167,16 @@ const BrandComponent = () => {
           setErrors({ form: "An error occurred. Please try again." });
       }
     }
-  }
+}
+
 
   function validateForm(object) {
     const errors = {};
-    if (!object.brandName) errors.brandName = 'Brand Name is required.';
+    if (!object.brandName) errors.brandName = 'Brand name is required.';
     return errors;
   }
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
   return (
     <>
       <Header title="Brand" />
@@ -166,7 +193,7 @@ const BrandComponent = () => {
                 rows={rows}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[5, 10, 15, 20]}
+                pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
                 sx={{ border: 0 }}
               />

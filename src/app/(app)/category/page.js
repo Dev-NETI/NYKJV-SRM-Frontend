@@ -4,11 +4,14 @@ import Header from '../Header';
 import { useCategory } from '@/hooks/api/category';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Box, Container, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Grid2 } from '@mui/material';
+import { Box, Container, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Grid2, IconButton, } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const CategoryComponent = () => {
-  const { index: showCategory, store, update: updateCategory, deleteCategory } = useCategory();
+  const { index: showCategory, store, update: updateCategory, destroy : deactivateCategory } = useCategory();
   const [categorys, setCategory] = useState([]);
   const [open, setOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -41,14 +44,37 @@ const CategoryComponent = () => {
     { field: 'updated_at', headerName: 'Updated At', width: 180 },
     { field: 'created_at', headerName: 'Created At', width: 180 },
     {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 240,
+      field: "actions",
+      headerName: "Actions",
+      width: 150,
       renderCell: (params) => (
         <>
-          <Button variant="outlined" color="primary" size="small" onClick={() => handleEdit(params.row)}>Edit</Button>
-          <Button variant="outlined" color="info" size="small" onClick={() => handleView(params.row)} sx={{ ml: 1 }}>View</Button>
-          <Button variant="outlined" color="error" size="small" onClick={() => handleDelete(params.row.id)} sx={{ ml: 1 }}>Delete</Button>
+          <IconButton
+            aria-label="edit"
+            color="primary"
+            size="small"
+            onClick={() => handleEdit(params.row)}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            aria-label="view"
+            color="info"
+            size="small"
+            onClick={() => handleView(params.row)}
+            sx={{ ml: 1 }}
+          >
+            <VisibilityIcon />
+          </IconButton>
+          <IconButton
+            aria-label="deactivate"
+            color="error"
+            size="small"
+            onClick={() => handleDeactivate(params.row.id)}
+            sx={{ ml: 1 }}
+          >
+            <DeleteIcon />
+          </IconButton>
         </>
       ),
     },
@@ -102,14 +128,14 @@ const CategoryComponent = () => {
     setViewOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDeactivate = async (id) => {
     try {
-      await deleteCategory(id);
+      await deactivateCategory(id);
       setCategory(categorys.filter((category) => category.id !== id));
-      toast.success("Category deleted successfully!");
+      toast.success("Category deactivated successfully!");
     } catch (error) {
       console.error("Error deleting category:", error);
-      toast.error("Failed to delete category. Please try again.");
+      toast.error("Failed to deactivate category. Please try again.");
     }
   };
 
@@ -149,7 +175,7 @@ const CategoryComponent = () => {
     return errors;
   }
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
   return (
     <>
       <Header title="Category" />
@@ -166,7 +192,7 @@ const CategoryComponent = () => {
                 rows={rows}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[5, 10, 15, 20]}
+                pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
                 sx={{ border: 0 }}
               />
@@ -239,4 +265,4 @@ const CategoryComponent = () => {
   );
 };
 
-export default CategoryComponent;
+export default CategoryComponent;  

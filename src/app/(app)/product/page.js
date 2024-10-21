@@ -17,15 +17,19 @@ import {
   DialogActions,
   Grid2,
   Typography,
+  IconButton,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const ProductComponent = () => {
   const {
     index: showProduct,
     store,
     update: updateProduct,
-    deleteProduct,
+    destroy : deactivateProduct,
   } = useProduct();
   const [products, setProducts] = useState([]);
   const [open, setOpen] = useState(false); // State for add/edit modal
@@ -64,57 +68,58 @@ const ProductComponent = () => {
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
-    { field: "category_id", headerName: "Category", flex: 1, minWidth: 140 },
-    { field: "brand_id", headerName: "Brand", flex: 1, minWidth: 140 },
     { field: "name", headerName: "Product Name", flex: 1, minWidth: 180 },
-    { field: "price", headerName: "Price", flex: 1, minWidth: 100 },
+    { field: "category_name", headerName: "Category", width: 200 },
+    { field: "brand_name", headerName: "Brand", width: 200 },
+    { field: "price", headerName: "Price", width: 100 },
     {
       field: "specification",
       headerName: "Specification",
-      flex: 1,
-      minWidth: 140,
+      width: 250,
     },
-    { field: "modified_by", headerName: "Modified By", width: 180 },
+    // { field: "modified_by", headerName: "Modified By", width: 150 },
     {
       field: "actions",
       headerName: "Actions",
-      width: 250,
+      width: 150,
       renderCell: (params) => (
         <>
-          <Button
-            variant="outlined"
+          <IconButton
+            aria-label="edit"
             color="primary"
             size="small"
             onClick={() => handleEdit(params.row)}
           >
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            aria-label="view"
             color="info"
             size="small"
             onClick={() => handleView(params.row)}
             sx={{ ml: 1 }}
           >
-            View
-          </Button>
-          <Button
-            variant="outlined"
+            <VisibilityIcon />
+          </IconButton>
+          <IconButton
+            aria-label="deactivate"
             color="error"
             size="small"
-            onClick={() => handleDelete(params.row.id)}
+            onClick={() => handleDeactivate(params.row.id)}
             sx={{ ml: 1 }}
           >
-            Delete
-          </Button>
+            <DeleteIcon />
+          </IconButton>
         </>
       ),
     },
   ];
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
   const rows = products.map((product) => ({
     id: product.id,
+    category_name: product.category.name,
+    brand_name: product.brand.name,
     category_id: product.category_id,
     brand_id: product.brand_id,
     name: product.name,
@@ -165,14 +170,14 @@ const ProductComponent = () => {
     setOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDeactivate = async (id) => {
     try {
-      await deleteProduct(id); // Call the delete function from your API hook
+      await deactivateProduct(id); // Call the deactivate function from your API hook
       setProducts(products.filter((product) => product.id !== id));
-      toast.success("Product deleted successfully!");
+      toast.success("Product deactivated successfully!");
     } catch (error) {
       console.error("Error deleting product:", error);
-      toast.error("Failed to delete product. Please try again.");
+      toast.error("Failed to deactivated product. Please try again.");
     }
   };
 
@@ -203,7 +208,11 @@ const ProductComponent = () => {
       handleClose(); // Close the modal and reset form
     } catch (error) {
       console.error("Error submitting product:", error);
-      setErrors({ form: "An error occurred. Please try again." });
+      if (error.response && error.response.status === 422) {
+          setErrors(error.response.data.errors);
+      } else {
+          setErrors({ form: "An error occurred. Please try again." });
+      }
     }
   }
 
@@ -240,7 +249,7 @@ const ProductComponent = () => {
                 rows={rows}
                 columns={columns}
                 initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[5, 10]}
+                pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
                 sx={{ border: 0 }}
               />
@@ -300,33 +309,6 @@ const ProductComponent = () => {
 
                   <Grid2 item size={{ xs: 6 }}>
                     <Typography variant="body1" color="textSecondary">
-                      <strong>Brand:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <select
-                        id="productBrand"
-                        name="productBrand"
-                        value={productBrand} // Update this state variable accordingly
-                        onChange={(e) => setProductBrand(e.target.value)} // Update the state function accordingly
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Select a brand</option>
-                        {brandItems.map(({ id, name }) => (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </item>
-                    {errors.productBrand && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productBrand}
-                      </p>
-                    )}
-                  </Grid2>
-
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
                       <strong>Category:</strong>
                     </Typography>
                     <item sx={{ fontSize: "1.1rem" }}>
@@ -348,6 +330,34 @@ const ProductComponent = () => {
                     {errors.productCategory && (
                       <p className="text-red-500 text-sm">
                         {errors.productCategory}
+                      </p>
+                    )}
+                  </Grid2>
+
+
+                  <Grid2 item size={{ xs: 6 }}>
+                    <Typography variant="body1" color="textSecondary">
+                      <strong>Brand:</strong>
+                    </Typography>
+                    <item sx={{ fontSize: "1.1rem" }}>
+                      <select
+                        id="productBrand"
+                        name="productBrand"
+                        value={productBrand} // Update this state variable accordingly
+                        onChange={(e) => setProductBrand(e.target.value)} // Update the state function accordingly
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Select a brand</option>
+                        {brandItems.map(({ id, name }) => (
+                          <option key={id} value={id}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </item>
+                    {errors.productBrand && (
+                      <p className="text-red-500 text-sm">
+                        {errors.productBrand}
                       </p>
                     )}
                   </Grid2>
@@ -425,7 +435,7 @@ const ProductComponent = () => {
                       <strong>Category:</strong>
                     </Typography>
                     <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.category_id || "N/A"}
+                      {viewProduct.category_name || "N/A"}
                     </item>
                   </Grid2>
                   <Grid2 item size={{ xs: 6 }}>
@@ -433,7 +443,7 @@ const ProductComponent = () => {
                       <strong>Brand:</strong>
                     </Typography>
                     <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.brand_id || "N/A"}
+                      {viewProduct.brand_name || "N/A"}
                     </item>
                   </Grid2>
                   <Grid2 item size={{ xs: 6 }}>
