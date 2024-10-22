@@ -122,7 +122,7 @@ function DocumentListItemComponent({
   return (
     <Link href={filePath} target="_blank">
       <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-        <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-60 h-60">
+        <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-56 h-56">
           <div className="flex flex-row gap-4 justify-between items-center">
             <div className="overflow-hidden flex flex-row gap-2">
               <PictureAsPdfIcon fontSize="small" color="error" />
