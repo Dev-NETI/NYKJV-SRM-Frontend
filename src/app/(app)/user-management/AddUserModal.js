@@ -9,14 +9,57 @@ import {
   Typography,
 } from "@mui/joy";
 import { Slide } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import UserFormComponent from "@/components/user-management/UserFormComponent";
+import { useCompanies } from "@/hooks/api/companies";
+import { useDepartment } from "@/hooks/api/department";
+import { useSupplier } from "@/hooks/api/supplier";
 
 function AddUserModal() {
   const [openAddModal, setOpenAddModal] = useState(false);
   const handleOpenAddModal = () => setOpenAddModal(true);
   const handleCloseAddModal = () => setOpenAddModal(false);
+
+  const [DataState, setDataState] = useState({
+    company_data: [],
+    department_data: [],
+    supplier_data: [],
+  });
+
+  const { index: getCompanyData } = useCompanies();
+  const { index: getDepartmentData } = useDepartment();
+  const { index: getSupplierData } = useSupplier();
+
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      const response = await getCompanyData();
+      setDataState((prevState) => ({
+        ...prevState,
+        company_data: response.data,
+      }));
+    };
+
+    const fetchDepartmentData = async () => {
+      const response = await getDepartmentData();
+      setDataState((prevState) => ({
+        ...prevState,
+        department_data: response.data,
+      }));
+    };
+
+    const fetchSupplierData = async () => {
+      const response = await getSupplierData();
+      setDataState((prevState) => ({
+        ...prevState,
+        supplier_data: response.data,
+      }));
+    };
+
+    fetchCompanyData();
+    fetchDepartmentData();
+    fetchSupplierData();
+  }, []);
 
   return (
     <React.Fragment>
@@ -74,6 +117,7 @@ function AddUserModal() {
             <UserFormComponent
               mode={1}
               handleCloseAddModal={handleCloseAddModal}
+              DataState={DataState}
             />
           </Sheet>
         </Slide>

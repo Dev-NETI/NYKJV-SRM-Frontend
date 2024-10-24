@@ -22,6 +22,8 @@ const useResource = ({ route }) => {
    */
   const show = (id) => axios.get(`${route}/${id}`);
 
+  const showWithSlug = (slug) => axios.get(`${route}/${slug}`);
+
   const showWith2Parameter = (param1, param2) =>
     axios.get(`${route}/${param1}/${param2}`);
 
@@ -69,6 +71,7 @@ const useResource = ({ route }) => {
     showWith3Parameter,
     destroy2Parameter,
     patchNoPayload,
+    showWithSlug,
   };
 };
 

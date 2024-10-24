@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import Header from "../Header";
 import {
   Box,
@@ -88,14 +89,14 @@ function page() {
     { field: "modified_by", headerName: "Modified By", width: 150 },
     { field: "updated_at", headerName: "Updated At", width: 180 },
     {
-      field: "actions",
+      field: "Action",
       width: 320,
       filterable: false,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
         <Box
-          key={`action-buttons-${params.row.id}`} // Adding key to Box
+          key={`action-buttons-${params.row.id}`}
           sx={{
             display: "flex",
             gap: 1,
@@ -104,58 +105,15 @@ function page() {
             mb: 1,
           }}
         >
-          <Button
-            key={`view-profile-${params.row.id}`}
-            startDecorator={<UserIcon />}
-            variant="soft"
-            onClick={() => {
-              // setSelectedSlug(params.row.slug);
-              // handleOpenUpdateModal(true);
-            }}
-          >
-            View Profile
-          </Button>
-          <Button
-            key={`toggle-status-${params.row.id}`}
-            variant="soft"
-            color={params.row.is_active === "Active" ? "danger" : "success"}
-            startDecorator={
-              params.row.is_active === "Active" ? (
-                <BlockOutlined />
-              ) : (
-                <CheckCircleOutline />
-              )
-            }
-            onClick={async () => {
-              try {
-                if (params.row.is_active === "Active") {
-                  // await destroyMealType(params.row.slug);
-                } else {
-                  // await patchMealType('activate/' + params.row.slug);
-                }
-                // setMealTypeState((prevState) => ({
-                //   ...prevState,
-                //   responseStore: true,
-                // }));
-              } catch (error) {
-                // console.error('Error updating recipe status:', error);
-              }
-            }}
-            sx={{
-              borderColor:
-                params.row.is_active === "Active"
-                  ? "error.main"
-                  : "success.main",
-              "&:hover": {
-                backgroundColor:
-                  params.row.is_active === "Active"
-                    ? "error.light"
-                    : "success.light",
-              },
-            }}
-          >
-            {params.row.is_active === "Active" ? "Deactivate" : "Activate"}
-          </Button>
+          <Link href={`/user-management/${params.row.slug}`} passHref>
+            <Button
+              key={`view-profile-${params.row.slug}`}
+              startDecorator={<UserIcon />}
+              variant="soft"
+            >
+              View Profile
+            </Button>
+          </Link>
         </Box>
       ),
     },

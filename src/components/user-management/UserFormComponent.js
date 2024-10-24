@@ -13,15 +13,16 @@ import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import TextFieldComponent from "../forms/TextFieldComponent";
-import SBComponent from "../snackbar/SBComponent";
+import SelectFieldComponent from "../forms/SelectFieldComponent";
 
-function UserFormComponent({ mode = 1, handleCloseAddModal }) {
+function UserFormComponent({ mode = 1, handleCloseAddModal, DataState }) {
   const { storeUser, setUserState, showSnackbar } = useContext(UserContext);
 
   const onSubmit = async (data) => {
     try {
       let response;
       if (mode === 1) {
+        console.log(data);
         response = await storeUser(data);
 
         if (response.status === 201) {
@@ -70,6 +71,9 @@ function UserFormComponent({ mode = 1, handleCloseAddModal }) {
     password: z.string().min(8, {
       message: "Password must be at least 8 characters.",
     }),
+    company_id: z.number().default(0),
+    department_id: z.number().default(0),
+    supplier_id: z.number().default(0),
   });
 
   const form = useForm({
@@ -82,6 +86,9 @@ function UserFormComponent({ mode = 1, handleCloseAddModal }) {
       contact_number: "",
       email: "",
       password: "",
+      company_id: "0",
+      department_id: "0",
+      supplier_id: "0",
     },
   });
 
@@ -134,30 +141,30 @@ function UserFormComponent({ mode = 1, handleCloseAddModal }) {
           />
         </Box>
         <Box sx={{ mb: 2 }}>
-          <TextFieldComponent
+          <SelectFieldComponent
             form={form}
             name="company_id"
-            type="text"
             label="Company"
-            variant="filled"
+            DataState={DataState.company_data}
+            defaultValue="0"
           />
         </Box>
         <Box sx={{ mb: 2 }}>
-          <TextFieldComponent
+          <SelectFieldComponent
             form={form}
             name="department_id"
-            type="text"
             label="Department"
-            variant="filled"
+            DataState={DataState.department_data}
+            defaultValue="0"
           />
         </Box>
         <Box sx={{ mb: 2 }}>
-          <TextFieldComponent
+          <SelectFieldComponent
             form={form}
             name="supplier_id"
-            type="text"
             label="Supplier"
-            variant="filled"
+            DataState={DataState.supplier_data}
+            defaultValue="0"
           />
         </Box>
         <Box sx={{ mb: 2 }}>
