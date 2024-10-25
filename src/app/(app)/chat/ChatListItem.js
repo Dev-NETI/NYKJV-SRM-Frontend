@@ -32,7 +32,7 @@ export default function ChatListItem(props) {
               <Typography level="body-sm">{sender.username}</Typography>
             </Box>
             <Box sx={{ lineHeight: 1.5, textAlign: 'right' }}>
-              {messages[0].unread && (
+              {messages[0]?.unread && (
                 <CircleIcon sx={{ fontSize: 12 }} color="primary" />
               )}
               <Typography
@@ -54,7 +54,7 @@ export default function ChatListItem(props) {
               textOverflow: 'ellipsis',
             }}
           >
-            {messages[0].content}
+            {messages[0]?.content}
           </Typography>
         </ListItemButton>
       </ListItem>

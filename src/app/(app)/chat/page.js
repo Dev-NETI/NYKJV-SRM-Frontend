@@ -15,9 +15,6 @@ export default function ChatPage() {
   const { data: chats, error, isLoading } = useSWR('/api/chats', fetcher);
   const [selectedChat, setSelectedChat] = React.useState(null);
  
-
-  
-
   if (isLoading) return <div>Loading chats...</div>;
   if (error) return <div>Error loading chats</div>; 
 

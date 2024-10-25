@@ -39,23 +39,29 @@ export default function ChatsPane(props) {
   };
 
   const onSelectUser = (user) => {
-    // Create a new chat object for the selected user
-    const newChat = {
-      id: `chat_${user.id}`,
-      sender: {
-        name: user.name,
-        username: user.email,
-        avatar: user.picture || "/static/images/avatar/default.jpg",
-        online: true,
-      },
-      messages: [],
-    };
+    // Check if a chat with this user already exists
+    const existingChat = props.chats.find(chat => chat.id === `chat_${user.id}`);
 
-    // Update the chats state by appending the new chat
-    props.setChats((prevChats) => [...prevChats, newChat]);
+    if (existingChat) {
+      // If the chat already exists, just select it
+      setSelectedChat(existingChat);
+    } else {
+      // If not, create a new chat object for the selected user
+      const newChat = {
+        id: `chat_${user.id}`,
+        sender: {
+          name: user.name,
+          username: user.email,
+          avatar: user.picture || "/static/images/avatar/default.jpg",
+          online: true,
+        },
+        messages: [],
+      };
 
-    // Select the newly created chat
-    setSelectedChat(newChat.id);
+      // Update the chats state by appending the new chat
+      setSelectedChat(newChat);
+      props.chats.push(newChat);
+    }
 
     // Close the modal
     setIsModalOpen(false);
@@ -140,16 +146,21 @@ export default function ChatsPane(props) {
           "--ListItem-paddingX": "1rem",
         }}
       >
-        {selectedChatId && filteredChats.map((chat) => (
-          <ChatListItem
-            key={chat.id}
-            {...chat}
-            setSelectedChat={setSelectedChat}
-            selectedChatId={selectedChatId}
-          />
-        ))}
+        {selectedChatId &&
+          filteredChats.map((chat) => (
+            <ChatListItem
+              key={chat.id}
+              {...chat}
+              setSelectedChat={setSelectedChat}
+              selectedChatId={selectedChatId}
+            />
+          ))}
       </List>
-      <UserListModal open={isModalOpen} onClose={() => setIsModalOpen(false)} onSelectUser={onSelectUser} />
+      <UserListModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelectUser={onSelectUser}
+      />
     </Sheet>
   );
 }
