@@ -20,11 +20,34 @@ import {
 
 import PersonIcon from "@mui/icons-material/Person";
 import { Button, Grid } from "@mui/joy";
+import ManageRoleModal from "../ManageRoleModal";
+import SBComponent from "@/components/snackbar/SBComponent";
 
 function UserManagementSlugPage() {
   const params = useParams();
   const { showWithSlug: getUser } = useUser();
   const [user, setUser] = useState(null);
+  const [snackbarState, setSnackbarState] = useState({
+    open: false,
+    message: "",
+    color: "",
+  });
+
+  const showSnackbar = (message, color) => {
+    setSnackbarState({
+      open: true,
+      message,
+      color,
+    });
+  };
+
+  // Auto-close snackbar after a few seconds (optional)
+  setTimeout(() => {
+    setSnackbarState((prevState) => ({
+      ...prevState,
+      open: false,
+    }));
+  }, 3000); // 3 seconds
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +60,7 @@ function UserManagementSlugPage() {
     };
 
     fetchData();
-  }, [params.slug, getUser]);
+  }, [params.slug]);
 
   if (!user) {
     return (
@@ -89,15 +112,13 @@ function UserManagementSlugPage() {
 
           {/* Roles Button */}
           <Box sx={{ textAlign: "right", p: 1 }}>
-            <Button variant="soft" color="neutral">
-              Manage Roles
-            </Button>
+            <ManageRoleModal user={user} showSnackbar={showSnackbar} />
           </Box>
 
           <Divider />
           <CardContent>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <List>
                   <ListItem>
                     <ListItemText
@@ -114,7 +135,7 @@ function UserManagementSlugPage() {
                 </List>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <List>
                   <ListItem>
                     <ListItemText
@@ -135,6 +156,11 @@ function UserManagementSlugPage() {
           </CardContent>
         </Card>
       </Container>
+      <SBComponent
+        open={snackbarState.open}
+        message={snackbarState.message}
+        color={snackbarState.color}
+      />
     </React.Fragment>
   );
 }
