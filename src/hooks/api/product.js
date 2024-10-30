@@ -11,8 +11,4 @@ const useProduct = () => {
   };
 };
 
-// const useProducts = () => useAPIResource('/api/products');
-// const useCategory = () => useAPIResource('/api/category');
-// const useBrand = () => useAPIResource('/api/category');
-
 export { useProduct };

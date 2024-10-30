@@ -18,52 +18,36 @@ import {
   Grid2,
   Typography,
   IconButton,
-  TextField,
-  CircularProgress,
-  InputAdornment,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { Search as SearchIcon } from "@mui/icons-material"; // Change to MUI's Search Icon
 
 const ProductComponent = () => {
   const {
     index: showProduct,
     store,
     update: updateProduct,
-    destroy: deactivateProduct,
+    destroy : deactivateProduct,
   } = useProduct();
-
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
-  const [viewProduct, setViewProduct] = useState({});
+  const [open, setOpen] = useState(false); // State for add/edit modal
+  const [viewOpen, setViewOpen] = useState(false); // State for view modal
+  const [viewProduct, setViewProduct] = useState({}); // Product to view
   const [productName, setProductName] = useState("");
   const [productCategory, setProductCategory] = useState("");
   const [productBrand, setProductBrand] = useState("");
   const [productPrice, setProductPrice] = useState("");
   const [productSpecification, setProductSpecification] = useState("");
   const [errors, setErrors] = useState({});
-  const [editingProductId, setEditingProductId] = useState(null);
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [search, setSearch] = useState("");
-  const [deactivatingId, setDeactivatingId] = useState(null);
+  const [editingProductId, setEditingProductId] = useState(null); // ID for editing a product
 
   const { index: showBrand } = useBrand();
   const [brandItems, setBrand] = useState([]);
-  
+
   const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
-
-  // Loading state
-  const [loading, setLoading] = useState({
-    adding: false,
-    updating: false,
-    deactivating: false,
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,27 +58,16 @@ const ProductComponent = () => {
         setBrand(brandData);
         setCategory(categoryData);
         setProducts(productData);
-        setFilteredProducts(productData);
       } catch (error) {
-        toast.error("Failed to load data. Please try again later.");
+        toast.error("Failed to load categorys. Please try again later.");
       }
     };
+
     fetchData();
   }, [showBrand, showCategory, showProduct]);
 
-  useEffect(() => {
-    if (search) {
-      const result = products.filter(product =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredProducts(result);
-    } else {
-      setFilteredProducts(products);
-    }
-  }, [search, products]);
-
   const columns = [
-    { field: "id", headerName: "#", width: 50 },
+    { field: "id", headerName: "#", width: 5 },
     { field: "name", headerName: "Product Name", flex: 1, minWidth: 180 },
     { field: "category_name", headerName: "Category", width: 200 },
     { field: "brand_name", headerName: "Brand", width: 200 },
@@ -104,6 +77,7 @@ const ProductComponent = () => {
       headerName: "Specification",
       width: 250,
     },
+    // { field: "modified_by", headerName: "Modified By", width: 150 },
     {
       field: "actions",
       headerName: "Actions",
@@ -133,13 +107,8 @@ const ProductComponent = () => {
             size="small"
             onClick={() => handleDeactivate(params.row.id)}
             sx={{ ml: 1 }}
-            disabled={deactivatingId === params.row.id}
           >
-            {deactivatingId === params.row.id ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <DeleteIcon />
-            )}
+            <DeleteIcon />
           </IconButton>
         </>
       ),
@@ -147,8 +116,7 @@ const ProductComponent = () => {
   ];
 
   const paginationModel = { page: 0, pageSize: 10 };
-
-  const rows = filteredProducts.map((product) => ({
+  const rows = products.map((product) => ({
     id: product.id,
     category_name: product.category.name,
     brand_name: product.brand.name,
@@ -157,12 +125,29 @@ const ProductComponent = () => {
     name: product.name,
     price: product.price,
     specification: product.specification,
+    modified_by: product.modified_by,
+    updated_at: new Date(product.updated_at).toLocaleString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }),
+    created_at: new Date(product.created_at).toLocaleString("en-US", {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }),
   }));
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => setOpen(true); // Open add/edit modal
   const handleClose = () => {
     setOpen(false);
-    resetForm();
+    resetForm(); // Reset the form when modal is closed
   };
 
   const resetForm = () => {
@@ -172,48 +157,27 @@ const ProductComponent = () => {
     setProductPrice("");
     setProductSpecification("");
     setErrors({});
-    setEditingProductId(null);
+    setEditingProductId(null); // Reset editing ID
   };
 
   const handleEdit = (product) => {
     setEditingProductId(product.id);
     setProductName(product.name);
-    setProductCategory(product.category_id);
-    setProductBrand(product.brand_id);
+    setProductCategory(product.category_id); // Ensure this matches the category ID
+    setProductBrand(product.brand_id); // Ensure this matches the brand ID
     setProductPrice(product.price);
     setProductSpecification(product.specification);
     setOpen(true);
   };
 
   const handleDeactivate = async (id) => {
-    setLoading(prev => ({ ...prev, deactivating: true }));
     try {
-      await deactivateProduct(id);
+      await deactivateProduct(id); // Call the deactivate function from your API hook
       setProducts(products.filter((product) => product.id !== id));
-      setFilteredProducts(filteredProducts.filter((product) => product.id !== id));
-      setSelectedIds(selectedIds.filter(selectedId => selectedId !== id));
       toast.success("Product deactivated successfully!");
     } catch (error) {
       console.error("Error deleting product:", error);
-      toast.error("Failed to deactivate product. Please try again.");
-    } finally {
-      setLoading(prev => ({ ...prev, deactivating: false }));
-    }
-  };
-
-  const handleMultipleDeactivate = async () => {
-    setLoading(prev => ({ ...prev, deactivating: true }));
-    try {
-      await Promise.all(selectedIds.map(id => deactivateProduct(id)));
-      setProducts(products.filter((product) => !selectedIds.includes(product.id)));
-      setFilteredProducts(filteredProducts.filter((product) => !selectedIds.includes(product.id)));
-      setSelectedIds([]);
-      toast.success("Selected products deactivated successfully!");
-    } catch (error) {
-      console.error("Error deactivating products:", error);
-      toast.error("Failed to deactivate products. Please try again.");
-    } finally {
-      setLoading(prev => ({ ...prev, deactivating: false }));
+      toast.error("Failed to deactivated product. Please try again.");
     }
   };
 
@@ -222,7 +186,7 @@ const ProductComponent = () => {
     setViewOpen(true);
   };
 
-  const handleSubmit = async (event) => {
+  async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
     const object = Object.fromEntries(formData.entries());
@@ -233,34 +197,26 @@ const ProductComponent = () => {
       return;
     }
 
-    setLoading(prev => ({
-      ...prev,
-      adding: !editingProductId,
-      updating: editingProductId,
-    }));
-
     try {
       if (editingProductId) {
-        await updateProduct(editingProductId, object); 
+        await updateProduct(editingProductId, object); // Update product if editing
         toast.success("Product updated successfully!");
       } else {
-        await store(object); 
+        await store(object); // Add new product
         toast.success("Product added successfully!");
       }
-      handleClose(); 
+      handleClose(); // Close the modal and reset form
     } catch (error) {
       console.error("Error submitting product:", error);
       if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
+          setErrors(error.response.data.errors);
       } else {
-        setErrors({ form: "An error occurred. Please try again." });
+          setErrors({ form: "An error occurred. Please try again." });
       }
-    } finally {
-      setLoading(prev => ({ ...prev, adding: false, updating: false }));
     }
-  };
+  }
 
-  const validateForm = (object) => {
+  function validateForm(object) {
     const errors = {};
     if (!object.productName) errors.productName = "Product Name is required.";
     if (!object.productPrice) {
@@ -272,10 +228,10 @@ const ProductComponent = () => {
       errors.productSpecification = "Product Specification is required.";
     if (!object.productCategory)
       errors.productCategory = "Please select a category.";
-    if (!object.productBrand) errors.productBrand = "Please select a brand.";
+    if (!object.productBrand) errors.productBrand = "Please select a category.";
 
     return errors;
-  };
+  }
 
   return (
     <>
@@ -283,80 +239,31 @@ const ProductComponent = () => {
       <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
-            <Box display="flex" justifyContent="space-between" mt={2}>
-              <Box display="flex" alignItems="center">
-                <TextField
-                  variant="outlined"
-                  placeholder="Search Products"
-                  size="small"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  sx={{ mr: 2 }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              <Box display="flex" alignItems="center">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpen}
-                  disabled={loading.adding || loading.updating} // Disable during loading
-                >
-                  {loading.adding || loading.updating ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Add"
-                  )}
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleMultipleDeactivate}
-                  disabled={selectedIds.length === 0 || loading.deactivating} // Disable if no products selected or during loading
-                  sx={{ ml: 2 }}
-                >
-                  {loading.deactivating ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Deactivate"
-                  )}
-                </Button>
-              </Box>
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button variant="contained" color="primary" onClick={handleOpen}>
+                Add Product
+              </Button>
             </Box>
             <Box sx={{ p: 2 }}>
               <DataGrid
                 rows={rows}
                 columns={columns}
-                pagination
-                initialState={{
-                  pagination: { paginationModel },
-                }}
+                initialState={{ pagination: { paginationModel } }}
                 pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
-                disableRowSelectionOnClick // This disables row selection when clicking anywhere else
-                onRowSelectionModelChange={(ids) => {
-                  setSelectedIds(ids);
-                }} // Track selected rows
                 sx={{ border: 0 }}
               />
             </Box>
           </Paper>
         </Box>
 
-        {/* Dialog for Add/Edit Product */}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingProductId ? "Edit Product" : "Add Product"}
           </DialogTitle>
           <DialogContent>
             <Box>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <Grid2 container spacing={2}>
                   <Grid2 item size={{ xs: 8 }}>
                     <Typography variant="body1" color="textSecondary">
@@ -512,22 +419,15 @@ const ProductComponent = () => {
             Product Details
           </DialogTitle>
           <DialogContent dividers>
-            <Box p={2}>
+            {viewProduct && (
+              <Box p={2}>
                 <Grid2 container spacing={2}>
-                  <Grid2 item size={{ xs: 8 }}>
+                  <Grid2 item size={{ xs: 12 }}>
                     <Typography variant="body1" color="textSecondary">
                       <strong>Product Name:</strong>
                     </Typography>
                     <item sx={{ fontSize: "1.1rem" }}>
                       {viewProduct.name || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 4 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Price:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.price || "N/A"}
                     </item>
                   </Grid2>
                   <Grid2 item size={{ xs: 6 }}>
@@ -544,6 +444,14 @@ const ProductComponent = () => {
                     </Typography>
                     <item sx={{ fontSize: "1.1rem" }}>
                       {viewProduct.brand_name || "N/A"}
+                    </item>
+                  </Grid2>
+                  <Grid2 item size={{ xs: 6 }}>
+                    <Typography variant="body1" color="textSecondary">
+                      <strong>Price:</strong>
+                    </Typography>
+                    <item sx={{ fontSize: "1.1rem" }}>
+                      {viewProduct.price || "N/A"}
                     </item>
                   </Grid2>
                   <Grid2 item size={{ xs: 6 }}>
@@ -583,7 +491,8 @@ const ProductComponent = () => {
                     </item>
                   </Grid2>
                 </Grid2>
-            </Box>
+              </Box>
+            )}
           </DialogContent>
           <DialogActions>
             <Button
