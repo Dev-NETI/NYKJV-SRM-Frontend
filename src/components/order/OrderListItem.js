@@ -5,10 +5,11 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
+import Link from "next/link";
 
 function OrderListItem({ referenceNumber, requestedBy, createdAt }) {
   return (
-    <>
+    <Link href={`/order-list/${referenceNumber}`}>
       <ListItem alignItems="flex-start">
         <ListItemAvatar>
           <Avatar alt={requestedBy} src="/static/images/avatar/1.jpg" />
@@ -30,7 +31,7 @@ function OrderListItem({ referenceNumber, requestedBy, createdAt }) {
         />
       </ListItem>
       <Divider variant="inset" component="li" />
-    </>
+    </Link>
   );
 }
 
