@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Modal,
   ModalClose,
@@ -10,28 +10,12 @@ import {
   ListItemButton,
   ListItemContent,
   Avatar,
-} from '@mui/joy';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
-import axios from '@/lib/axios';
-
+} from "@mui/joy";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import { useChat } from "@/stores/ChatContext";
 export default function UserListModal({ open, onClose, onSelectUser }) {
-  const [users, setUsers] = React.useState([]);
-  const [searchQuery, setSearchQuery] = React.useState('');
-
-  React.useEffect(() => {
-    if (open) {
-      fetchUsers();
-    }
-  }, [open]);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get('/api/users');
-      setUsers(response.data);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
+  const { users } = useChat();
+  const [searchQuery, setSearchQuery] = React.useState("");
 
   const filteredUsers = users.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -43,18 +27,18 @@ export default function UserListModal({ open, onClose, onSelectUser }) {
       aria-describedby="modal-desc"
       open={open}
       onClose={onClose}
-      sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+      sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
     >
       <Sheet
         variant="outlined"
-        sx={{ 
-          maxWidth: 500, 
-          width: '100%', 
-          maxHeight: '80vh',
-          borderRadius: 'md', 
-          p: 3, 
-          boxShadow: 'lg',
-          overflowY: 'auto'
+        sx={{
+          maxWidth: 500,
+          width: "100%",
+          maxHeight: "80vh",
+          borderRadius: "md",
+          p: 3,
+          boxShadow: "lg",
+          overflowY: "auto",
         }}
       >
         <ModalClose variant="plain" sx={{ m: 1 }} />
@@ -79,7 +63,13 @@ export default function UserListModal({ open, onClose, onSelectUser }) {
         <List>
           {filteredUsers.map((user) => (
             <ListItem key={user.id}>
-              <ListItemButton onClick={() => onSelectUser(user)}>
+              <ListItemButton
+                onClick={() => {
+                  onSelectUser(user);
+                  // Close the modal
+                 onClose();
+                }}
+              >
                 <Avatar src={user.picture} sx={{ mr: 2 }} />
                 <ListItemContent>
                   <Typography level="body1">{user.name}</Typography>

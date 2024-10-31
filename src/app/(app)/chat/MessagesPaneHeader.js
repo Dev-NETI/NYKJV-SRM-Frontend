@@ -14,7 +14,7 @@ import { toggleMessagesPane } from '@/utils';
 
 
 export default function MessagesPaneHeader(props) {
-  const { sender } = props;
+  const { sender, isOnline } = props;
   return (
     <Stack
       direction="row"
@@ -41,32 +41,31 @@ export default function MessagesPaneHeader(props) {
         >
           <ArrowBackIosNewRoundedIcon />
         </IconButton>
-        <Avatar size="lg" src={sender.avatar} />
+        <Avatar size="lg" src={sender.profile_photo_url} />
         <div>
           <Typography
             component="h2"
             noWrap
             endDecorator={
-              sender.online ? (
-                <Chip
-                  variant="outlined"
-                  size="sm"
-                  color="neutral"
-                  sx={{ borderRadius: 'sm' }}
-                  startDecorator={
-                    <CircleIcon sx={{ fontSize: 8 }} color="success" />
-                  }
-                  slotProps={{ root: { component: 'span' } }}
-                >
-                  Online
-                </Chip>
-              ) : undefined
+              <Chip
+                variant="outlined"
+                size="sm"
+                color={isOnline ? "success" : "neutral"}
+                startDecorator={
+                  <CircleIcon 
+                    sx={{ fontSize: 8 }} 
+                    color={isOnline ? "success" : "neutral"} 
+                  />
+                }
+              >
+                {isOnline ? "Online" : "Offline"}
+              </Chip>
             }
             sx={{ fontWeight: 'lg', fontSize: 'lg' }}
           >
-            {sender.name}
+            {sender.full_name}
           </Typography>
-          <Typography level="body-sm">{sender.username}</Typography>
+          <Typography level="body-sm">{sender.email}</Typography>
         </div>
       </Stack>
       <Stack spacing={1} direction="row" sx={{ alignItems: 'center' }}>

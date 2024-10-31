@@ -16,56 +16,33 @@ import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ChatListItem from "./ChatListItem";
-import { toggleMessagesPane } from "@/utils";
-import axios from "@/lib/axios";
+import { toggleMessagesPane } from "@/utils"; 
 import UserListModal from "./UserListModal";
+import { useChat } from "@/stores/ChatContext";
+import { useState } from "react";
 
-export default function ChatsPane(props) {
-  const { chats, setSelectedChat, selectedChatId } = props;
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [filteredChats, setFilteredChats] = React.useState(chats);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+export default function ChatsPane(props) { 
+  const { chats, onSelectUser, selectedChat, setSelectedChat } = useChat();
+ 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filteredChats, setFilteredChats] = useState(chats);
+  const [searchQuery, setSearchQuery] = useState("");
 
   React.useEffect(() => {
-    setFilteredChats(chats);
+  
+    setFilteredChats(chats); 
+   
   }, [chats]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
     const filtered = chats.filter((chat) =>
-      chat.sender.name.toLowerCase().includes(query.toLowerCase())
+      chat.participants.map((p) => p.sender.full_name.toLowerCase()).includes(query.toLowerCase())
     );
     setFilteredChats(filtered);
   };
 
-  const onSelectUser = (user) => {
-    // Check if a chat with this user already exists
-    const existingChat = props.chats.find(chat => chat.id === `chat_${user.id}`);
-
-    if (existingChat) {
-      // If the chat already exists, just select it
-      setSelectedChat(existingChat);
-    } else {
-      // If not, create a new chat object for the selected user
-      const newChat = {
-        id: `chat_${user.id}`,
-        sender: {
-          name: user.name,
-          username: user.email,
-          avatar: user.picture || "/static/images/avatar/default.jpg",
-          online: true,
-        },
-        messages: [],
-      };
-
-      // Update the chats state by appending the new chat
-      setSelectedChat(newChat);
-      props.chats.push(newChat);
-    }
-
-    // Close the modal
-    setIsModalOpen(false);
-  };
+ 
 
   return (
     <Sheet
@@ -146,13 +123,13 @@ export default function ChatsPane(props) {
           "--ListItem-paddingX": "1rem",
         }}
       >
-        {selectedChatId &&
+        {
           filteredChats.map((chat) => (
             <ChatListItem
               key={chat.id}
-              {...chat}
+              item={chat}
               setSelectedChat={setSelectedChat}
-              selectedChatId={selectedChatId}
+              selectedChat={selectedChat} 
             />
           ))}
       </List>

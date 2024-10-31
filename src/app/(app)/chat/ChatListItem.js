@@ -1,60 +1,72 @@
-import * as React from 'react';
-import Box from '@mui/joy/Box';
-import ListDivider from '@mui/joy/ListDivider';
-import ListItem from '@mui/joy/ListItem';
-import ListItemButton, { ListItemButtonProps } from '@mui/joy/ListItemButton';
-import Stack from '@mui/joy/Stack';
-import Typography from '@mui/joy/Typography';
-import CircleIcon from '@mui/icons-material/Circle';
-import AvatarWithStatus from './AvatarWithStatus';
-import { toggleMessagesPane } from '@/utils';
-
+import * as React from "react";
+import Box from "@mui/joy/Box";
+import ListDivider from "@mui/joy/ListDivider";
+import ListItem from "@mui/joy/ListItem";
+import ListItemButton from "@mui/joy/ListItemButton";
+import Stack from "@mui/joy/Stack";
+import Typography from "@mui/joy/Typography";
+import CircleIcon from "@mui/icons-material/Circle";
+import AvatarWithStatus from "./AvatarWithStatus";
+import { toggleMessagesPane } from "@/utils";
+import { useAuth } from "@/hooks/auth";
 
 export default function ChatListItem(props) {
-  const { id, sender, messages, selectedChatId, setSelectedChat } = props;
-  const selected = selectedChatId === id;
+  const { selectedChat, setSelectedChat } = props;
+  const { id, participants, messages } = props.item;
+  const user = useAuth({ middleware: "auth" });
+
+  const { sender } = participants.find(
+    (participant) => participant.sender.id !== user.id
+  );
+  const lastMessage = messages[messages.length - 1];
+
   return (
     <React.Fragment>
       <ListItem>
         <ListItemButton
           onClick={() => {
             toggleMessagesPane();
-            setSelectedChat({ id, sender, messages });
+            setSelectedChat(props.item);
           }}
-          selected={selected || null}
+          selected={selectedChat?.id === id}
           color="neutral"
-          sx={{ flexDirection: 'column', alignItems: 'initial', gap: 1 }}
+          sx={{ flexDirection: "column", alignItems: "initial", gap: 1 }}
         >
           <Stack direction="row" spacing={1.5}>
-            <AvatarWithStatus online={sender.online} src={sender.avatar} />
+            <AvatarWithStatus
+              online={sender?.is_active === 1}
+              src={sender?.profile_photo_url}
+            />
             <Box sx={{ flex: 1 }}>
-              <Typography level="title-sm">{sender.name}</Typography>
-              <Typography level="body-sm">{sender.username}</Typography>
+              <Typography level="title-sm">{sender?.full_name}</Typography>
+              <Typography level="body-sm">{sender?.email}</Typography>
             </Box>
-            <Box sx={{ lineHeight: 1.5, textAlign: 'right' }}>
-              {messages[0]?.unread && (
+            <Box sx={{ lineHeight: 1.5, textAlign: "right" }}>
+              {lastMessage?.unread === 1 && (
                 <CircleIcon sx={{ fontSize: 12 }} color="primary" />
               )}
               <Typography
                 level="body-xs"
                 noWrap
-                sx={{ display: { xs: 'none', md: 'block' } }}
+                sx={{ display: { xs: "none", md: "block" } }}
               >
-                5 mins ago
+                {lastMessage?.created_at
+                  ? new Date(lastMessage.created_at).toLocaleString()
+                  : ""}
               </Typography>
             </Box>
           </Stack>
           <Typography
             level="body-sm"
             sx={{
-              display: '-webkit-box',
-              WebkitLineClamp: '2',
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
+              display: "-webkit-box",
+              WebkitLineClamp: "2",
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            {messages[0]?.content}
+            {lastMessage?.content}
           </Typography>
         </ListItemButton>
       </ListItem>
