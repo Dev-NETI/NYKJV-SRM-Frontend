@@ -2,17 +2,13 @@
 
 import { useResource } from "../resource";
 
-const useProduct = () => {
+const useProduct = (customUrl = null) => {
   const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-  const route = "/api/products";
+  const route = customUrl ? `/api/products/${customUrl}` : "/api/products";
 
   return {
     ...useResource({ baseURL, route }),
   };
 };
-
-// const useProducts = () => useAPIResource('/api/products');
-// const useCategory = () => useAPIResource('/api/category');
-// const useBrand = () => useAPIResource('/api/category');
 
 export { useProduct };
