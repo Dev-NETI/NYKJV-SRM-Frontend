@@ -14,7 +14,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
-import BasicModal from "@/components/Modal"; // Modal component
+import BasicModal from "@/components/Modal"; 
 
 const Dashboard = () => {
   const router = useRouter();
