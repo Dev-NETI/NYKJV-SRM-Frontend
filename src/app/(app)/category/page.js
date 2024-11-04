@@ -15,15 +15,23 @@ import {
   DialogActions,
   Typography,
   Grid2,
+  IconButton,
+  CircularProgress,
+  TextField,
+  InputAdornment,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
 
 const CategoryComponent = () => {
   const {
     index: showCategory,
     store,
     update: updateCategory,
-    deleteCategory,
+    destroy: deactivateCategory,
   } = useCategory();
   const [categorys, setCategory] = useState([]);
   const [open, setOpen] = useState(false);
@@ -32,6 +40,9 @@ const CategoryComponent = () => {
   const [errors, setErrors] = useState({});
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [viewCategory, setViewCategory] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [deactivatingId, setDeactivatingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
   useEffect(() => {
     const fetchCategorys = async () => {
@@ -59,65 +70,75 @@ const CategoryComponent = () => {
     {
       field: "actions",
       headerName: "Actions",
-      width: 240,
+      width: 150,
       renderCell: (params) => (
         <>
-          <Button
-            variant="outlined"
+          <IconButton
+            aria-label="edit"
             color="primary"
             size="small"
             onClick={() => handleEdit(params.row)}
           >
-            Edit
-          </Button>
-          <Button
-            variant="outlined"
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            aria-label="view"
             color="info"
             size="small"
             onClick={() => handleView(params.row)}
             sx={{ ml: 1 }}
           >
-            View
-          </Button>
-          <Button
-            variant="outlined"
+            <VisibilityIcon />
+          </IconButton>
+          <IconButton
+            aria-label="deactivate"
             color="error"
             size="small"
-            onClick={() => handleDelete(params.row.id)}
+            onClick={() => handleDeactivate(params.row.id)}
             sx={{ ml: 1 }}
+            disabled={deactivatingId === params.row.id}
           >
-            Delete
-          </Button>
+            {deactivatingId === params.row.id ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <DeleteIcon />
+            )}
+          </IconButton>
         </>
       ),
     },
   ];
 
-  const rows = categorys.map((category) => ({
-    id: category.id,
-    name: category.name,
-    modified_by: category.modified_by || "N/A",
-    updated_at: category.updated_at
-      ? new Date(category.updated_at).toLocaleString("en-US", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-      : "N/A",
-    created_at: category.created_at
-      ? new Date(category.created_at).toLocaleString("en-US", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-        })
-      : "N/A",
-  }));
+  // Filter categorys based on the search query
+  const filteredRows = categorys
+    .filter((category) =>
+      category.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .map((category) => ({
+      id: category.id,
+      name: category.name,
+      modified_by: category.modified_by || "N/A",
+      updated_at: category.updated_at
+        ? new Date(category.updated_at).toLocaleString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+        : "N/A",
+      created_at: category.created_at
+        ? new Date(category.created_at).toLocaleString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+        : "N/A",
+    }));
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -145,14 +166,17 @@ const CategoryComponent = () => {
     setViewOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDeactivate = async (id) => {
+    setDeactivatingId(id);
     try {
-      await deleteCategory(id);
+      await deactivateCategory(id);
       setCategory(categorys.filter((category) => category.id !== id));
-      toast.success("Category deleted successfully!");
+      toast.success("Category deactivated successfully!");
     } catch (error) {
-      console.error("Error deleting category:", error);
-      toast.error("Failed to delete category. Please try again.");
+      console.error("Error deactivating category:", error);
+      toast.error("Failed to deactivate category. Please try again.");
+    } finally {
+      setDeactivatingId(null);
     }
   };
 
@@ -167,6 +191,7 @@ const CategoryComponent = () => {
       return;
     }
 
+    setLoading(true);
     try {
       if (editingCategoryId) {
         await updateCategory(editingCategoryId, object);
@@ -183,6 +208,8 @@ const CategoryComponent = () => {
       } else {
         setErrors({ form: "An error occurred. Please try again." });
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -192,32 +219,98 @@ const CategoryComponent = () => {
       errors.categoryName = "Category Name is required.";
     return errors;
   }
+  const paginationModel = { page: 0, pageSize: 10 };
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]); // New state for selected categories
+  const handleMultipleDeactivation = async () => {
+    if (selectedCategoryIds.length === 0) {
+      toast.error("No categories selected for deactivation.");
+      return;
+    }
 
-  const paginationModel = { page: 0, pageSize: 5 };
+    setDeactivatingId("multiple"); // Temporarily set a flag for multiple deactivations
+
+    try {
+      // Loop over the selectedCategoryIds and deactivate each category
+      for (const id of selectedCategoryIds) {
+        await deactivateCategory(id);
+        // Remove the deactivated category from the state
+        setCategory((prev) => prev.filter((category) => category.id !== id));
+      }
+      toast.success("Selected categories deactivated successfully!");
+      setSelectedCategoryIds([]); // Clear selection after deactivation
+    } catch (error) {
+      console.error("Error deactivating categories:", error);
+      toast.error("Failed to deactivate categories. Please try again.");
+    } finally {
+      setDeactivatingId(null); // Reset deactivating flag
+    }
+  };
+
   return (
     <>
       <Header title="Category" />
       <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button variant="contained" color="primary" onClick={handleOpen}>
-                Add Category
-              </Button>
+            <Box display="flex" justifyContent="space-between" mt={2}>
+              <TextField
+                variant="outlined"
+                placeholder="Search Products"
+                size="small"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                sx={{ mr: 2 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Box display="flex">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleOpen}
+                  sx={{ mr: 2 }}
+                >
+                  Add
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleMultipleDeactivation}
+                  disabled={
+                    selectedCategoryIds.length === 0 ||
+                    deactivatingId === "multiple"
+                  }
+                >
+                  {deactivatingId === "multiple" ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Deactivate"
+                  )}
+                </Button>
+              </Box>
             </Box>
+
             <Box sx={{ p: 2 }}>
               <DataGrid
-                rows={rows}
+                rows={filteredRows}
                 columns={columns}
-                initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[5, 10, 15, 20]}
+                initialState={{
+                  pagination: { paginationModel },
+                }}
+                pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
+                disableRowSelectionOnClick // This disables row selection when clicking anywhere else
+                onRowSelectionModelChange={(ids) => setSelectedCategoryIds(ids)} // Track selected rows
                 sx={{ border: 0 }}
               />
             </Box>
           </Paper>
         </Box>
-
         {/* Add/Edit Modal */}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
@@ -248,27 +341,27 @@ const CategoryComponent = () => {
                 <p className="text-red-500 text-sm">{errors.form}</p>
               )}
               <DialogActions>
-                <Button
-                  onClick={handleClose}
-                  color="error"
-                  variant="contained"
-                  sx={{ fontWeight: "bold" }}
-                >
+                <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   color="primary"
                   variant="contained"
-                  sx={{ fontWeight: "bold" }}
+                  disabled={loading}
                 >
-                  {editingCategoryId ? "Update" : "Add"}
+                  {loading ? (
+                    <CircularProgress size={24} />
+                  ) : editingCategoryId ? (
+                    "Update"
+                  ) : (
+                    "Save"
+                  )}
                 </Button>
               </DialogActions>
             </form>
           </DialogContent>
         </Dialog>
-
         {/* View Modal */}
         <Dialog
           open={viewOpen}
@@ -329,8 +422,8 @@ const CategoryComponent = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        <ToastContainer />
       </Container>
-      <ToastContainer />
     </>
   );
 };

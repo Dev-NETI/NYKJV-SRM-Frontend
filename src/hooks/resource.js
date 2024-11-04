@@ -50,6 +50,8 @@ const useResource = ({ route }) => {
   const patch = (id, payload) => axios.patch(`${route}/${id}`, payload);
 
   const patchNoPayload = (id) => axios.patch(`${route}/${id}`);
+  const patchNoPayloadW2Param = (id, id2) =>
+    axios.patch(`${route}/${id}/${id2}`);
 
   /**
    * Delete a record from the resource.
@@ -72,6 +74,7 @@ const useResource = ({ route }) => {
     destroy2Parameter,
     patchNoPayload,
     showWithSlug,
+    patchNoPayloadW2Param,
   };
 };
 

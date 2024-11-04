@@ -25,7 +25,7 @@ const AppLayout = ({ children, header }) => {
     <div className="min-h-screen bg-gray-100">
       <Navigation user={user} />
 
-      <main>{children}</main>
+      <main className="p-4">{children}</main>
     </div>
   );
 };

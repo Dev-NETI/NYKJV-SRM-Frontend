@@ -2,13 +2,12 @@
 
 import { useResource } from "../resource";
 
-const useProduct = (customUrl = null) => {
+const useOrder = (customUrl = null) => {
   const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-  const route = customUrl ? `/api/products/${customUrl}` : "/api/products";
-
+  const route = customUrl ? `/api/order/${customUrl}` : "/api/order";
   return {
     ...useResource({ baseURL, route }),
   };
 };
 
-export { useProduct };
+export { useOrder };
