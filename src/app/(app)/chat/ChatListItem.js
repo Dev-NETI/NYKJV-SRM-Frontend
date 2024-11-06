@@ -9,24 +9,27 @@ import CircleIcon from "@mui/icons-material/Circle";
 import AvatarWithStatus from "./AvatarWithStatus";
 import { toggleMessagesPane } from "@/utils";
 import { useAuth } from "@/hooks/auth";
+import Badge from "@mui/joy/Badge";
 
 export default function ChatListItem(props) {
-  const { selectedChat, setSelectedChat } = props;
-  const { id, participants, messages } = props.item;
-  const user = useAuth({ middleware: "auth" });
+  const { selectedChat, setSelectedChat, user, onlineUsers, unreadCounts } =
+    props;
+  const { id, participants, messages } = props.chat;
 
   const { sender } = participants.find(
-    (participant) => participant.sender.id !== user.id
+    (participant) => participant.user_id !== user.id
   );
   const lastMessage = messages[messages.length - 1];
-
+  //check if user is online
+  const isOnline = sender ? onlineUsers?.has(sender.id) : false;
+ 
   return (
     <React.Fragment>
       <ListItem>
         <ListItemButton
           onClick={() => {
             toggleMessagesPane();
-            setSelectedChat(props.item);
+            setSelectedChat(props.chat); 
           }}
           selected={selectedChat?.id === id}
           color="neutral"
@@ -34,17 +37,16 @@ export default function ChatListItem(props) {
         >
           <Stack direction="row" spacing={1.5}>
             <AvatarWithStatus
-              online={sender?.is_active === 1}
+              online={isOnline}
               src={sender?.profile_photo_url}
             />
             <Box sx={{ flex: 1 }}>
-              <Typography level="title-sm">{sender?.full_name}</Typography>
-              <Typography level="body-sm">{sender?.email}</Typography>
+              <Typography level="title-sm">{sender.full_name}</Typography>
+              <Typography level="body-sm">{sender.email}</Typography>
             </Box>
-            <Box sx={{ lineHeight: 1.5, textAlign: "right" }}>
-              {lastMessage?.unread === 1 && (
-                <CircleIcon sx={{ fontSize: 12 }} color="primary" />
-              )}
+            <Box sx={{ lineHeight: 1.5, textAlign: "right", paddingRight: 1 }}>
+            
+
               <Typography
                 level="body-xs"
                 noWrap
@@ -54,6 +56,9 @@ export default function ChatListItem(props) {
                   ? new Date(lastMessage.created_at).toLocaleString()
                   : ""}
               </Typography>
+              {unreadCounts[id] > 0 && (
+                <Badge badgeContent={unreadCounts[id]}></Badge>
+              )}
             </Box>
           </Stack>
           <Typography

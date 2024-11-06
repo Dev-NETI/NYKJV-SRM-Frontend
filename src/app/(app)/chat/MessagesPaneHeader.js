@@ -69,23 +69,7 @@ export default function MessagesPaneHeader(props) {
         </div>
       </Stack>
       <Stack spacing={1} direction="row" sx={{ alignItems: 'center' }}>
-        <Button
-          startDecorator={<PhoneInTalkRoundedIcon />}
-          color="neutral"
-          variant="outlined"
-          size="sm"
-          sx={{ display: { xs: 'none', md: 'inline-flex' } }}
-        >
-          Call
-        </Button>
-        <Button
-          color="neutral"
-          variant="outlined"
-          size="sm"
-          sx={{ display: { xs: 'none', md: 'inline-flex' } }}
-        >
-          View profile
-        </Button>
+       
         <IconButton size="sm" variant="plain" color="neutral">
           <MoreVertRoundedIcon />
         </IconButton>

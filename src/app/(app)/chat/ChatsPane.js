@@ -16,40 +16,48 @@ import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ChatListItem from "./ChatListItem";
-import { toggleMessagesPane } from "@/utils"; 
+import { toggleMessagesPane } from "@/utils";
 import UserListModal from "./UserListModal";
 import { useChat } from "@/stores/ChatContext";
 import { useState } from "react";
 
-export default function ChatsPane(props) { 
-  const { chats, onSelectUser, selectedChat, setSelectedChat } = useChat();
- 
+export default function ChatsPane(props) {
+  const {
+    chats,
+    onSelectUser,
+    selectedChat,
+    setSelectedChat,
+    currentUser,
+    onlineUsers,
+    unreadCounts,
+    lastMessage
+  } = useChat();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filteredChats, setFilteredChats] = useState(chats);
   const [searchQuery, setSearchQuery] = useState("");
 
   React.useEffect(() => {
-  
-    setFilteredChats(chats); 
-   
+    setFilteredChats(chats);
   }, [chats]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    const filtered = chats.filter((chat) =>
-      chat.participants.map((p) => p.sender.full_name.toLowerCase()).includes(query.toLowerCase())
+    setFilteredChats(
+      chats.filter(({ participants }) =>
+        participants.some(({ sender }) =>
+          sender.full_name.toLowerCase().includes(query.toLowerCase())
+        )
+      )
     );
-    setFilteredChats(filtered);
   };
-
- 
 
   return (
     <Sheet
       sx={{
         borderRight: "1px solid",
         borderColor: "divider",
-        height: { sm: "calc(100dvh - var(--Header-height))", md: "100dvh" },
+        height: { sm: "calc(100dvh - var(--Header-height))", md: "94dvh" },
         overflowY: "auto",
       }}
     >
@@ -123,15 +131,18 @@ export default function ChatsPane(props) {
           "--ListItem-paddingX": "1rem",
         }}
       >
-        {
-          filteredChats.map((chat) => (
-            <ChatListItem
-              key={chat.id}
-              item={chat}
-              setSelectedChat={setSelectedChat}
-              selectedChat={selectedChat} 
-            />
-          ))}
+        {filteredChats.map((chat) => (
+          <ChatListItem
+            key={chat.id}
+            chat={chat}
+            setSelectedChat={setSelectedChat}
+            selectedChat={selectedChat}
+            user={currentUser}
+            onlineUsers={onlineUsers}
+            unreadCounts={unreadCounts}
+            lastMessage={lastMessage}
+          />
+        ))}
       </List>
       <UserListModal
         open={isModalOpen}

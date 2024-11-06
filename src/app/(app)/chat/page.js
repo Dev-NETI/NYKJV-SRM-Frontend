@@ -7,7 +7,6 @@ import Sheet from "@mui/joy/Sheet";
 import MessagesPane from "./MessagesPane";
 import ChatsPane from "./ChatsPane";
 import { ChatProvider } from "@/stores/ChatContext";
-import { useChat } from "@/stores/ChatContext";
 
 export default function ChatPage() {
   return (

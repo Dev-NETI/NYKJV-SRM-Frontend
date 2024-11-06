@@ -6,18 +6,18 @@ import AvatarWithStatus from "./AvatarWithStatus";
 import ChatBubble from "./ChatBubble";
 import MessageInput from "./MessageInput";
 import MessagesPaneHeader from "./MessagesPaneHeader";
-import { useAuth } from "@/hooks/auth";
 import { useChat } from "@/stores/ChatContext";
-import { useEffect } from "react";
 
 export default function MessagesPane() {
-  const { selectedChat: chat, onlineUsers, sendMessage, messages } = useChat();
-  const user = useAuth({ middleware: "auth" });
+  const {
+    selectedChat: chat,
+    onlineUsers,
+    sendMessage,
+    messages,
+    currentUser: user,
+  } = useChat();
 
-   
   const [textAreaValue, setTextAreaValue] = React.useState("");
-
- 
 
   const sender = chat?.participants.find(
     (participant) => participant.sender.id !== user.id
@@ -27,7 +27,7 @@ export default function MessagesPane() {
   return (
     <Sheet
       sx={{
-        height: { xs: "calc(100dvh - var(--Header-height))", md: "100dvh" },
+        height: { xs: "calc(100dvh - var(--Header-height))", md: "94vh" },
         display: "flex",
         flexDirection: "column",
         backgroundColor: "background.level1",
@@ -48,7 +48,7 @@ export default function MessagesPane() {
             }}
           >
             <Stack spacing={2} sx={{ justifyContent: "flex-end" }}>
-              {messages?.map((message, index) => {
+              {messages?.map((message, index) => { 
                 const isYou = message.sender.id === user.id;
                 return (
                   <Stack
@@ -59,7 +59,7 @@ export default function MessagesPane() {
                   >
                     {message?.sender !== "You" && (
                       <AvatarWithStatus
-                        online={message.sender.online}
+                        online={isOnline}
                         src={message.sender.avatar}
                       />
                     )}
@@ -76,9 +76,7 @@ export default function MessagesPane() {
             textAreaValue={textAreaValue}
             setTextAreaValue={setTextAreaValue}
             onSubmit={() => {
-            
               sendMessage(textAreaValue, chat);
-             
             }}
           />
         </>

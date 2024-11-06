@@ -4,80 +4,78 @@ import Button from '@mui/joy/Button';
 import FormControl from '@mui/joy/FormControl';
 import Textarea from '@mui/joy/Textarea';
 import { IconButton, Stack } from '@mui/joy';
-
-import FormatBoldRoundedIcon from '@mui/icons-material/FormatBoldRounded';
-import FormatItalicRoundedIcon from '@mui/icons-material/FormatItalicRounded';
-import StrikethroughSRoundedIcon from '@mui/icons-material/StrikethroughSRounded';
-import FormatListBulletedRoundedIcon from '@mui/icons-material/FormatListBulletedRounded';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
+import { Upload } from '@mui/icons-material';
 
+function MessageInputDecorator({ onSubmit }) {
+  return (
+    <Stack
+      direction="row"
+      sx={{
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexGrow: 1,
+        py: 1,
+        pr: 1,
+        borderTop: '1px solid',
+        borderColor: 'divider',
+      }}
+    >
+      <div>
+        <IconButton size="sm" variant="plain" color="neutral">
+          <Upload />
+        </IconButton>
+      </div>
+      <Button
+        type="submit"
+        size="sm"
+        color="primary"
+        sx={{ alignSelf: 'right', borderRadius: 'sm' }}
+        endDecorator={<SendRoundedIcon />}
+      >
+        Send
+      </Button>
+    </Stack>
+  );
+}
 
+const MemoizedDecorator = React.memo(MessageInputDecorator);
 
-export default function MessageInput(props) {
-  const { textAreaValue, setTextAreaValue, onSubmit } = props;
+function MessageInput({ textAreaValue, setTextAreaValue, onSubmit }) {
   const textAreaRef = React.useRef(null);
-  const handleClick = () => {
+
+  const handleSubmit = React.useCallback((event) => {
+    event.preventDefault();
     if (textAreaValue.trim() !== '') {
       onSubmit();
       setTextAreaValue('');
     }
-  };
+  }, [textAreaValue, onSubmit, setTextAreaValue]);
+
+  const handleKeyDown = React.useCallback((event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSubmit(event);
+    }
+  }, [handleSubmit]);
+
+  const handleChange = React.useCallback((event) => {
+    setTextAreaValue(event.target.value);
+  }, [setTextAreaValue]);
+
   return (
     <Box sx={{ px: 2, pb: 3 }}>
-      <FormControl>
+      <FormControl component="form" onSubmit={handleSubmit}>
         <Textarea
           placeholder="Type something here…"
           aria-label="Message"
           ref={textAreaRef}
-          onChange={(event) => {
-            setTextAreaValue(event.target.value);
-          }}
+          onChange={handleChange}
           value={textAreaValue}
           minRows={3}
           maxRows={10}
-          endDecorator={
-            <Stack
-              direction="row"
-              sx={{
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexGrow: 1,
-                py: 1,
-                pr: 1,
-                borderTop: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              <div>
-                <IconButton size="sm" variant="plain" color="neutral">
-                  <FormatBoldRoundedIcon />
-                </IconButton>
-                <IconButton size="sm" variant="plain" color="neutral">
-                  <FormatItalicRoundedIcon />
-                </IconButton>
-                <IconButton size="sm" variant="plain" color="neutral">
-                  <StrikethroughSRoundedIcon />
-                </IconButton>
-                <IconButton size="sm" variant="plain" color="neutral">
-                  <FormatListBulletedRoundedIcon />
-                </IconButton>
-              </div>
-              <Button
-                size="sm"
-                color="primary"
-                sx={{ alignSelf: 'center', borderRadius: 'sm' }}
-                endDecorator={<SendRoundedIcon />}
-                onClick={handleClick}
-              >
-                Send
-              </Button>
-            </Stack>
-          }
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-              handleClick();
-            }
-          }}
+          endDecorator={<MemoizedDecorator onSubmit={handleSubmit} />}
+          onKeyDown={handleKeyDown}
           sx={{
             '& textarea:first-of-type': {
               minHeight: 72,
@@ -88,3 +86,5 @@ export default function MessageInput(props) {
     </Box>
   );
 }
+
+export default React.memo(MessageInput);
