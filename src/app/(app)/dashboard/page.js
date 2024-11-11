@@ -1,10 +1,7 @@
-import Header from "@/app/(app)/Header";
+import React from "react";
+import Header from "../Header";
 
-export const metadata = {
-  title: "Laravel - Dashboard",
-};
-
-const Dashboard = () => {
+function Dashboard() {
   return (
     <>
       <Header title="Dashboard" />
@@ -19,6 +16,6 @@ const Dashboard = () => {
       </div>
     </>
   );
-};
+}
 
 export default Dashboard;
