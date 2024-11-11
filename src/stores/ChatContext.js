@@ -4,7 +4,9 @@ import axios from "@/lib/axios";
 import useEcho from "@/hooks/useEcho";
 import { useAuth } from "@/hooks/auth";
 import { chatService } from "@/hooks/api/chats";
-import { useRef } from "react";
+import { useRef } from "react"; 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ChatContext = createContext(undefined);
 
@@ -119,7 +121,7 @@ export const ChatProvider = ({ children }) => {
       });
       setUnreadCounts(counts);
     } catch (error) {
-      console.error("Error fetching initial data:", error);
+      toast.error("Error fetching initial data");
     }
   };
 
@@ -162,7 +164,7 @@ export const ChatProvider = ({ children }) => {
 
       await chatService.sendMessage(content, chat.id);
     } catch (error) {
-      console.error("Error sending message:", error);
+      toast.error("Error sending message");
     }
   };
   const updateChat = (chatId, newMessage) => {
@@ -203,7 +205,76 @@ export const ChatProvider = ({ children }) => {
         [chatId]: 0,
       }));
     } catch (error) {
-      console.error("Error marking messages as read:", error);
+      toast.error("Error marking messages as read");
+    }
+  };
+
+  const addParticipantToChat = async (chatId, userId) => {
+    try {
+      await axios.post(`/api/chats/${chatId}/participants`, {
+        user_id: userId
+      });
+      
+      // Update the local chat state with the new participant
+      setChats(prevChats =>
+        prevChats.map(chat => {
+          if (chat.id === chatId) {
+            const newParticipant = users.find(u => u.id === userId);
+            return {
+              ...chat,
+              participants: [...chat.participants, {
+                user: newParticipant,
+                chat_id: chatId
+              }]
+            };
+          }
+          return chat;
+        })
+      );
+
+      if (selectedChat?.id === chatId) {
+        setSelectedChat(prev => ({
+          ...prev,
+          participants: [...prev.participants, {
+            user: users.find(u => u.id === userId),
+            chat_id: chatId
+          }]
+        }));
+      }
+    } catch (error) {
+      toast.error("Error adding participant");
+    }
+  };
+
+  const removeParticipantFromChat = async (chatId, userId) => {
+    try {
+      await axios.delete(`/api/chats/${chatId}/participants/${userId}`);
+      
+      // Update local state
+      setChats(prevChats =>
+        prevChats.map(chat => {
+          if (chat.id === chatId) {
+            return {
+              ...chat,
+              participants: chat.participants.filter(
+                p => p.sender.id !== userId
+              )
+            };
+          }
+          return chat;
+        })
+      );
+
+      if (selectedChat?.id === chatId) {
+        setSelectedChat(prev => ({
+          ...prev,
+          participants: prev.participants.filter(
+            p => p.sender.id !== userId
+          )
+        }));
+      }
+    } catch (error) {
+      toast.error("Error removing participant");
     }
   };
 
@@ -225,9 +296,13 @@ export const ChatProvider = ({ children }) => {
         setSelectedChat,
         selectedChat, 
         currentUser: user,
+        addParticipantToChat,
+        removeParticipantFromChat,
       }}
     >
+      <ToastContainer/> 
       {children}
+     
     </ChatContext.Provider>
   );
 };

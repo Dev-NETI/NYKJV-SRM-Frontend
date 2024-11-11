@@ -15,19 +15,19 @@ export default function ChatListItem(props) {
   const {
     selectedChat,
     setSelectedChat,
-    user,
+    user: currentUser,
     onlineUsers,
     unreadCounts,
     chat,
   } = props;
   const { id, participants, messages } = chat;
 
-  const { sender } = participants.find(
-    (participant) => participant.user_id !== user.id
+  const { user } = participants.find(
+    (participant) => participant.user_id !== currentUser.id
   );
   const lastMessage = messages[messages.length - 1];
   //check if user is online
-  const isOnline = sender ? onlineUsers?.has(sender.id) : false;
+  const isOnline = user ? onlineUsers?.has(user.id) : false;
 
   return (
     <React.Fragment>
@@ -44,11 +44,11 @@ export default function ChatListItem(props) {
           <Stack direction="row" spacing={1.5}>
             <AvatarWithStatus
               online={isOnline}
-              src={sender?.profile_photo_url}
+              src={user?.profile_photo_url}
             />
             <Box sx={{ flex: 1 }}>
-              <Typography level="title-sm">{sender.full_name}</Typography>
-              <Typography level="body-sm">{sender.email}</Typography>
+              <Typography level="title-sm">{user.full_name}</Typography>
+              <Typography level="body-sm">{user.email}</Typography>
             </Box>
             <Box sx={{ lineHeight: 1.5, textAlign: "right", paddingRight: 1 }}>
               <Typography

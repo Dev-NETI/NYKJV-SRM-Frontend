@@ -20,8 +20,8 @@ export default function MessagesPane() {
   const [textAreaValue, setTextAreaValue] = React.useState("");
 
   const sender = chat?.participants.find(
-    (participant) => participant.sender.id !== user.id
-  )?.sender;
+    (participant) => participant.user.id !== user.id
+  )?.user;
   const isOnline = sender ? onlineUsers.has(sender.id) : false;
 
   return (

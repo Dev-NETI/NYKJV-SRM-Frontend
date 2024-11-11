@@ -36,4 +36,5 @@ export const chatService = {
       const response = await axios.get('/api/chat/users');
       return response.data;
     },
+    
   };
