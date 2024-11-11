@@ -4,15 +4,18 @@ import { useAuth } from "@/hooks/auth";
 import Navigation from "@/app/(app)/Navigation";
 import Loading from "@/app/(app)/Loading";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const AppLayout = ({ children, header }) => {
   const { user, checkVerified } = useAuth({
     middleware: "auth",
   });
 
+  const path = usePathname();
+
   useEffect(() => {
-    checkVerified();
-  }, []);
+    checkVerified({ user, path });
+  }, [path, user]);
 
   if (!user) {
     return <Loading />;
