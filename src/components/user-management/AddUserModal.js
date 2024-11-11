@@ -11,10 +11,10 @@ import {
 import { Slide } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
-import UserFormComponent from "@/components/user-management/UserFormComponent";
 import { useCompanies } from "@/hooks/api/companies";
 import { useDepartment } from "@/hooks/api/department";
 import { useSupplier } from "@/hooks/api/supplier";
+import UserFormComponent from "./UserFormComponent";
 
 function AddUserModal() {
   const [openAddModal, setOpenAddModal] = useState(false);

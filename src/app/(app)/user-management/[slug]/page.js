@@ -19,9 +19,11 @@ import {
 } from "@mui/material";
 
 import PersonIcon from "@mui/icons-material/Person";
-import { Button, Grid } from "@mui/joy";
-import ManageRoleModal from "../ManageRoleModal";
+import { Grid } from "@mui/joy";
+import ManageRoleModal from "../../../../components/user-management/ManageRoleModal";
 import SBComponent from "@/components/snackbar/SBComponent";
+import EditUserModal from "@/components/user-management/EditUserModal";
+import { UserContext } from "@/stores/UserContext";
 
 function UserManagementSlugPage() {
   const params = useParams();
@@ -33,7 +35,7 @@ function UserManagementSlugPage() {
     color: "",
   });
 
-  const showSnackbar = (message, color) => {
+  const showSnackbar1 = (message, color) => {
     setSnackbarState({
       open: true,
       message,
@@ -112,7 +114,7 @@ function UserManagementSlugPage() {
 
           {/* Roles Button */}
           <Box sx={{ textAlign: "right", p: 1 }}>
-            <ManageRoleModal user={user} showSnackbar={showSnackbar} />
+            <ManageRoleModal user={user} showSnackbar={showSnackbar1} />
           </Box>
 
           <Divider />

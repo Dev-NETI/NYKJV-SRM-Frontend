@@ -2,31 +2,19 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "../Header";
-import {
-  Box,
-  Button,
-  Card,
-  Chip,
-  Container,
-  Divider,
-  Grid,
-  Typography,
-} from "@mui/joy";
+import { Box, Button, Card, Divider, Typography } from "@mui/joy";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import {
-  CheckCircleOutline,
-  BlockOutlined,
-  InfoOutlined,
-} from "@mui/icons-material";
+import { InfoOutlined } from "@mui/icons-material";
 import { UserContext } from "@/stores/UserContext";
 import { useUser } from "@/hooks/api/user";
 import Loading from "../Loading";
-import { UserIcon } from "lucide-react";
-import AddUserModal from "./AddUserModal";
+import AddUserModal from "../../../components/user-management/AddUserModal";
 import SBComponent from "@/components/snackbar/SBComponent";
+import EditUserModal from "@/components/user-management/EditUserModal";
+import { EyeIcon } from "lucide-react";
 
 function page() {
-  const { index: getUsers, store: storeUser } = useUser();
+  const { index: getUsers, store: storeUser, update: updateUser } = useUser();
   const [loading, setLoading] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
     open: false,
@@ -95,25 +83,17 @@ function page() {
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <Box
-          key={`action-buttons-${params.row.id}`}
-          sx={{
-            display: "flex",
-            gap: 1,
-            alignItems: "center",
-            mt: 1,
-            mb: 1,
-          }}
-        >
+        <Box key={`action-buttons-${params.row.id}`} sx={{ py: 1 }}>
           <Link href={`/user-management/${params.row.slug}`} passHref>
             <Button
               key={`view-profile-${params.row.slug}`}
-              startDecorator={<UserIcon />}
-              variant="soft"
-            >
-              View Profile
-            </Button>
+              startDecorator={<EyeIcon />}
+              variant="outlined" // Optional: use "outlined" or "contained" for visual distinction
+              size="small" // Optional: "small" for compact styling
+              sx={{ minWidth: "auto", padding: "4px", mr: 1 }}
+            ></Button>
           </Link>
+          <EditUserModal slug={params.row.slug} />
         </Box>
       ),
     },
@@ -137,7 +117,9 @@ function page() {
 
   return (
     <>
-      <UserContext.Provider value={{ setUserState, storeUser, showSnackbar }}>
+      <UserContext.Provider
+        value={{ setUserState, storeUser, showSnackbar, updateUser }}
+      >
         <Header title={"User Management"} />
         <Card
           variant="outlined"

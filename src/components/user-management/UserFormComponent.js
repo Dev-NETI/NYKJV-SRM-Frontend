@@ -15,8 +15,9 @@ import { z } from "zod";
 import TextFieldComponent from "../forms/TextFieldComponent";
 import SelectFieldComponent from "../forms/SelectFieldComponent";
 
-function UserFormComponent({ mode = 1, handleCloseAddModal, DataState }) {
-  const { storeUser, setUserState, showSnackbar } = useContext(UserContext);
+function UserFormComponent({ mode = 1, handleCloseAddModal, DataState, user }) {
+  const { storeUser, setUserState, showSnackbar, updateUser } =
+    useContext(UserContext);
 
   const onSubmit = async (data) => {
     try {
@@ -31,7 +32,13 @@ function UserFormComponent({ mode = 1, handleCloseAddModal, DataState }) {
           showSnackbar("User addition failed!", "danger");
         }
       } else {
-        // Handle the update case if needed
+        response = await updateUser(user?.slug, data);
+
+        if (response.status === 201) {
+          showSnackbar("User updated successfully!", "success");
+        } else {
+          showSnackbar("User update failed!", "danger");
+        }
       }
 
       if (response && response.data) {
@@ -47,10 +54,18 @@ function UserFormComponent({ mode = 1, handleCloseAddModal, DataState }) {
       if (error.response && error.response.status === 422) {
         const validationErrors = error.response.data.errors;
         let errorMessages = Object.values(validationErrors).flat().join("\n");
-        showSnackbar(errorMessages, "danger");
+        if (mode === 1) {
+          showSnackbar(errorMessages, "danger");
+        } else {
+          showSnackbar(errorMessages, "danger");
+        }
       } else {
         // Handle other errors (e.g., network issues, server errors)
-        showSnackbar(error.message, "danger");
+        if (mode === 1) {
+          showSnackbar(error.message, "danger");
+        } else {
+          showSnackbar(error.message, "danger");
+        }
       }
     }
   };
@@ -79,16 +94,16 @@ function UserFormComponent({ mode = 1, handleCloseAddModal, DataState }) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      f_name: "",
-      m_name: "",
-      l_name: "",
-      suffix: "",
-      contact_number: "",
-      email: "",
+      f_name: user?.f_name || "",
+      m_name: user?.m_name || "",
+      l_name: user?.l_name || "",
+      suffix: user?.suffix || "",
+      contact_number: user?.contact_number || "",
+      email: user?.email || "",
       password: "",
-      company_id: "0",
-      department_id: "0",
-      supplier_id: "0",
+      company_id: user?.company_id || 0,
+      department_id: user?.department_id || 0,
+      supplier_id: user?.supplier_id || 0,
     },
   });
 
@@ -210,7 +225,7 @@ function UserFormComponent({ mode = 1, handleCloseAddModal, DataState }) {
           Cancel
         </Button>
         <Button variant="solid" color="primary" type="submit">
-          Add User
+          {mode === 1 ? "Add User" : "Update User"}
         </Button>
       </Box>
     </form>
