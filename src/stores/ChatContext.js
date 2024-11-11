@@ -187,7 +187,7 @@ export const ChatProvider = ({ children }) => {
       setSelectedChat(existingChat);
     } else {
       // Create new chat session if none exists
-      newSession(selectedUser.id);
+      chatService.newSession(selectedUser.id);
     }
   };
 

@@ -12,9 +12,15 @@ import { useAuth } from "@/hooks/auth";
 import Badge from "@mui/joy/Badge";
 
 export default function ChatListItem(props) {
-  const { selectedChat, setSelectedChat, user, onlineUsers, unreadCounts } =
-    props;
-  const { id, participants, messages } = props.chat;
+  const {
+    selectedChat,
+    setSelectedChat,
+    user,
+    onlineUsers,
+    unreadCounts,
+    chat,
+  } = props;
+  const { id, participants, messages } = chat;
 
   const { sender } = participants.find(
     (participant) => participant.user_id !== user.id
@@ -22,14 +28,14 @@ export default function ChatListItem(props) {
   const lastMessage = messages[messages.length - 1];
   //check if user is online
   const isOnline = sender ? onlineUsers?.has(sender.id) : false;
- 
+
   return (
     <React.Fragment>
       <ListItem>
         <ListItemButton
           onClick={() => {
             toggleMessagesPane();
-            setSelectedChat(props.chat); 
+            setSelectedChat(props.chat);
           }}
           selected={selectedChat?.id === id}
           color="neutral"
@@ -45,8 +51,6 @@ export default function ChatListItem(props) {
               <Typography level="body-sm">{sender.email}</Typography>
             </Box>
             <Box sx={{ lineHeight: 1.5, textAlign: "right", paddingRight: 1 }}>
-            
-
               <Typography
                 level="body-xs"
                 noWrap

@@ -33,7 +33,7 @@ export const chatService = {
     },
   
     async fetchUsers() {
-      const response = await axios.get('/api/users');
+      const response = await axios.get('/api/chat/users');
       return response.data;
     },
   };

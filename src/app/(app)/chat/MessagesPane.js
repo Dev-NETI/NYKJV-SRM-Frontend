@@ -48,7 +48,7 @@ export default function MessagesPane() {
             }}
           >
             <Stack spacing={2} sx={{ justifyContent: "flex-end" }}>
-              {messages?.map((message, index) => { 
+              {messages?.map((message, index) => {
                 const isYou = message.sender.id === user.id;
                 return (
                   <Stack
