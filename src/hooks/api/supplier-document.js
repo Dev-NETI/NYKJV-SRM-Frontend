@@ -7,9 +7,10 @@ const useSupplierDocument = (customUrl = null) => {
   const route = customUrl
     ? `/api/supplier-document/${customUrl}`
     : "/api/supplier-document";
+  
   return {
     ...useResource({ baseURL, route }),
   };
 };
 
-export { useSupplierDocument };
+export { useSupplierDocument};

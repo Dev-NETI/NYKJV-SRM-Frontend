@@ -12,6 +12,7 @@ const useResource = ({ route }) => {
    *
    * @return {*}
    */
+
   const index = () => axios.get(`${route}`);
 
   /**

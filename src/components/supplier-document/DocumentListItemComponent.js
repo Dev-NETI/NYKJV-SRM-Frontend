@@ -120,68 +120,70 @@ function DocumentListItemComponent({
   };
 
   return (
-    <Link href={filePath} target="_blank">
-      <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-        <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-56 h-56">
-          <div className="flex flex-row gap-4 justify-between items-center">
-            <div className="overflow-hidden flex flex-row gap-2">
-              <PictureAsPdfIcon fontSize="small" color="error" />
-              <p className="font-semibold text-xs text-stone-800 truncate">
-                {fileName}
-              </p>
+    <div className="w-full h-full min-h-60">
+      <Link className="w-full h-full m-0" href={filePath} target="_blank">
+        <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
+          <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-full h-full min-h-60">
+            <div className="flex flex-row gap-4 justify-between items-center">
+              <div className="overflow-hidden flex flex-row gap-2">
+                <PictureAsPdfIcon fontSize="small" color="error" />
+                <p className="font-semibold text-xs text-stone-800 truncate">
+                  {fileName}
+                </p>
+              </div>
+              <div>
+                <MoreVertIcon fontSize="small" onClick={handleContextMenu} />
+              </div>
             </div>
+
+            <div className="bg-white rounded-md flex justify-center items-center p-2">
+              <canvas
+                ref={canvasRef}
+                style={{ width: "100px", height: "100px" }}
+              ></canvas>
+            </div>
+
+            <DocumentListItemFooterComponent label={modifiedBy} />
+            <DocumentListItemFooterComponent label={updatedAt} />
+          </div>
+
+          <ContextMenuComponent
+            contextMenu={contextMenu}
+            handleClose={handleClose}
+          >
             <div>
-              <MoreVertIcon fontSize="small" onClick={handleContextMenu} />
+              {supplierDocumentState.activePage === 1 ? (
+                <>
+                  <ContextMenuItemComponent
+                    onClick={handleMoveToTrash}
+                    label="Move to trash"
+                    icon={<DeleteIcon fontSize="small" />}
+                  />
+                  <ContextMenuItemComponent
+                    filePath={filePath}
+                    label="Open"
+                    icon={<OpenInNewIcon fontSize="small" />}
+                  />
+                </>
+              ) : (
+                <>
+                  <ContextMenuItemComponent
+                    onClick={handleRecycle}
+                    label="Activate"
+                    icon={<RecyclingIcon fontSize="small" />}
+                  />
+                  <ContextMenuItemComponent
+                    onClick={handleDestroy}
+                    label="Delete Forever"
+                    icon={<DeleteForeverIcon fontSize="small" />}
+                  />
+                </>
+              )}
             </div>
-          </div>
-
-          <div className="bg-white rounded-md flex justify-center items-center p-2">
-            <canvas
-              ref={canvasRef}
-              style={{ width: "100px", height: "100px" }}
-            ></canvas>
-          </div>
-
-          <DocumentListItemFooterComponent label={modifiedBy} />
-          <DocumentListItemFooterComponent label={updatedAt} />
+          </ContextMenuComponent>
         </div>
-
-        <ContextMenuComponent
-          contextMenu={contextMenu}
-          handleClose={handleClose}
-        >
-          <div>
-            {supplierDocumentState.activePage === 1 ? (
-              <>
-                <ContextMenuItemComponent
-                  onClick={handleMoveToTrash}
-                  label="Move to trash"
-                  icon={<DeleteIcon fontSize="small" />}
-                />
-                <ContextMenuItemComponent
-                  filePath={filePath}
-                  label="Open"
-                  icon={<OpenInNewIcon fontSize="small" />}
-                />
-              </>
-            ) : (
-              <>
-                <ContextMenuItemComponent
-                  onClick={handleRecycle}
-                  label="Activate"
-                  icon={<RecyclingIcon fontSize="small" />}
-                />
-                <ContextMenuItemComponent
-                  onClick={handleDestroy}
-                  label="Delete Forever"
-                  icon={<DeleteForeverIcon fontSize="small" />}
-                />
-              </>
-            )}
-          </div>
-        </ContextMenuComponent>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
