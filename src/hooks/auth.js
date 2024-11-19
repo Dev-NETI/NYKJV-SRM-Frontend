@@ -163,10 +163,10 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     window.location.pathname = "/login";
   };
 
-  const checkVerified = async ({ user, path }) => {
+  const checkVerified = async ({ user, pathname }) => {
     try {
       const response = await axios.get("api/checking-status-otp");
-      const currentPath = path;
+      const currentPath = pathname;
 
       console.log("Current Path:", currentPath);
 

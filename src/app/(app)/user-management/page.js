@@ -120,17 +120,7 @@ function page() {
       <UserContext.Provider
         value={{ setUserState, storeUser, showSnackbar, updateUser }}
       >
-        <Header title={"User Management"} />
-        <Card
-          variant="outlined"
-          sx={{
-            maxHeight: "max-content",
-            maxWidth: "90%",
-            mx: "auto",
-            resize: "horizontal",
-            mt: 2,
-          }}
-        >
+        <Card>
           <Box
             sx={{
               display: "flex",
@@ -138,9 +128,7 @@ function page() {
               alignItems: "center",
             }}
           >
-            <Typography level="title-lg" startDecorator={<InfoOutlined />}>
-              List of Users
-            </Typography>
+            <Typography level="title-lg">List of Users</Typography>
             <AddUserModal />
           </Box>
           <Divider inset="none" />
