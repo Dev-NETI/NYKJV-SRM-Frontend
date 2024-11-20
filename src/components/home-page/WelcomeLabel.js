@@ -12,9 +12,9 @@ function WelcomeLabel() {
   };
 
   return (
-    <div className="basis-6/12 flex flex-col gap-2 p-10 ">
+    <div className="basis-6/12 flex flex-col gap-20 px-10 py-2 ">
       <motion.p
-        className="text-stone-800 font-bold text-5xl"
+        className="text-stone-950 font-bold text-2xl md:text-5xl lg:text-5xl"
         variants={textAnimation}
         initial="hidden"
         animate="visible"

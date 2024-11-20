@@ -14,7 +14,7 @@ import {
 
 function NykJvAnimatedLogo() {
   return (
-    <div className="basis-6/12 p-10">
+    <div className="basis-6/12 px-10 py-2 hidden md:block lg:block">
       <Canvas
         shadows
         style={{
