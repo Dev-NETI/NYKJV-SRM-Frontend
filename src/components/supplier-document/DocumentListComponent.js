@@ -55,14 +55,14 @@ function DocumentListComponent() {
                  flex flex-col gap-4"
     >
       <div className="flex justify-center items-center">
-        <Space direction="vertical">
+        {/* <Space direction="vertical">
           <Search
             size="large"
             placeholder="Search file here..."
             onSearch={handleSearch}
             enterButton
           />
-        </Space>
+        </Space> */}
       </div>
       <div
         className="rounded-xl bg-white border-gray-500
