@@ -1,69 +1,57 @@
 "use client";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import BrightnessAutoRoundedIcon from "@mui/icons-material/BrightnessAutoRounded";
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import QuestionAnswerRoundedIcon from "@mui/icons-material/QuestionAnswerRounded";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
-import SupportRoundedIcon from "@mui/icons-material/SupportRounded";
+import {
+  AssignmentRounded as AssignmentRoundedIcon,
+  BrightnessAutoRounded as BrightnessAutoRoundedIcon,
+  DashboardRounded as DashboardRoundedIcon,
+  HomeRounded as HomeRoundedIcon,
+  LogoutRounded as LogoutRoundedIcon,
+  QuestionAnswerRounded as QuestionAnswerRoundedIcon,
+  SearchRounded as SearchRoundedIcon,
+  ShoppingCartRounded as ShoppingCartRoundedIcon,
+} from "@mui/icons-material";
 import Avatar from "@mui/joy/Avatar";
 import Box from "@mui/joy/Box";
 import Divider from "@mui/joy/Divider";
-import GlobalStyles from "@mui/joy/GlobalStyles";
 import IconButton from "@mui/joy/IconButton";
 import Input from "@mui/joy/Input";
 import List from "@mui/joy/List";
 import ListItem from "@mui/joy/ListItem";
-import ListItemButton, { listItemButtonClasses } from "@mui/joy/ListItemButton";
+import ListItemButton from "@mui/joy/ListItemButton";
 import ListItemContent from "@mui/joy/ListItemContent";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
-import ArticleIcon from "@mui/icons-material/Article";
-import { closeSidebar } from "../utils";
+import { useAuth } from "@/hooks/auth";
+import Image from "next/image";
 
 const routes = [
-  { href: "/dashboard", label: "Dashboard", icon: <DashboardRoundedIcon /> },
-  { href: "/product", label: "Product", icon: <HomeRoundedIcon /> },
-  { href: "/brand", label: "Brand", icon: <ShoppingCartRoundedIcon /> },
-  { href: "/category", label: "Category", icon: <AssignmentRoundedIcon /> },
   {
-    href: "/supplier-document",
-    label: "Documents",
-    icon: <ArticleIcon />,
+    group: "Main",
+    items: [
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        icon: <DashboardRoundedIcon />,
+      },
+      { href: "/category", label: "Category", icon: <AssignmentRoundedIcon /> },
+      { href: "/brand", label: "Brand", icon: <ShoppingCartRoundedIcon /> },
+      { href: "/product", label: "Product", icon: <HomeRoundedIcon /> },
+    ],
   },
-  { href: "/chat", label: "Chat", icon: <QuestionAnswerRoundedIcon /> },
+  {
+    group: "Communication",
+    items: [
+      { href: "/chat", label: "Chat", icon: <QuestionAnswerRoundedIcon /> },
+    ],
+  },
 ];
 
-function Toggler({ defaultExpanded = false, renderToggle, children }) {
-  const [open, setOpen] = React.useState(defaultExpanded);
-  return (
-    <React.Fragment>
-      {renderToggle({ open, setOpen })}
-      <Box
-        sx={[
-          {
-            display: "grid",
-            transition: "0.2s ease",
-            "& > *": {
-              overflow: "hidden",
-            },
-          },
-          open ? { gridTemplateRows: "1fr" } : { gridTemplateRows: "0fr" },
-        ]}
-      >
-        {children}
-      </Box>
-    </React.Fragment>
-  );
-}
-
 export default function Sidebar({ user }) {
+  const { logout } = useAuth({
+    middleware: "auth",
+  });
   const pathname = usePathname();
 
   return (
@@ -76,7 +64,7 @@ export default function Sidebar({ user }) {
           md: "none",
         },
         transition: "transform 0.4s, width 0.4s",
-        zIndex: 10000,
+        zIndex: 100,
         height: "100dvh",
         width: "var(--Sidebar-width)",
         top: 0,
@@ -84,122 +72,144 @@ export default function Sidebar({ user }) {
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
-        gap: 2,
         borderRight: "1px solid",
         borderColor: "divider",
+        backgroundColor: "#FEFEFE",
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 400'%3E%3Cdefs%3E%3CradialGradient id='a' cx='396' cy='281' r='514' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%232A2ADD'/%3E%3Cstop offset='1' stop-color='%23FEFEFE'/%3E%3C/radialGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='400' y1='148' x2='400' y2='333'%3E%3Cstop offset='0' stop-color='%23000000' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23000000' stop-opacity='0.5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a)' width='800' height='400'/%3E%3Cg fill-opacity='0.4'%3E%3Ccircle fill='url(%23b)' cx='267.5' cy='61' r='300'/%3E%3Ccircle fill='url(%23b)' cx='532.5' cy='61' r='300'/%3E%3Ccircle fill='url(%23b)' cx='400' cy='30' r='300'/%3E%3C/g%3E%3C/svg%3E")`,
+        backgroundAttachment: "fixed",
+        backgroundSize: "cover",
+        boxShadow: "xl",
       }}
     >
-      <GlobalStyles
-        styles={(theme) => ({
-          ":root": {
-            "--Sidebar-width": "220px",
-            [theme.breakpoints.up("lg")]: {
-              "--Sidebar-width": "240px",
-            },
-          },
-        })}
-      />
+      {/ Sidebar Header /}
       <Box
-        className="Sidebar-overlay"
-        sx={{
-          position: "fixed",
-          zIndex: 9998,
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          opacity: "var(--SideNavigation-slideIn)",
-          backgroundColor: "var(--joy-palette-background-backdrop)",
-          transition: "opacity 0.4s",
-          transform: {
-            xs: "translateX(calc(100% * (var(--SideNavigation-slideIn, 0) - 1) + var(--SideNavigation-slideIn, 0) * var(--Sidebar-width, 0px)))",
-            lg: "translateX(-100%)",
-          },
-        }}
-        onClick={() => closeSidebar()}
-      />
-      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <IconButton variant="soft" color="primary" size="sm">
-          <BrightnessAutoRoundedIcon />
-        </IconButton>
-        <Typography level="title-lg">SRM App</Typography>
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Image src="/SRM.png" alt="NYKJV-SRM-Logo" width={170} height={170} />
       </Box>
+
+      {/ Search Input /}
       <Input
         size="sm"
         startDecorator={<SearchRoundedIcon />}
         placeholder="Search"
+        sx={{
+          borderRadius: "8px",
+          boxShadow: "sm",
+          mt: 2,
+        }}
       />
+
+      {/ Navigation Links /}
       <Box
         sx={{
-          minHeight: 0,
+          mt: 2,
+          flex: 1,
           overflow: "hidden auto",
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          [`& .${listItemButtonClasses.root}`]: {
-            gap: 1.5,
-          },
         }}
       >
-        <List
-          size="sm"
-          sx={{
-            gap: 1,
-            "--List-nestedInsetStart": "30px",
-            "--ListItem-radius": (theme) => theme.vars.radius.sm,
-          }}
-        >
-          {routes.map((route) => (
-            <ListItem key={route.href}>
-              <ListItemButton
-                component={Link}
-                href={route.href}
-                selected={pathname === route.href}
+        {routes.map((group) => (
+          <List
+            key={group.group}
+            size="sm"
+            sx={{
+              gap: 1,
+              "--List-nestedInsetStart": "30px",
+              "--ListItem-radius": "8px",
+              mb: 2,
+            }}
+          >
+            <ListItem nested>
+              <Typography
+                level="body-xs"
+                sx={{
+                  fontWeight: 600,
+                  color: "neutral.500",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  mb: 1,
+                  pl: 2,
+                }}
               >
-                {route.icon}
-                <ListItemContent>
-                  <Typography level="title-sm">{route.label}</Typography>
-                </ListItemContent>
-              </ListItemButton>
+                {group.group}
+              </Typography>
+              <List>
+                {group.items.map((route) => (
+                  <ListItem key={route.href}>
+                    <ListItemButton
+                      component={Link}
+                      href={route.href}
+                      selected={pathname === route.href}
+                      sx={{
+                        pl: 2,
+                        gap: 1.5,
+                        "&.Mui-selected": {
+                          backgroundColor: "primary.softBg",
+                          "&:hover": {
+                            backgroundColor: "primary.softHover",
+                          },
+                        },
+                        "&:hover": {
+                          backgroundColor: "neutral.softHover",
+                        },
+                      }}
+                    >
+                      {route.icon}
+                      <ListItemContent>
+                        <Typography level="title-sm">{route.label}</Typography>
+                      </ListItemContent>
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
             </ListItem>
-          ))}
-        </List>
-        <List
-          size="sm"
+          </List>
+        ))}
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      {/ Profile Section at the Bottom /}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          p: 2,
+          borderRadius: "sm",
+          bgcolor: "background.surface",
+          boxShadow: "sm",
+        }}
+      >
+        <Avatar
+          src={"/user.png"}
+          alt={user?.f_name}
+          size="lg"
           sx={{
-            mt: "auto",
-            flexGrow: 0,
-            "--ListItem-radius": (theme) => theme.vars.radius.sm,
-            "--List-gap": "8px",
-            mb: 2,
+            "--Avatar-size": "40px",
+            border: "2px solid",
+            borderColor: "primary.500",
+          }}
+        />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography level="body-sm" fontWeight="bold">
+            Hi, {user?.f_name} {user?.l_name}
+          </Typography>
+          <Typography level="body-xs" color="neutral.500">
+            {user?.email}
+          </Typography>
+        </Box>
+        <IconButton
+          size="sm"
+          variant="plain"
+          color="neutral"
+          onClick={logout}
+          sx={{
+            "&:hover": {
+              backgroundColor: "neutral.100",
+            },
           }}
         >
-          <ListItem>
-            <ListItemButton>
-              <SupportRoundedIcon />
-              Support
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton>
-              <SettingsRoundedIcon />
-              Settings
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Box>
-      <Divider />
-      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <Avatar
-          variant="outlined"
-          size="sm"
-          src={`${user?.profile_photo_url}`}
-        />
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography level="title-sm">{user?.full_name}</Typography>
-          <Typography level="body-xs">{user?.email}</Typography>
-        </Box>
-        <IconButton size="sm" variant="plain" color="neutral">
           <LogoutRoundedIcon />
         </IconButton>
       </Box>
