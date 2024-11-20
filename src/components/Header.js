@@ -61,7 +61,7 @@ export default function Header() {
         position: "sticky",
         top: 0,
         backgroundColor: "background.surface",
-        zIndex: 1100,
+        zIndex: 50,
       }}
     >
       <IconButton

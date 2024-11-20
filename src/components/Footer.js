@@ -34,7 +34,7 @@ const Footer = () => {
           fontWeight: 500,
         }}
       >
-        © {currentYear} SRM App. All rights reserved.
+        © {currentYear} Supplier Relationship Management. All rights reserved.
       </Typography>
     </Box>
   );

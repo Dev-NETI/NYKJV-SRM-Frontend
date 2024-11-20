@@ -24,6 +24,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useAuth } from "@/hooks/auth";
+import Image from "next/image";
 
 const routes = [
   {
@@ -65,7 +66,7 @@ export default function Sidebar({ user }) {
         transition: "transform 0.4s, width 0.4s",
         zIndex: 100,
         height: "100dvh",
-        width: "var(--Sidebar-width)", // Sidebar adjusts based on screen
+        width: "var(--Sidebar-width)",
         top: 0,
         p: 2,
         flexShrink: 0,
@@ -73,18 +74,18 @@ export default function Sidebar({ user }) {
         flexDirection: "column",
         borderRight: "1px solid",
         borderColor: "divider",
-        backgroundColor: "background.surface",
+        backgroundColor: "#FEFEFE",
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 400'%3E%3Cdefs%3E%3CradialGradient id='a' cx='396' cy='281' r='514' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%232A2ADD'/%3E%3Cstop offset='1' stop-color='%23FEFEFE'/%3E%3C/radialGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='400' y1='148' x2='400' y2='333'%3E%3Cstop offset='0' stop-color='%23000000' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23000000' stop-opacity='0.5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a)' width='800' height='400'/%3E%3Cg fill-opacity='0.4'%3E%3Ccircle fill='url(%23b)' cx='267.5' cy='61' r='300'/%3E%3Ccircle fill='url(%23b)' cx='532.5' cy='61' r='300'/%3E%3Ccircle fill='url(%23b)' cx='400' cy='30' r='300'/%3E%3C/g%3E%3C/svg%3E")`,
+        backgroundAttachment: "fixed",
+        backgroundSize: "cover",
         boxShadow: "xl",
       }}
     >
       {/* Sidebar Header */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <IconButton variant="soft" color="primary" size="sm">
-          <BrightnessAutoRoundedIcon />
-        </IconButton>
-        <Typography level="title-lg" sx={{ fontWeight: "bold" }}>
-          SRM App
-        </Typography>
+      <Box
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Image src="/SRM.png" alt="NYKJV-SRM-Logo" width={170} height={170} />
       </Box>
 
       {/* Search Input */}
@@ -181,7 +182,7 @@ export default function Sidebar({ user }) {
         }}
       >
         <Avatar
-          src={user?.profile_photo_url}
+          src={"/user.png"}
           alt={user?.f_name}
           size="lg"
           sx={{
@@ -192,7 +193,7 @@ export default function Sidebar({ user }) {
         />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography level="body-sm" fontWeight="bold">
-            {user?.f_name}
+            Hi, {user?.f_name} {user?.l_name}
           </Typography>
           <Typography level="body-xs" color="neutral.500">
             {user?.email}
