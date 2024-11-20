@@ -1,9 +1,23 @@
-const AuthCard = ({ logo, children }) => (
-  <div className="min-h-screen flex flex-col sm:justify-center items-center p-4 sm:pt-0 custom-bg-nyk">
-    <div className="mb-4 sm:mb-6">{logo}</div>
+"use client";
 
-    <div className="w-full sm:max-w-md px-4 sm:px-6 py-6 sm:py-8 bg-white shadow-md overflow-hidden rounded-xl sm:rounded-lg mx-auto">
-      {children}
+import dynamic from "next/dynamic";
+
+const LogoCanvas = dynamic(() => import("@/components/logo/srm/Logo"), {
+  ssr: false,
+});
+
+const AuthCard = ({ children }) => (
+  <div className="min-h-screen flex items-center justify-center custom-bg-nyk">
+    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between w-full h-full bg-white shadow-md sm:rounded-none">
+      {/* Logo Section */}
+      <div className="hidden sm:flex justify-center items-center w-full sm:w-1/2 h-full custom-bg-nyk">
+        <LogoCanvas />
+      </div>
+
+      {/* Login Form Section */}
+      <div className="w-full sm:w-1/2 h-full flex items-center justify-center px-6 py-8">
+        {children}
+      </div>
     </div>
   </div>
 );

@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+
 const FormSchema = z.object({
   email: z.string().email({
     message: "Invalid email format.",
@@ -85,8 +86,10 @@ const Login = () => {
               alt="NYKJV-SRM-Logo"
               width={250}
               height={250}
+              priority
             />
           </div>
+
           <h2 className="mt-10 mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
             Sign in to your account
           </h2>
