@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,10 +15,12 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import Image from "next/image";
 const FormSchema = z
   .object({
-    name: z.string().nonempty(),
+    f_name: z.string().nonempty(),
+    m_name: z.string().nonempty(),
+    l_name: z.string().nonempty(),
     email: z.string().email({
       message: "Invalid email format.",
     }),
@@ -39,7 +40,9 @@ const Page = () => {
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: "",
+      f_name: "",
+      m_name: "",
+      l_name: "",
       email: "",
       password: "",
       passwordConfirmation: "",
@@ -50,7 +53,9 @@ const Page = () => {
 
   const submitForm = async (data) => {
     register({
-      name: data.name,
+      f_name: data.f_name,
+      m_name: data.m_name,
+      l_name: data.l_name,
       email: data.email,
       password: data.password,
       password_confirmation: data.passwordConfirmation,
@@ -62,11 +67,14 @@ const Page = () => {
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center items-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            className="mx-auto h-10 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-            alt="Your Company"
-          />
+          <div className="flex justify-center items-center">
+            <Image
+              src="/SRM.png"
+              alt="NYKJV-SRM-Logo"
+              width={250}
+              height={250}
+            />
+          </div>
           <h2 className="mt-10 mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
             Register an account
           </h2>
@@ -78,10 +86,36 @@ const Page = () => {
           >
             <FormField
               control={form.control}
-              name="name"
+              name="f_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>First name</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="m_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Middle name</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="l_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last name</FormLabel>
                   <FormControl>
                     <Input type="text" placeholder="Name" {...field} />
                   </FormControl>
