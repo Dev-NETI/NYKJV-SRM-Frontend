@@ -135,15 +135,25 @@ const Logo = () => {
   );
 };
 
-const LogoCanvas = () => {
+const LogoCanvas = ({
+  height = "650px",
+  width = "650px",
+  margin = "0 auto",
+  position,
+  top,
+  left,
+}) => {
   return (
     <Canvas
       camera={{ position: [0, 0, 6], fov: 45 }}
       style={{
-        height: "650px",
-        width: "650px",
-        margin: "0 auto",
+        height: height,
+        width: width,
+        margin: margin,
         background: "transparent",
+        position: position,
+        top: top,
+        left: left,
       }}
       gl={{
         antialias: true,
