@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.entry";
 import ContextMenuComponent from "../material-ui/ContextMenuComponent";
 import { useSupplierDocument } from "@/hooks/api/supplier-document";
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 import { useContext } from "react";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -15,6 +13,7 @@ import ContextMenuItemComponent from "./ContextMenuItemComponent";
 import DocumentListItemFooterComponent from "./DocumentListItemFooterComponent";
 import RecyclingIcon from "@mui/icons-material/Recycling";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { motion } from "framer-motion";
 
 function DocumentListItemComponent({
   id,
@@ -25,6 +24,7 @@ function DocumentListItemComponent({
 }) {
   const canvasRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [isActionTriggered, setIsActionTriggered] = useState(null);
   const { patchNoPayload: moveToTrash } = useSupplierDocument("trash");
   const { patchNoPayload: recycle } = useSupplierDocument("recycle");
   const { destroy } = useSupplierDocument();
@@ -90,6 +90,9 @@ function DocumentListItemComponent({
         : "Something went wrong!",
       snackBarSeverity: response ? "success" : "error",
     }));
+
+    setIsActionTriggered("trash");
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
   };
 
@@ -103,6 +106,9 @@ function DocumentListItemComponent({
         : "Something went wrong!",
       snackBarSeverity: response ? "success" : "error",
     }));
+
+    setIsActionTriggered("recycle");
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
   };
 
@@ -116,12 +122,32 @@ function DocumentListItemComponent({
         : "Something went wrong!",
       snackBarSeverity: response ? "success" : "error",
     }));
+
+    setIsActionTriggered("destroy");
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
+  };
+
+  const itemAnimation = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    exit: {
+      opacity: 0,
+      scale: 0,
+      rotate: 360,
+      transition: { duration: 0.5 },
+    },
   };
 
   return (
     <Link href={filePath} target="_blank">
-      <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
+      <motion.div
+        onContextMenu={handleContextMenu}
+        style={{ cursor: "context-menu" }}
+        initial={itemAnimation.initial}
+        animate={isActionTriggered ? itemAnimation.exit : itemAnimation.animate}
+        exit={itemAnimation.exit}
+      >
         <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-56 h-56">
           <div className="flex flex-row gap-4 justify-between items-center">
             <div className="overflow-hidden flex flex-row gap-2">
@@ -180,7 +206,7 @@ function DocumentListItemComponent({
             )}
           </div>
         </ContextMenuComponent>
-      </div>
+      </motion.div>
     </Link>
   );
 }
