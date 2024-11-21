@@ -81,14 +81,12 @@ export default function Sidebar({ user }) {
         boxShadow: "xl",
       }}
     >
-      {/ Sidebar Header /}
       <Box
         sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
         <Image src="/SRM.png" alt="NYKJV-SRM-Logo" width={170} height={170} />
       </Box>
 
-      {/ Search Input /}
       <Input
         size="sm"
         startDecorator={<SearchRoundedIcon />}
@@ -100,7 +98,6 @@ export default function Sidebar({ user }) {
         }}
       />
 
-      {/ Navigation Links /}
       <Box
         sx={{
           mt: 2,
@@ -169,7 +166,6 @@ export default function Sidebar({ user }) {
 
       <Divider sx={{ my: 2 }} />
 
-      {/ Profile Section at the Bottom /}
       <Box
         sx={{
           display: "flex",
