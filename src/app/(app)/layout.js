@@ -1,29 +1,65 @@
 "use client";
 
 import { useAuth } from "@/hooks/auth";
-import Navigation from "@/app/(app)/Navigation";
 import Loading from "@/app/(app)/Loading";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Box } from "@mui/joy";
 
-const AppLayout = ({ children, header }) => {
+const AppLayout = ({ children }) => {
   const { user, checkVerified } = useAuth({
     middleware: "auth",
   });
+  const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    checkVerified();
-  }, []);
+    checkVerified({ user, pathname });
+  }, [pathname, user]);
 
   if (!user) {
     return <Loading />;
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <Navigation user={user} />
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
-      <main>{children}</main>
-    </div>
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      <Sidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        user={user}
+      />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          height: "100vh",
+          gap: 1,
+        }}
+      >
+        <Header toggleSidebar={toggleSidebar} />
+        <Box
+          sx={{
+            p: 2,
+            mb: "60px", // Add margin bottom to prevent content from being hidden behind footer
+            flexGrow: 1,
+            overflow: "auto",
+          }}
+        >
+          {children}
+        </Box>
+        <Footer />
+      </Box>
+    </Box>
   );
 };
 

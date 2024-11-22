@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,7 +15,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import Image from "next/image";
 const FormSchema = z
   .object({
     f_name: z.string().nonempty(),
@@ -68,11 +67,14 @@ const Page = () => {
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center items-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <img
-            className="mx-auto h-10 w-auto"
-            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-            alt="Your Company"
-          />
+          <div className="flex justify-center items-center">
+            <Image
+              src="/SRM.png"
+              alt="NYKJV-SRM-Logo"
+              width={250}
+              height={250}
+            />
+          </div>
           <h2 className="mt-10 mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
             Register an account
           </h2>
@@ -171,7 +173,7 @@ const Page = () => {
           </form>
         </Form>
         <p className="mt-10 text-center text-sm text-gray-500">
-          Not register?{" "}
+          Already have an account?{" "}
           <a
             href="login"
             className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
