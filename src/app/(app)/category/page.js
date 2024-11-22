@@ -1,3 +1,5 @@
+category
+
 "use client";
 import React, { useEffect, useState } from "react";
 import Header from "../Header";
@@ -311,7 +313,7 @@ const CategoryComponent = () => {
             </Box>
           </Paper>
         </Box>
-        {/* Add/Edit Modal */}
+        {/ Add/Edit Modal /}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingCategoryId ? "Edit Category" : "Add Category"}
@@ -362,7 +364,7 @@ const CategoryComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-        {/* View Modal */}
+        {/ View Modal /}
         <Dialog
           open={viewOpen}
           onClose={handleViewClose}

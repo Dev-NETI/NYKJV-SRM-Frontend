@@ -54,6 +54,7 @@ const ProductComponent = () => {
 
   const { index: showBrand } = useBrand();
   const [brandItems, setBrand] = useState([]);
+  
   const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
 
@@ -153,9 +154,6 @@ const ProductComponent = () => {
     brand_name: product.brand.name,
     category_id: product.category_id,
     brand_id: product.brand_id,
-    modified_by: product.modified_by,
-    created_at: product.created_at,
-    updated_at: product.updated_at,
     name: product.name,
     price: product.price,
     specification: product.specification,
@@ -308,8 +306,13 @@ const ProductComponent = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleOpen}
+                  disabled={loading.adding || loading.updating} // Disable during loading
                 >
-                  add
+                  {loading.adding || loading.updating ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    "Add"
+                  )}
                 </Button>
                 <Button
                   variant="contained"
@@ -346,7 +349,7 @@ const ProductComponent = () => {
           </Paper>
         </Box>
 
-        {/* Dialog for Add/Edit Product */}
+        {/ Dialog for Add/Edit Product /}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>{editingProductId ? 'Edit Product' : 'Add Product'}</DialogTitle>
           <DialogContent>
@@ -519,7 +522,7 @@ const ProductComponent = () => {
           </DialogContent>
         </Dialog>
 
-        {/* View Modal */}
+        {/ View Modal /}
         <Dialog open={viewOpen} onClose={() => setViewOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Product Details</DialogTitle>
           <DialogContent dividers>
