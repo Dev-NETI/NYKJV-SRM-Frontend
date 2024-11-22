@@ -1,65 +1,29 @@
 "use client";
 
 import { useAuth } from "@/hooks/auth";
+import Navigation from "@/app/(app)/Navigation";
 import Loading from "@/app/(app)/Loading";
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { Box } from "@mui/joy";
+import { useEffect } from "react";
 
-const AppLayout = ({ children }) => {
+const AppLayout = ({ children, header }) => {
   const { user, checkVerified } = useAuth({
     middleware: "auth",
   });
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    checkVerified({ user, pathname });
-  }, [pathname, user]);
+    checkVerified();
+  }, []);
 
   if (!user) {
     return <Loading />;
   }
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        user={user}
-      />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          display: "flex",
-          flexDirection: "column",
-          minWidth: 0,
-          height: "100vh",
-          gap: 1,
-        }}
-      >
-        <Header toggleSidebar={toggleSidebar} />
-        <Box
-          sx={{
-            p: 2,
-            mb: "60px", // Add margin bottom to prevent content from being hidden behind footer
-            flexGrow: 1,
-            overflow: "auto",
-          }}
-        >
-          {children}
-        </Box>
-        <Footer />
-      </Box>
-    </Box>
+    <div className="min-h-screen bg-gray-100">
+      <Navigation user={user} />
+
+      <main>{children}</main>
+    </div>
   );
 };
 

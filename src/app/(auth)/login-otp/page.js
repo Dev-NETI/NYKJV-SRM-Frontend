@@ -26,7 +26,6 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -73,7 +72,7 @@ function LoginOtp() {
   };
 
   async function generateOtp() {
-    // console.log(user);
+    console.log(user);
     await axios
       .post("/api/authenticating", { temp_otp: tempt_otp })
       .then((response) => {
@@ -88,6 +87,7 @@ function LoginOtp() {
     axios.get("/api/checking-status-otp").then((response) => {
       if (response.data.status === true) {
         router.push("/dashboard");
+        console.log("Verified");
       } else {
         generateOtp();
       }
@@ -98,14 +98,11 @@ function LoginOtp() {
     <>
       <div className="flex min-h-full flex-1 flex-col justify-center items-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <div className="flex justify-center items-center">
-            <Image
-              src="/SRM.png"
-              alt="NYKJV-SRM-Logo"
-              width={250}
-              height={250}
-            />
-          </div>
+          <img
+            className="mx-auto h-10 w-auto"
+            src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+            alt="Your Company"
+          />
           <h2 className="mt-10 mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
             Authentication
           </h2>

@@ -1,9 +1,115 @@
-import React from "react";
-import Header from "../Header";
+"use client";
+import { useState, useEffect } from "react";
+import axios from "@/lib/axios";
+import Header from "@/app/(app)/Header";
+import Button from "@/components/Button";
+import { Alert } from "@mui/material";
+import { useRouter } from "next/navigation";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Box from "@mui/material/Box";
+import Skeleton from "@mui/material/Skeleton";
+import BasicModal from "@/components/Modal"; 
 
-function Dashboard() {
+const Dashboard = () => {
+  const router = useRouter();
+  const [suppliers, setSuppliers] = useState([]);
+  const [success, setSuccess] = useState("");
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await axios.get("/dashboard");
+        const supplierData = response.data.suppliers || [];
+        setSuppliers(supplierData);
+        setFilteredSuppliers(supplierData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+        setError("Failed to load suppliers");
+        setLoading(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
+
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    const filtered = suppliers.filter(
+      (supplier) =>
+        supplier.name?.toLowerCase().includes(query) ||
+        supplier.street_address?.toLowerCase().includes(query)
+    );
+    setFilteredSuppliers(filtered);
+    setCurrentPage(1);
+  };
+
+  // Calculate total pages
+  // Calculate total pages
+  const totalPages = Math.max(
+    Math.ceil(filteredSuppliers.length / itemsPerPage),
+    1
+  );
+
+  // Slice filtered suppliers for the current page
+  const currentSuppliers = filteredSuppliers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleEditClick = (id) => {
+    router.push(`/dashboard/${id}/edit`);
+    console.log("Editing supplier with ID", id);
+  };
+
+  // Function to open delete confirmation modal
+  const handleDeleteClick = (id) => {
+    setSelectedSupplierId(id);
+    setIsModalOpen(true);
+  };
+
+  // Function to delete supplier after confirmation
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`/dashboard/${selectedSupplierId}`);
+      setSuppliers((prev) =>
+        prev.filter((supplier) => supplier.id !== selectedSupplierId)
+      );
+      setFilteredSuppliers((prev) =>
+        prev.filter((supplier) => supplier.id !== selectedSupplierId)
+      );
+      setIsModalOpen(false);
+      setSuccess("Supplier deleted successfully");
+      setTimeout(() => {
+        setSuccess("");
+      }, 2000);
+    } catch (error) {
+      console.error("Error deleting supplier:", error);
+      alert("Failed to delete supplier");
+    }
+  };
+
   return (
     <>
+      <Header title="Supplier Management System" />
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -130,6 +236,6 @@ function Dashboard() {
       )}
     </>
   );
-}
+};
 
 export default Dashboard;
