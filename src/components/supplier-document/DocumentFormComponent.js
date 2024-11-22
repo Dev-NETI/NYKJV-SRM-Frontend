@@ -1,3 +1,4 @@
+import axios from "@/lib/axios";
 import React, { useEffect, useState } from "react";
 import SelectComponent from "../material-ui/SelectComponent";
 import FileUploadComponent from "../material-ui/FileUploadComponent";
@@ -15,13 +16,15 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 
 const validationSchema = Yup.object({
-  documentType: Yup.string().required("Document Type is required"),
+  documentType: Yup.string()
+    .required("Document Type is required")
+    .test("notDefault", "Document Type is required", (value) => value !== "0"),
   fileDocument: Yup.mixed()
     .required("A file is required")
     .test(
       "fileFormat",
       "Only PDF files are allowed",
-      (value) => value && value.type === "application/pdf"
+      (value) => value && value.type === "application/pdf",
     ),
 });
 
@@ -32,20 +35,28 @@ function DocumentFormComponent({ setSnackbarMethod }) {
     uploadProgress: 0,
     isExpirable: false,
   });
+  
   const { index: getDocumentType } = useDocumentType();
+  
   const { edgestore } = useEdgeStore();
+  
   const { user } = useAuth({ middleware: "auth" });
+  
   const { store } = useSupplierDocument();
-  const { supplierDocumentState, setSupplierDocumentState } = useContext(
-    SupplierDocumentContext
+  
+  const { supplierDocumentState, setSupplierDocumentState, initialDocumentTypeInForm, setInitialDocumentTypeInForm } = useContext(
+    SupplierDocumentContext,
   );
-
+  
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getDocumentType();
       setDocumentFormState((prevState) => ({
         ...prevState,
-        documentTypeData: data,
+        documentTypeData: [
+          { id: 0, name: "Select Document Type", disabled: true },
+          ...data,
+        ],
         loading: false,
       }));
     };
@@ -54,7 +65,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
   }, []);
 
   const initialValues = {
-    documentType: 1,
+    documentType: initialDocumentTypeInForm || 0,
     fileDocument: null,
     expirationField: undefined,
   };
@@ -66,13 +77,15 @@ function DocumentFormComponent({ setSnackbarMethod }) {
       console.log(false);
     }
     const documentObject = {
-      supplierId: user.supplier_id,
+      supplierId: 1,
       documentTypeId: values.documentType,
       fileName: values.fileDocument.name,
       filePath: uploadResponse.url,
       expiration: values.expirationField || null,
     };
+    
     const { data: requestResponse } = await store(documentObject);
+     
     setSnackbarMethod((prevState) => ({
       ...prevState,
       modal: false,
@@ -130,7 +143,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
                     as={SelectComponent}
                     label="Document Type"
                     data={documentFormState.documentTypeData}
-                  />
+                  ></Field>
                   <ErrorMessage
                     name="documentType"
                     component="div"
@@ -145,7 +158,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
                     onChange={(event) => {
                       setFieldValue(
                         "fileDocument",
-                        event.currentTarget.files[0]
+                        event.currentTarget.files[0],
                       );
                     }}
                   />

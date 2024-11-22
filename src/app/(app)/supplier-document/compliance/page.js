@@ -1,7 +1,7 @@
 "use client";
+ import Header from "../../Header";
 import React, { useState } from "react";
-import Header from "../Header";
-import DocumentListComponent from "@/components/supplier-document/DocumentListComponent";
+import ComplianceDocumentListComponent from "@/components/supplier-document/compliance/ComplianceDocumentListComponent";
 import DocumentListNavigationComponent from "@/components/supplier-document/DocumentListNavigationComponent";
 import DialogComponent from "@/components/material-ui/DialogComponent";
 import DocumentFormComponent from "@/components/supplier-document/DocumentFormComponent";
@@ -21,8 +21,11 @@ function page() {
     activePage: 1, //1 - documents, 0 - trash
   });
 
-  const handleClickOpen = () => {
+  const [initialDocumentTypeInForm, setInitialDocumentTypeInForm] = useState(null);
+
+  const handleClickOpen = (id = 0) => {
     setSupplierDocumentState((prevState) => ({ ...prevState, modal: true }));
+    setInitialDocumentTypeInForm(id);
   };
 
   const handleClose = () => {
@@ -31,7 +34,7 @@ function page() {
 
   return (
     <SupplierDocumentContext.Provider
-      value={{ supplierDocumentState, setSupplierDocumentState }}
+      value={{ supplierDocumentState, setSupplierDocumentState, initialDocumentTypeInForm, setInitialDocumentTypeInForm }}
     >
       <div className="p-4">
         <Header title="Documents" />
@@ -39,7 +42,7 @@ function page() {
           <DocumentListNavigationComponent
             handleOpenFileUploadModal={handleClickOpen}
           />
-          <DocumentListComponent />
+          <ComplianceDocumentListComponent handleOpenFileUploadModal={handleClickOpen} />
         </div>
 
         <DialogComponent

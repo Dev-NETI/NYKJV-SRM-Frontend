@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
 import ContextMenuComponent from "../material-ui/ContextMenuComponent";
 import { useSupplierDocument } from "@/hooks/api/supplier-document";
-import { useContext } from "react";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -52,8 +51,7 @@ function DocumentListItemComponent({
         canvas.height = desiredSize;
         canvas.width = desiredSize;
 
-        page.render({ canvasContext: context, viewport: scaledViewport })
-          .promise;
+        await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
       } catch (error) {
         console.error("Error loading PDF:", error);
       }
@@ -156,9 +154,7 @@ function DocumentListItemComponent({
                 {fileName}
               </p>
             </div>
-            <div>
-              <MoreVertIcon fontSize="small" onClick={handleContextMenu} />
-            </div>
+            <MoreVertIcon fontSize="small" onClick={handleContextMenu} />
           </div>
 
           <div className="bg-white rounded-md flex justify-center items-center p-2">
@@ -170,42 +166,42 @@ function DocumentListItemComponent({
 
           <DocumentListItemFooterComponent label={modifiedBy} />
           <DocumentListItemFooterComponent label={updatedAt} />
-        </div>
 
-        <ContextMenuComponent
-          contextMenu={contextMenu}
-          handleClose={handleClose}
-        >
-          <div>
-            {supplierDocumentState.activePage === 1 ? (
-              <>
-                <ContextMenuItemComponent
-                  onClick={handleMoveToTrash}
-                  label="Move to trash"
-                  icon={<DeleteIcon fontSize="small" />}
-                />
-                <ContextMenuItemComponent
-                  filePath={filePath}
-                  label="Open"
-                  icon={<OpenInNewIcon fontSize="small" />}
-                />
-              </>
-            ) : (
-              <>
-                <ContextMenuItemComponent
-                  onClick={handleRecycle}
-                  label="Activate"
-                  icon={<RecyclingIcon fontSize="small" />}
-                />
-                <ContextMenuItemComponent
-                  onClick={handleDestroy}
-                  label="Delete Forever"
-                  icon={<DeleteForeverIcon fontSize="small" />}
-                />
-              </>
-            )}
-          </div>
-        </ContextMenuComponent>
+          <ContextMenuComponent
+            contextMenu={contextMenu}
+            handleClose={handleClose}
+          >
+            <div>
+              {supplierDocumentState.activePage === 1 ? (
+                <>
+                  <ContextMenuItemComponent
+                    onClick={handleMoveToTrash}
+                    label="Move to trash"
+                    icon={<DeleteIcon fontSize="small" />}
+                  />
+                  <ContextMenuItemComponent
+                    filePath={filePath}
+                    label="Open"
+                    icon={<OpenInNewIcon fontSize="small" />}
+                  />
+                </>
+              ) : (
+                <>
+                  <ContextMenuItemComponent
+                    onClick={handleRecycle}
+                    label="Activate"
+                    icon={<RecyclingIcon fontSize="small" />}
+                  />
+                  <ContextMenuItemComponent
+                    onClick={handleDestroy}
+                    label="Delete Forever"
+                    icon={<DeleteForeverIcon fontSize="small" />}
+                  />
+                </>
+              )}
+            </div>
+          </ContextMenuComponent>
+        </div>
       </motion.div>
     </Link>
   );
