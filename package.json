@@ -51,6 +51,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.51.3",
     "react-toastify": "^10.0.5",
+    "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.13",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.3.0",
