@@ -365,7 +365,10 @@ const CategoryComponent = () => {
                                 </p>
                             )}
                             <DialogActions>
-                                <Button onClick={handleClose} color="primary">
+                                <Button onClick={handleClose} 
+                                variant="contained"
+                                color="error"
+                                className="mr-2">
                                     Cancel
                                 </Button>
                                 <Button

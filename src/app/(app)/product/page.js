@@ -54,7 +54,6 @@ const ProductComponent = () => {
 
   const { index: showBrand } = useBrand();
   const [brandItems, setBrand] = useState([]);
-  
   const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
 
@@ -154,6 +153,9 @@ const ProductComponent = () => {
     brand_name: product.brand.name,
     category_id: product.category_id,
     brand_id: product.brand_id,
+    modified_by: product.modified_by,
+    created_at: product.created_at,
+    updated_at: product.updated_at,
     name: product.name,
     price: product.price,
     specification: product.specification,
@@ -306,13 +308,8 @@ const ProductComponent = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleOpen}
-                  disabled={loading.adding || loading.updating} // Disable during loading
                 >
-                  {loading.adding || loading.updating ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Add"
-                  )}
+                  add
                 </Button>
                 <Button
                   variant="contained"
@@ -490,10 +487,20 @@ const ProductComponent = () => {
                     >
                       Cancel
                     </Button>
-                    <Button variant="contained" color="primary" type="submit">
-                      {" "}
-                      {editingProductId ? "Update Product" : "Add Product"}
+                    
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      type="submit"
+                      disabled={loading.adding || loading.updating}
+                    >
+                      {loading.adding || loading.updating ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        editingProductId ? "Update" : "Save"
+                      )}
                     </Button>
+
                   </DialogActions>
                 </div>
               </form>
