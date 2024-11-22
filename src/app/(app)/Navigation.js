@@ -15,14 +15,6 @@ const Navigation = ({ user }) => {
 
   const [open, setOpen] = useState(false);
 
-  const routes = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/category", label: "Category" },
-    { href: "/brand", label: "Brand" },
-    { href: "/product", label: "Product" },
-    { href: "/chat", label: "Chat" },
-  ]
-
   return (
     <nav className="bg-white border-b border-gray-100">
       {/* Primary Navigation Menu */}
@@ -38,15 +30,40 @@ const Navigation = ({ user }) => {
 
             {/* Navigation Links */}
             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-              {routes.map(({ href, label }) => (
-                <NavLink
-                  key={href}
-                  href={href}
-                  active={usePathname() === href}
-                >
-                  {label}
-                </NavLink>
-              ))}
+              <NavLink
+                href="/dashboard"
+                active={usePathname() === "/dashboard"}
+              >
+                Dashboard
+              </NavLink>
+
+              <NavLink
+                href="/category"
+                active={usePathname() === "/category"}
+              >
+                Category
+              </NavLink>
+
+              <NavLink
+                href="/brand"
+                active={usePathname() === "/brand"}
+              >
+                Brand
+              </NavLink>
+
+              <NavLink
+                href="/product"
+                active={usePathname() === "/product"}
+              >
+                Product
+              </NavLink>
+
+              <NavLink
+                href="/supplier"
+                active={usePathname() === "/supplier"}
+              >
+                Supplier
+              </NavLink>
             </div>
           </div>
 

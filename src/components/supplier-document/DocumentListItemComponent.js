@@ -1,10 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
-import pdfWorker from "pdfjs-dist/build/pdf.worker.entry";
 import ContextMenuComponent from "../material-ui/ContextMenuComponent";
 import { useSupplierDocument } from "@/hooks/api/supplier-document";
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-import { useContext } from "react";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -15,6 +12,7 @@ import ContextMenuItemComponent from "./ContextMenuItemComponent";
 import DocumentListItemFooterComponent from "./DocumentListItemFooterComponent";
 import RecyclingIcon from "@mui/icons-material/Recycling";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import { motion } from "framer-motion";
 
 function DocumentListItemComponent({
   id,
@@ -25,6 +23,7 @@ function DocumentListItemComponent({
 }) {
   const canvasRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [isActionTriggered, setIsActionTriggered] = useState(null);
   const { patchNoPayload: moveToTrash } = useSupplierDocument("trash");
   const { patchNoPayload: recycle } = useSupplierDocument("recycle");
   const { destroy } = useSupplierDocument();
@@ -52,8 +51,7 @@ function DocumentListItemComponent({
         canvas.height = desiredSize;
         canvas.width = desiredSize;
 
-        page.render({ canvasContext: context, viewport: scaledViewport })
-          .promise;
+        await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
       } catch (error) {
         console.error("Error loading PDF:", error);
       }
@@ -90,6 +88,9 @@ function DocumentListItemComponent({
         : "Something went wrong!",
       snackBarSeverity: response ? "success" : "error",
     }));
+
+    setIsActionTriggered("trash");
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
   };
 
@@ -103,6 +104,9 @@ function DocumentListItemComponent({
         : "Something went wrong!",
       snackBarSeverity: response ? "success" : "error",
     }));
+
+    setIsActionTriggered("recycle");
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
   };
 
@@ -116,36 +120,52 @@ function DocumentListItemComponent({
         : "Something went wrong!",
       snackBarSeverity: response ? "success" : "error",
     }));
+
+    setIsActionTriggered("destroy");
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
   };
 
+  const itemAnimation = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    exit: {
+      opacity: 0,
+      scale: 0,
+      rotate: 360,
+      transition: { duration: 0.5 },
+    },
+  };
+
   return (
-    <div className="w-full h-full min-h-60">
-      <Link className="w-full h-full m-0" href={filePath} target="_blank">
-        <div onContextMenu={handleContextMenu} style={{ cursor: "context-menu" }}>
-          <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-full h-full min-h-60">
-            <div className="flex flex-row gap-4 justify-between items-center">
-              <div className="overflow-hidden flex flex-row gap-2">
-                <PictureAsPdfIcon fontSize="small" color="error" />
-                <p className="font-semibold text-xs text-stone-800 truncate">
-                  {fileName}
-                </p>
-              </div>
-              <div>
-                <MoreVertIcon fontSize="small" onClick={handleContextMenu} />
-              </div>
+    <Link href={filePath} target="_blank">
+      <motion.div
+        onContextMenu={handleContextMenu}
+        style={{ cursor: "context-menu" }}
+        initial={itemAnimation.initial}
+        animate={isActionTriggered ? itemAnimation.exit : itemAnimation.animate}
+        exit={itemAnimation.exit}
+      >
+        <div className="flex flex-col gap-2 bg-gray-100 rounded-lg hover:bg-gray-200 p-4 w-56 h-56">
+          <div className="flex flex-row gap-4 justify-between items-center">
+            <div className="overflow-hidden flex flex-row gap-2">
+              <PictureAsPdfIcon fontSize="small" color="error" />
+              <p className="font-semibold text-xs text-stone-800 truncate">
+                {fileName}
+              </p>
             </div>
-
-            <div className="bg-white rounded-md flex justify-center items-center p-2">
-              <canvas
-                ref={canvasRef}
-                style={{ width: "100px", height: "100px" }}
-              ></canvas>
-            </div>
-
-            <DocumentListItemFooterComponent label={modifiedBy} />
-            <DocumentListItemFooterComponent label={updatedAt} />
+            <MoreVertIcon fontSize="small" onClick={handleContextMenu} />
           </div>
+
+          <div className="bg-white rounded-md flex justify-center items-center p-2">
+            <canvas
+              ref={canvasRef}
+              style={{ width: "100px", height: "100px" }}
+            ></canvas>
+          </div>
+
+          <DocumentListItemFooterComponent label={modifiedBy} />
+          <DocumentListItemFooterComponent label={updatedAt} />
 
           <ContextMenuComponent
             contextMenu={contextMenu}
@@ -182,8 +202,8 @@ function DocumentListItemComponent({
             </div>
           </ContextMenuComponent>
         </div>
-      </Link>
-    </div>
+      </motion.div>
+    </Link>
   );
 }
 

@@ -3,7 +3,6 @@
 import { useUser } from "@/hooks/api/user";
 import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
-import Header from "../../Header";
 import {
   Typography,
   Avatar,
@@ -22,8 +21,6 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Grid } from "@mui/joy";
 import ManageRoleModal from "../../../../components/user-management/ManageRoleModal";
 import SBComponent from "@/components/snackbar/SBComponent";
-import EditUserModal from "@/components/user-management/EditUserModal";
-import { UserContext } from "@/stores/UserContext";
 
 function UserManagementSlugPage() {
   const params = useParams();
@@ -81,7 +78,6 @@ function UserManagementSlugPage() {
 
   return (
     <React.Fragment>
-      <Header title="User Details" />
       <Container sx={{ my: 4 }}>
         <Card
           sx={{

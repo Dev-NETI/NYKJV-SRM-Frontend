@@ -55,18 +55,18 @@ function DocumentListComponent() {
                  flex flex-col gap-4"
     >
       <div className="flex justify-center items-center">
-        <Space direction="vertical">
+        {/* <Space direction="vertical">
           <Search
             size="large"
             placeholder="Search file here..."
             onSearch={handleSearch}
             enterButton
           />
-        </Space>
+        </Space> */}
       </div>
       <div
         className="rounded-xl bg-white border-gray-500
-    grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 
+    grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 
     gap-4 p-4"
       >
         {documentListState.filteredData.length > 0

@@ -4,7 +4,7 @@ import axios from "@/lib/axios";
 import useEcho from "@/hooks/useEcho";
 import { useAuth } from "@/hooks/auth";
 import { chatService } from "@/hooks/api/chats";
-import { useRef } from "react"; 
+import { useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -48,7 +48,7 @@ export const ChatProvider = ({ children }) => {
 
       if (echo) {
         // Join presence channel if not already joined
-        const presenceChannelName = 'presence-chat';
+        const presenceChannelName = "presence-chat";
         if (!joinedChannels.current.has(presenceChannelName)) {
           echo
             .join(presenceChannelName)
@@ -83,10 +83,7 @@ export const ChatProvider = ({ children }) => {
                 sender: e.sender,
               };
 
-              // Update messages if this is the selected chat
-              if (selectedChat?.id === chat.id) {
-                setMessages((prev) => [...prev, newMessage]);
-              }
+              setMessages((prev) => [...prev, newMessage]);
 
               // Update the chat's messages in the chats list
               setChats((prevChats) =>
@@ -125,7 +122,6 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-
   // Cleanup function for echo channels
   useEffect(() => {
     return () => {
@@ -139,7 +135,6 @@ export const ChatProvider = ({ children }) => {
       }
     };
   }, [echo]);
-
 
   const sendMessage = async (content, chat) => {
     if (!echo || !chat) return;
@@ -181,7 +176,7 @@ export const ChatProvider = ({ children }) => {
     // Find if there's an existing chat with the selected user
     const existingChat = chats.find((chat) =>
       chat.participants.some(
-        (participant) => participant.sender.id === selectedUser.id
+        (participant) => participant.user.id === selectedUser.id
       )
     );
 
@@ -212,20 +207,23 @@ export const ChatProvider = ({ children }) => {
   const addParticipantToChat = async (chatId, userId) => {
     try {
       await axios.post(`/api/chats/${chatId}/participants`, {
-        user_id: userId
+        user_id: userId,
       });
-      
+
       // Update the local chat state with the new participant
-      setChats(prevChats =>
-        prevChats.map(chat => {
+      setChats((prevChats) =>
+        prevChats.map((chat) => {
           if (chat.id === chatId) {
-            const newParticipant = users.find(u => u.id === userId);
+            const newParticipant = users.find((u) => u.id === userId);
             return {
               ...chat,
-              participants: [...chat.participants, {
-                user: newParticipant,
-                chat_id: chatId
-              }]
+              participants: [
+                ...chat.participants,
+                {
+                  user: newParticipant,
+                  chat_id: chatId,
+                },
+              ],
             };
           }
           return chat;
@@ -233,12 +231,15 @@ export const ChatProvider = ({ children }) => {
       );
 
       if (selectedChat?.id === chatId) {
-        setSelectedChat(prev => ({
+        setSelectedChat((prev) => ({
           ...prev,
-          participants: [...prev.participants, {
-            user: users.find(u => u.id === userId),
-            chat_id: chatId
-          }]
+          participants: [
+            ...prev.participants,
+            {
+              user: users.find((u) => u.id === userId),
+              chat_id: chatId,
+            },
+          ],
         }));
       }
     } catch (error) {
@@ -249,16 +250,16 @@ export const ChatProvider = ({ children }) => {
   const removeParticipantFromChat = async (chatId, userId) => {
     try {
       await axios.delete(`/api/chats/${chatId}/participants/${userId}`);
-      
+
       // Update local state
-      setChats(prevChats =>
-        prevChats.map(chat => {
+      setChats((prevChats) =>
+        prevChats.map((chat) => {
           if (chat.id === chatId) {
             return {
               ...chat,
               participants: chat.participants.filter(
-                p => p.sender.id !== userId
-              )
+                (p) => p.sender.id !== userId
+              ),
             };
           }
           return chat;
@@ -266,11 +267,9 @@ export const ChatProvider = ({ children }) => {
       );
 
       if (selectedChat?.id === chatId) {
-        setSelectedChat(prev => ({
+        setSelectedChat((prev) => ({
           ...prev,
-          participants: prev.participants.filter(
-            p => p.sender.id !== userId
-          )
+          participants: prev.participants.filter((p) => p.sender.id !== userId),
         }));
       }
     } catch (error) {
@@ -284,9 +283,8 @@ export const ChatProvider = ({ children }) => {
         messages,
         currentSessionId,
         setCurrentSessionId,
-        
 
-        sendMessage, 
+        sendMessage,
 
         users,
         onlineUsers,
@@ -294,15 +292,14 @@ export const ChatProvider = ({ children }) => {
         onSelectUser,
         unreadCounts,
         setSelectedChat,
-        selectedChat, 
+        selectedChat,
         currentUser: user,
         addParticipantToChat,
         removeParticipantFromChat,
       }}
     >
-      <ToastContainer/> 
+      <ToastContainer />
       {children}
-     
     </ChatContext.Provider>
   );
 };
