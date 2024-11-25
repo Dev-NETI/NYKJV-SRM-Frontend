@@ -349,7 +349,7 @@ const ProductComponent = () => {
           </Paper>
         </Box>
 
-        {/* Dialog for Add/Edit Product */}
+        {/ Dialog for Add/Edit Product /}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>{editingProductId ? 'Edit Product' : 'Add Product'}</DialogTitle>
           <DialogContent>
@@ -522,7 +522,7 @@ const ProductComponent = () => {
           </DialogContent>
         </Dialog>
 
-        {/* View Modal */}
+        {/ View Modal /}
         <Dialog open={viewOpen} onClose={() => setViewOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Product Details</DialogTitle>
           <DialogContent dividers>
