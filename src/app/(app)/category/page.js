@@ -1,11 +1,32 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import Header from '../Header';
-import { useCategory } from '@/hooks/api/category';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Box, Container, Paper, Button, Dialog, DialogTitle, DialogContent, DialogActions, Typography, Grid2 } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+category
+
+"use client";
+import React, { useEffect, useState } from "react";
+import Header from "../Header";
+import { useCategory } from "@/hooks/api/category";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  Box,
+  Container,
+  Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Grid2,
+  IconButton,
+  CircularProgress,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import SearchIcon from "@mui/icons-material/Search";
 
 const CategoryComponent = () => {
   const { index: showCategory, store, update: updateCategory, deleteCategory } = useCategory();
@@ -173,8 +194,7 @@ const CategoryComponent = () => {
             </Box>
           </Paper>
         </Box>
-
-        {/* Add/Edit Modal */}
+        {/ Add/Edit Modal /}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>{editingCategoryId ? 'Edit Category' : 'Add Category'}</DialogTitle>
           <DialogContent>
@@ -201,10 +221,16 @@ const CategoryComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-
-        {/* View Modal */}
-        <Dialog open={viewOpen} onClose={handleViewClose} fullWidth maxWidth="sm">
-          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Category Details</DialogTitle>
+        {/ View Modal /}
+        <Dialog
+          open={viewOpen}
+          onClose={handleViewClose}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+            Category Details
+          </DialogTitle>
           <DialogContent dividers>
             {viewCategory && (
               <Box p={2}>

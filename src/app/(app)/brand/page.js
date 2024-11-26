@@ -173,8 +173,7 @@ const BrandComponent = () => {
             </Box>
           </Paper>
         </Box>
-
-        {/* Add/Edit Modal */}
+        {/ Add/Edit Modal /}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>{editingBrandId ? 'Edit Brand' : 'Add Brand'}</DialogTitle>
           <DialogContent>
@@ -201,10 +200,16 @@ const BrandComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-
-        {/* View Modal */}
-        <Dialog open={viewOpen} onClose={handleViewClose} fullWidth maxWidth="sm">
-          <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>Brand Details</DialogTitle>
+        {/ View Modal /}
+        <Dialog
+          open={viewOpen}
+          onClose={handleViewClose}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+            Brand Details
+          </DialogTitle>
           <DialogContent dividers>
             {viewBrand && (
               <Box p={2}>

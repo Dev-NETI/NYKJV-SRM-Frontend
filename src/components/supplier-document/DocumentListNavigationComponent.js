@@ -13,7 +13,7 @@ function DocumentListNavigationComponent({ handleOpenFileUploadModal }) {
     <div className="basis-full md:basis-2/12 lg:basis-2/12">
       <Paper>
         <MenuList>
-          <MenuItem onClick={handleOpenFileUploadModal}>
+          <MenuItem onClick={() => handleOpenFileUploadModal(0)}>
             <ListItemIcon>
               <FileUploadIcon fontSize="small" />
             </ListItemIcon>
