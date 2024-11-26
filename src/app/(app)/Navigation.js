@@ -59,11 +59,17 @@ const Navigation = ({ user }) => {
               </NavLink>
 
               <NavLink
-                href="/supplier"
-                active={usePathname() === "/supplier"}
+                href="/supplier-admin"
+                active={usePathname() === "/supplier-admin"}
               >
-                Supplier
+                Supplier Admin
               </NavLink>
+              <NavLink
+                href="/supplier-user"
+                active={usePathname() === "/supplier-user"}
+                >
+                  Supplier User
+                </NavLink>
             </div>
           </div>
 

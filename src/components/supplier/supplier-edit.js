@@ -20,8 +20,6 @@ import TerrainIcon from "@mui/icons-material/Terrain";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
-
-// Import skeleton
 import Skeleton from "@mui/material/Skeleton";
 
 // Define the schema
@@ -54,6 +52,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
   } = useForm({
     resolver: zodResolver(FormSchema),
   });
+  
   React.useEffect(() => {
     const fetchOptions = async () => {
       setLoading(true); // Start loading
