@@ -1,4 +1,4 @@
-category
+// category
 
 "use client";
 import React, { useEffect, useState } from "react";
@@ -251,7 +251,7 @@ const CategoryComponent = () => {
   return (
     <>
       <Header title="Category" />
-      <Container maxWidth="xl" sx={{ mt: 3 }}>
+      {/* <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
             <Box display="flex" justifyContent="space-between" mt={2}>
@@ -425,7 +425,7 @@ const CategoryComponent = () => {
           </DialogActions>
         </Dialog>
         <ToastContainer />
-      </Container>
+      </Container> */}
     </>
   );
 };

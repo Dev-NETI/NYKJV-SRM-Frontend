@@ -65,33 +65,33 @@ const ProductComponent = () => {
     deactivating: false,
   });
 
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const { data: brandData } = await showBrand();
-        const { data: categoryData } = await showCategory();
-        const { data: productData } = await showProduct();
-        setBrand(brandData);
-        setCategory(categoryData);
-        setProducts(productData);
-        setFilteredProducts(productData);
-      } catch (error) {
-        toast.error("Failed to load data. Please try again later.");
-      }
-    };
-    fetchData();
-  }, [showBrand, showCategory, showProduct]);
+  // useEffect(() => {
+  //   const fetchBrands = async () => {
+  //     try {
+  //       const { data: brandData } = await showBrand();
+  //       const { data: categoryData } = await showCategory();
+  //       const { data: productData } = await showProduct();
+  //       setBrand(brandData);
+  //       setCategory(categoryData);
+  //       setProducts(productData);
+  //       setFilteredProducts(productData);
+  //     } catch (error) {
+  //       toast.error("Failed to load data. Please try again later.");
+  //     }
+  //   };
+  //   fetchData();
+  // }, [showBrand, showCategory, showProduct]);
 
-  useEffect(() => {
-    if (search) {
-      const result = products.filter(product =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredProducts(result);
-    } else {
-      setFilteredProducts(products);
-    }
-  }, [search, products]);
+  // useEffect(() => {
+  //   if (search) {
+  //     const result = products.filter(product =>
+  //       product.name.toLowerCase().includes(search.toLowerCase())
+  //     );
+  //     setFilteredProducts(result);
+  //   } else {
+  //     setFilteredProducts(products);
+  //   }
+  // }, [search, products]);
 
   const columns = [
     { field: "id", headerName: "#", width: 50 },
@@ -280,7 +280,7 @@ const ProductComponent = () => {
   return (
     <>
       <Header title="Product" />
-      <Container maxWidth="xl" sx={{ mt: 3 }}>
+      {/* <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
             <Box display="flex" justifyContent="space-between" mt={2}>
@@ -585,7 +585,7 @@ const ProductComponent = () => {
         </Dialog>
 
         <ToastContainer />
-      </Container>
+      </Container> */}
     </>
   );
 };
