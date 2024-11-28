@@ -39,6 +39,8 @@ const routes = [
       { href: "/category", label: "Category", icon: <AssignmentRoundedIcon /> },
       { href: "/brand", label: "Brand", icon: <ShoppingCartRoundedIcon /> },
       { href: "/product", label: "Product", icon: <HomeRoundedIcon /> },
+      { href: "/supplier", label: "Supplier Admin", icon: <HomeRoundedIcon /> },
+      { href: "/supplier-user", label: "Supplier User", icon: <HomeRoundedIcon /> },
       {
         href: "/supplier-document",
         label: "Documents",
