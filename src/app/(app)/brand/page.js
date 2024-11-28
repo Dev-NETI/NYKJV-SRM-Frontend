@@ -248,7 +248,7 @@ const BrandComponent = () => {
   return (
     <>
       <Header title="Brand" />
-      <Container maxWidth="xl" sx={{ mt: 3 }}>
+      {/* <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
             <Box display="flex" justifyContent="space-between" mt={2}>
@@ -422,7 +422,7 @@ const BrandComponent = () => {
           </DialogActions>
         </Dialog>
         <ToastContainer />
-      </Container>
+      </Container> */}
     </>
   );
 };

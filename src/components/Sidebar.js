@@ -8,7 +8,9 @@ import {
   QuestionAnswerRounded as QuestionAnswerRoundedIcon,
   SearchRounded as SearchRoundedIcon,
   ShoppingCartRounded as ShoppingCartRoundedIcon,
+  PersonRounded as PersonIcon,
 } from "@mui/icons-material";
+
 import ArticleIcon from "@mui/icons-material/Article";
 import Avatar from "@mui/joy/Avatar";
 import Box from "@mui/joy/Box";
@@ -39,6 +41,8 @@ const routes = [
       { href: "/category", label: "Category", icon: <AssignmentRoundedIcon /> },
       { href: "/brand", label: "Brand", icon: <ShoppingCartRoundedIcon /> },
       { href: "/product", label: "Product", icon: <HomeRoundedIcon /> },
+      { href: "/supplier", label: "Supplier Admin", icon: <PersonIcon /> },
+      { href: "/supplier-user", label: "Supplier User", icon: <PersonIcon /> },
       {
         href: "/supplier-document",
         label: "Documents",
