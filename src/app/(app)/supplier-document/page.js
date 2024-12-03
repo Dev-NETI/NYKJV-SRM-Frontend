@@ -34,7 +34,6 @@ function page() {
       value={{ supplierDocumentState, setSupplierDocumentState }}
     >
       <div className="p-4">
-        <Header title="Documents" />
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 mt-4">
           <DocumentListNavigationComponent
             handleOpenFileUploadModal={handleClickOpen}
