@@ -1,3 +1,5 @@
+// category
+
 "use client";
 import React, { useEffect, useState } from "react";
 import Header from "../Header";
@@ -249,7 +251,7 @@ const CategoryComponent = () => {
   return (
     <>
       <Header title="Category" />
-      <Container maxWidth="xl" sx={{ mt: 3 }}>
+      {/* <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
             <Box display="flex" justifyContent="space-between" mt={2}>
@@ -311,7 +313,7 @@ const CategoryComponent = () => {
             </Box>
           </Paper>
         </Box>
-        {/* Add/Edit Modal */}
+        {/ Add/Edit Modal /}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingCategoryId ? "Edit Category" : "Add Category"}
@@ -362,7 +364,7 @@ const CategoryComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-        {/* View Modal */}
+        {/ View Modal /}
         <Dialog
           open={viewOpen}
           onClose={handleViewClose}
@@ -423,7 +425,7 @@ const CategoryComponent = () => {
           </DialogActions>
         </Dialog>
         <ToastContainer />
-      </Container>
+      </Container> */}
     </>
   );
 };
