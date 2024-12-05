@@ -14,7 +14,7 @@ const AppLayout = ({ children }) => {
     middleware: "auth",
   });
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     checkVerified({ user, pathname });
@@ -34,6 +34,7 @@ const AppLayout = ({ children }) => {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         user={user}
+        toggleSidebar={toggleSidebar}
       />
       <Box
         component="main"
@@ -50,7 +51,7 @@ const AppLayout = ({ children }) => {
         <Box
           sx={{
             p: 2,
-            mb: "60px", // Add margin bottom to prevent content from being hidden behind footer
+            mb: "60px",
             flexGrow: 1,
             overflow: "auto",
           }}

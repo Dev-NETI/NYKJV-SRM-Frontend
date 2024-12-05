@@ -1,5 +1,3 @@
-// category
-
 "use client";
 import React, { useEffect, useState } from "react";
 import Header from "../Header";
@@ -111,7 +109,6 @@ const CategoryComponent = () => {
     },
   ];
 
-  // Filter categorys based on the search query
   const filteredRows = categorys
     .filter((category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -251,7 +248,7 @@ const CategoryComponent = () => {
   return (
     <>
       <Header title="Category" />
-      {/* <Container maxWidth="xl" sx={{ mt: 3 }}>
+      <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
             <Box display="flex" justifyContent="space-between" mt={2}>
@@ -313,7 +310,7 @@ const CategoryComponent = () => {
             </Box>
           </Paper>
         </Box>
-        {/ Add/Edit Modal /}
+
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingCategoryId ? "Edit Category" : "Add Category"}
@@ -364,7 +361,7 @@ const CategoryComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-        {/ View Modal /}
+
         <Dialog
           open={viewOpen}
           onClose={handleViewClose}
@@ -425,7 +422,7 @@ const CategoryComponent = () => {
           </DialogActions>
         </Dialog>
         <ToastContainer />
-      </Container> */}
+      </Container>
     </>
   );
 };
