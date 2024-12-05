@@ -248,7 +248,7 @@ const BrandComponent = () => {
   return (
     <>
       <Header title="Brand" />
-      {/* <Container maxWidth="xl" sx={{ mt: 3 }}>
+      <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
             <Box display="flex" justifyContent="space-between" mt={2}>
@@ -310,7 +310,7 @@ const BrandComponent = () => {
             </Box>
           </Paper>
         </Box>
-        {/ Add/Edit Modal /}
+
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingBrandId ? "Edit Brand" : "Add Brand"}
@@ -361,7 +361,7 @@ const BrandComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-        {/ View Modal /}
+
         <Dialog
           open={viewOpen}
           onClose={handleViewClose}
@@ -422,7 +422,7 @@ const BrandComponent = () => {
           </DialogActions>
         </Dialog>
         <ToastContainer />
-      </Container> */}
+      </Container>
     </>
   );
 };
