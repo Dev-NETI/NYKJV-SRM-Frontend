@@ -94,7 +94,13 @@ export default function Sidebar({ user }) {
       <Box
         sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
       >
-        <Image src="/SRM.png" alt="NYKJV-SRM-Logo" width={170} height={170} />
+        <Image
+          src="/SRM.png"
+          alt="NYKJV-SRM-Logo"
+          width={170}
+          height={170}
+          priority
+        />
       </Box>
 
       <Input

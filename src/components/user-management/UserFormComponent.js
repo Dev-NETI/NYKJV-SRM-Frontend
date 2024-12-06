@@ -15,7 +15,13 @@ import { z } from "zod";
 import TextFieldComponent from "../forms/TextFieldComponent";
 import SelectFieldComponent from "../forms/SelectFieldComponent";
 
-function UserFormComponent({ mode = 1, handleCloseAddModal, DataState, user }) {
+function UserFormComponent({
+  mode = 1,
+  handleCloseAddModal,
+  handleCloseEditModal,
+  DataState,
+  user,
+}) {
   const { storeUser, setUserState, showSnackbar, updateUser } =
     useContext(UserContext);
 
@@ -221,7 +227,11 @@ function UserFormComponent({ mode = 1, handleCloseAddModal, DataState, user }) {
           mt: 2,
         }}
       >
-        <Button variant="plain" color="neutral" onClick={handleCloseAddModal}>
+        <Button
+          variant="plain"
+          color="neutral"
+          onClick={mode === 1 ? handleCloseAddModal : handleCloseEditModal}
+        >
           Cancel
         </Button>
         <Button variant="solid" color="primary" type="submit">
