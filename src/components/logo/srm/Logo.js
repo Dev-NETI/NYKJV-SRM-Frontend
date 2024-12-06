@@ -139,9 +139,9 @@ const LogoCanvas = ({
   height = "650px",
   width = "650px",
   margin = "0 auto",
-  position,
-  top,
-  left,
+  position = null,
+  top = null,
+  left = null,
 }) => {
   return (
     <Canvas

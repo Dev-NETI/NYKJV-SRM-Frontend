@@ -6,7 +6,7 @@ import Select from "@mui/material/Select";
 
 function SelectComponent({ label, data = null, ...props }) {
   return (
-    <FormControl >
+    <FormControl>
       <InputLabel id="demo-simple-select-label">{label}</InputLabel>
       <Select {...props}>
         {data &&
