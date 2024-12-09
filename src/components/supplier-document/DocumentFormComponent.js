@@ -6,13 +6,12 @@ import LoadingComponent from "../tailwind/LoadingComponent";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { Button, LinearProgress, Snackbar, TextField } from "@mui/material";
-import { useEdgeStore } from "@/lib/edgestore";
 import { useAuth } from "@/hooks/auth";
-import { useSupplierDocument } from "@/hooks/api/supplier-document";
 import { useContext } from "react";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
+import axios from "@/lib/axios";
 
 const validationSchema = Yup.object({
   documentType: Yup.string()
@@ -34,21 +33,11 @@ function DocumentFormComponent({ setSnackbarMethod }) {
     uploadProgress: 0,
     isExpirable: false,
   });
-
   const { index: getDocumentType } = useDocumentType();
-
-  const { edgestore } = useEdgeStore();
-
   const { user } = useAuth({ middleware: "auth" });
-
-  const { store } = useSupplierDocument();
-
-  const {
-    supplierDocumentState,
-    setSupplierDocumentState,
-    initialDocumentTypeInForm,
-    setInitialDocumentTypeInForm,
-  } = useContext(SupplierDocumentContext);
+  const { setSupplierDocumentState, initialDocumentTypeInForm } = useContext(
+    SupplierDocumentContext
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,57 +62,29 @@ function DocumentFormComponent({ setSnackbarMethod }) {
   };
 
   const handleSubmit = async (values) => {
-    setDocumentFormState((prevState) => ({ ...prevState, uploadProgress: 0 }));
-    const uploadResponse = await handleUpload(values.fileDocument);
-    if (!uploadResponse) {
-      console.log(false);
-    }
-    const documentObject = {
-      supplierId: 1,
-      documentTypeId: values.documentType,
-      fileName: values.fileDocument.name,
-      filePath: uploadResponse.url,
-      expiration: values.expirationField || null,
-    };
+    values.supplierId = user?.supplier?.id;
+    values.fileName = values.fileDocument.name;
+    values.documentTypeId = values.documentType;
 
-    const { data: requestResponse } = await store(documentObject);
+    const { data: response } = await axios.post(
+      "/api/supplier-document",
+      values,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
     setSnackbarMethod((prevState) => ({
       ...prevState,
       modal: false,
       snackbar: true,
-      snackbarMessage: requestResponse
-        ? "File saved successfully!"
-        : "Something went wrong!",
-      snackBarSeverity: requestResponse ? "success" : "error",
+      snackbarMessage: response.message,
+      snackBarSeverity: response.response ? "success" : "error",
     }));
-    setDocumentFormState((prevState) => ({ ...prevState, uploadProgress: 0 }));
+
     setSupplierDocumentState((prevState) => ({ ...prevState, reload: true }));
-  };
-
-  const handleUpload = async (file) => {
-    if (file) {
-      const res = await edgestore.publicFiles.upload({
-        file,
-        onProgressChange: (progress) => {
-          setDocumentFormState((prevState) => ({
-            ...prevState,
-            uploadProgress: progress,
-          }));
-        },
-      });
-
-      const resData = {
-        url: res.url,
-        size: res.size,
-        uploadedAt: res.uploadedAt,
-        metadata: res.metadata,
-        path: res.path,
-        pathOrder: res.pathOrder,
-      };
-
-      return resData;
-    }
   };
 
   return (
