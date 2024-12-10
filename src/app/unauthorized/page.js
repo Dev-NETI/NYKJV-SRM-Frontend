@@ -1,7 +1,14 @@
+"use client";
 import React from "react";
 import Link from "next/link";
+import { LogoutRounded } from "@mui/icons-material";
+import { Button } from "@mui/joy";
+import { useAuth } from "@/hooks/auth";
 
 function Unauthorized() {
+  const { logout } = useAuth({
+    middleware: "auth",
+  });
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100">
       <div className="bg-white p-10 rounded-xl shadow-2xl text-center max-w-md w-full">
@@ -27,26 +34,36 @@ function Unauthorized() {
           Sorry, you don't have permission to access this page. Please log in or
           contact an administrator.
         </p>
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
-        >
-          <svg
-            className="mr-2 -ml-1 h-5 w-5"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        <div className="flex justify-between">
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          Back to Dashboard
-        </Link>
+            <svg
+              className="mr-2 -ml-1 h-5 w-5"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+              />
+            </svg>
+            Back to Dashboard
+          </Link>
+
+          <Button
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
+            onClick={logout}
+          >
+            <LogoutRounded />
+            Logout
+          </Button>
+        </div>
       </div>
     </div>
   );
