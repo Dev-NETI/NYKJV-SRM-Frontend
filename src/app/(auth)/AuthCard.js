@@ -1,10 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-
-const LogoCanvas = dynamic(() => import("@/components/logo/srm/Logo"), {
-  ssr: false,
-});
+import LogoCanvas from "../../components/logo/srm/Logo";
 
 const AuthCard = ({ children }) => (
   <div className="min-h-screen flex items-center justify-center custom-bg-nyk">

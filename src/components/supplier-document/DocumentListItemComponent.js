@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
-import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import React, { useState, useContext } from "react";
 import ContextMenuComponent from "../material-ui/ContextMenuComponent";
 import { useSupplierDocument } from "@/hooks/api/supplier-document";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
@@ -21,7 +20,6 @@ function DocumentListItemComponent({
   updatedAt = "",
   filePath = "",
 }) {
-  const canvasRef = useRef(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [isActionTriggered, setIsActionTriggered] = useState(null);
   const { patchNoPayload: moveToTrash } = useSupplierDocument("trash");
@@ -30,37 +28,6 @@ function DocumentListItemComponent({
   const { supplierDocumentState, setSupplierDocumentState } = useContext(
     SupplierDocumentContext
   );
-
-  useEffect(() => {
-    const loadPdf = async () => {
-      try {
-        const loadingTask = pdfjsLib.getDocument(filePath);
-        const pdf = await loadingTask.promise;
-        const page = await pdf.getPage(1);
-
-        const desiredSize = 96;
-        const viewport = page.getViewport({ scale: 1 });
-        const scale = Math.min(
-          desiredSize / viewport.width,
-          desiredSize / viewport.height
-        );
-
-        const scaledViewport = page.getViewport({ scale });
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d");
-        canvas.height = desiredSize;
-        canvas.width = desiredSize;
-
-        await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
-      } catch (error) {
-        console.error("Error loading PDF:", error);
-      }
-    };
-
-    if (filePath) {
-      loadPdf();
-    }
-  }, [filePath]);
 
   const handleContextMenu = (event) => {
     event.preventDefault();
@@ -138,7 +105,10 @@ function DocumentListItemComponent({
   };
 
   return (
-    <Link href={filePath} target="_blank">
+    <Link
+      href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/supplier-documents/${filePath}`}
+      target="_blank"
+    >
       <motion.div
         onContextMenu={handleContextMenu}
         style={{ cursor: "context-menu" }}
@@ -158,10 +128,10 @@ function DocumentListItemComponent({
           </div>
 
           <div className="bg-white rounded-md flex justify-center items-center p-2">
-            <canvas
+            {/* <canvas
               ref={canvasRef}
               style={{ width: "100px", height: "100px" }}
-            ></canvas>
+            ></canvas> */}
           </div>
 
           <DocumentListItemFooterComponent label={modifiedBy} />
@@ -180,7 +150,7 @@ function DocumentListItemComponent({
                     icon={<DeleteIcon fontSize="small" />}
                   />
                   <ContextMenuItemComponent
-                    filePath={filePath}
+                    filePath={`${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/supplier-documents/${filePath}`}
                     label="Open"
                     icon={<OpenInNewIcon fontSize="small" />}
                   />
