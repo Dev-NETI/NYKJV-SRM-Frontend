@@ -56,10 +56,7 @@ function Unauthorized() {
             Back to Dashboard
           </Link>
 
-          <Button
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out"
-            onClick={logout}
-          >
+          <Button variant="solid" color="danger" onClick={logout}>
             <LogoutRounded />
             Logout
           </Button>
