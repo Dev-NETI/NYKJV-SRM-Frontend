@@ -13,7 +13,7 @@ const useResource = ({ route }) => {
    * @return {*}
    */
 
-  const index = () => axios.get(`${route}`);
+  const index = (params = {}) => axios.get(`${route}`, { params });
 
   /**
    * Fetch a single record from the resource.

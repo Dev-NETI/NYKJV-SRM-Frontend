@@ -1,10 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Header from "../Header";
-import { Box, Button, Card, Divider, Typography } from "@mui/joy";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { InfoOutlined } from "@mui/icons-material";
+import {
+  Box,
+  Button,
+  Card,
+  Divider,
+  Typography,
+  FormControl,
+  FormLabel,
+  Input,
+} from "@mui/joy";
+import { Table, Sheet, Checkbox, IconButton, Select, Option } from "@mui/joy";
+import { Search, Add as AddIcon } from "@mui/icons-material";
 import { UserContext } from "@/stores/UserContext";
 import { useUser } from "@/hooks/api/user";
 import Loading from "../Loading";
@@ -24,6 +32,15 @@ function page() {
   const [userState, setUserState] = useState({
     userData: [],
     responseStore: true,
+  });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    total: 0,
+    lastPage: 1,
+  });
+  const [searchParams, setSearchParams] = useState({
+    f_name: "",
+    l_name: "",
   });
 
   const showSnackbar = (message, color) => {
@@ -46,52 +63,93 @@ function page() {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const { data } = await getUsers();
+        const { data } = await getUsers({
+          page: pagination.page,
+          f_name: searchParams.f_name,
+          l_name: searchParams.l_name,
+        });
         setUserState((prevState) => ({
           ...prevState,
-          userData: data,
+          userData: data.data,
           responseStore: false,
         }));
+        setPagination((prev) => ({
+          ...prev,
+          total: data.total,
+          lastPage: data.last_page,
+        }));
       } catch (error) {
-        // console.error('Error fetching meal type data:', error);
+        console.error("Error fetching user data:", error);
       } finally {
         setLoading(false);
       }
     };
+
     if (userState.responseStore) {
       fetchUserData();
     }
-  }, [userState.responseStore, getUsers]);
+  }, [userState.responseStore, pagination.page]);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "f_name", headerName: "First Name", flex: 1, minWidth: 100 },
-    { field: "m_name", headerName: "Middle Name", flex: 1, minWidth: 100 },
-    { field: "l_name", headerName: "Last Name", flex: 1, minWidth: 100 },
-    { field: "suffix", headerName: "Suffix", flex: 1, minWidth: 70 },
     {
-      field: "is_active",
-      headerName: "Status",
-      width: 180,
+      field: "id",
+      headerName: "ID",
+      width: { xs: "5%", sm: "5%", md: "5%" },
     },
-    { field: "modified_by", headerName: "Modified By", width: 150 },
-    { field: "updated_at", headerName: "Updated At", width: 180 },
+    {
+      field: "f_name",
+      headerName: "First Name",
+      width: { xs: "15%", sm: "15%", md: "15%" },
+    },
+    {
+      field: "m_name",
+      headerName: "Middle Name",
+      width: { xs: "15%", sm: "15%", md: "15%" },
+    },
+    {
+      field: "l_name",
+      headerName: "Last Name",
+      width: { xs: "15%", sm: "15%", md: "15%" },
+    },
+    {
+      field: "suffix",
+      headerName: "Suffix",
+      width: { xs: "5%", sm: "5%", md: "5%" },
+    },
+    {
+      field: "company_id",
+      headerName: "Company",
+      width: { xs: "20%", sm: "20%", md: "20%" },
+    },
+    {
+      field: "modified_by",
+      headerName: "Modified By",
+      width: { xs: "15%", sm: "15%", md: "15%" },
+    },
     {
       field: "Action",
-      width: 320,
+      width: { xs: "10%", sm: "10%", md: "10%" },
       filterable: false,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <Box key={`action-buttons-${params.row.id}`} sx={{ py: 1 }}>
+        <Box
+          key={`action-buttons-${params.row.id}`}
+          sx={{
+            display: "flex",
+            gap: 1,
+            flexWrap: "nowrap", // Prevent buttons from wrapping
+          }}
+        >
           <Link href={`/user-management/${params.row.slug}`} passHref>
-            <Button
+            <IconButton
               key={`view-profile-${params.row.slug}`}
-              startDecorator={<EyeIcon />}
-              variant="outlined" // Optional: use "outlined" or "contained" for visual distinction
-              size="small" // Optional: "small" for compact styling
-              sx={{ minWidth: "auto", padding: "4px", mr: 1 }}
-            ></Button>
+              variant="solid"
+              size="sm"
+              color="primary"
+            >
+              <EyeIcon />
+            </IconButton>
           </Link>
           <EditUserModal slug={params.row.slug} />
         </Box>
@@ -105,11 +163,15 @@ function page() {
     m_name: user.m_name,
     l_name: user.l_name,
     suffix: user.suffix,
-    is_active: user.is_active === 0 ? "Inactive" : "Active",
+    company_id: user.company?.name || "N/A",
     modified_by: user.modified_by || "N/A",
-    updated_at: new Date(user.updated_at).toLocaleString(),
     slug: user.slug,
   }));
+
+  const handleSearch = () => {
+    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page when searching
+    setUserState((prev) => ({ ...prev, responseStore: true }));
+  };
 
   if (loading) {
     return <Loading />;
@@ -120,38 +182,244 @@ function page() {
       <UserContext.Provider
         value={{ setUserState, storeUser, showSnackbar, updateUser }}
       >
-        <Card>
+        <Card variant="soft" sx={{ p: 2, mb: 2 }}>
+          <Box
+            sx={{
+              borderBottom: "2px solid",
+              borderColor: "primary.500",
+              pb: 2,
+              mb: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography level="h4" color="primary">
+                Search Users
+              </Typography>
+            </Box>
+          </Box>
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              gap: 2,
+              flexWrap: "wrap",
             }}
           >
-            <Typography level="title-lg">List of Users</Typography>
-            <AddUserModal />
+            <FormControl sx={{ minWidth: 200 }}>
+              <FormLabel>First Name</FormLabel>
+              <Input
+                placeholder="Search by first name..."
+                startDecorator={<Search />}
+                value={searchParams.f_name}
+                onChange={(e) => {
+                  setSearchParams((prev) => ({
+                    ...prev,
+                    f_name: e.target.value,
+                  }));
+                }}
+              />
+            </FormControl>
+            <FormControl sx={{ minWidth: 200 }}>
+              <FormLabel>Last Name</FormLabel>
+              <Input
+                placeholder="Search by last name..."
+                startDecorator={<Search />}
+                value={searchParams.l_name}
+                onChange={(e) => {
+                  setSearchParams((prev) => ({
+                    ...prev,
+                    l_name: e.target.value,
+                  }));
+                }}
+              />
+            </FormControl>
+            <Button
+              variant="solid"
+              color="primary"
+              sx={{ alignSelf: "flex-end" }}
+              startDecorator={<Search />}
+              onClick={handleSearch}
+            >
+              Search
+            </Button>
+          </Box>
+        </Card>
+
+        <Card variant="soft" sx={{ p: 2 }}>
+          <Box
+            sx={{
+              borderBottom: "2px solid",
+              borderColor: "primary.500",
+              pb: 2,
+              mb: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Typography level="h4" color="primary">
+                List of Users
+              </Typography>
+              <AddUserModal />
+            </Box>
           </Box>
           <Divider inset="none" />
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 10 },
-              },
-            }}
-            pageSizeOptions={[10, 20, 50]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            components={{
-              Toolbar: GridToolbar,
-            }}
+          <Sheet
             sx={{
-              "& .MuiDataGrid-cell:hover": {
-                color: "primary.main",
-              },
+              width: "100%",
+              overflow: "auto",
+              borderRadius: "sm",
+              mt: 2,
+              display: "flex",
+              flexDirection: "column",
+              height: "70vh",
             }}
-          />
+          >
+            <Table
+              borderAxis="bothBetween"
+              size="md"
+              stickyHeader
+              variant="outlined"
+              hoverRow
+              sx={{
+                "--TableCell-headBackground":
+                  "var(--joy-palette-background-level2)",
+                "--Table-headerUnderlineThickness": "1px",
+                "--TableRow-hoverBackground":
+                  "var(--joy-palette-background-level1)",
+                "--TableCell-paddingY": "12px",
+                "--TableCell-paddingX": "16px",
+                minWidth: "1000px",
+                tableLayout: "fixed",
+                "& tbody": {
+                  bgcolor: "background.surface",
+                },
+                "& thead th": {
+                  fontWeight: "bold",
+                  color: "text.primary",
+                  backgroundColor: "var(--TableCell-headBackground)",
+                  borderBottom: "2px solid var(--joy-palette-divider)",
+                  whiteSpace: "normal",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                },
+                "& tbody tr": {
+                  transition: "background-color 0.2s",
+                },
+                "& td": {
+                  color: "text.secondary",
+                  padding: "12px",
+                  whiteSpace: "normal",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: 0,
+                  "&[title]": {
+                    cursor: "pointer",
+                  },
+                },
+              }}
+            >
+              <thead>
+                <tr>
+                  {columns.map((column) => (
+                    <th key={column.field} style={{ width: column.width }}>
+                      {column.headerName}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.id}>
+                    {columns.map((column) => (
+                      <td
+                        key={`${row.id}-${column.field}`}
+                        title={column.renderCell ? null : row[column.field]}
+                        sx={{
+                          maxHeight: "100px",
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        {column.renderCell
+                          ? column.renderCell({ row })
+                          : row[column.field]}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                justifyContent: "space-between",
+                p: 2,
+                borderTop: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <Typography level="body-sm" textColor="text.secondary">
+                {`Showing page ${pagination.page} of ${pagination.lastPage}`}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  size="sm"
+                  variant="solid"
+                  disabled={pagination.page === 1}
+                  onClick={() => {
+                    setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+                    setUserState((prev) => ({ ...prev, responseStore: true }));
+                  }}
+                >
+                  Previous
+                </Button>
+                {[...Array(pagination.lastPage)].map((_, index) => (
+                  <Button
+                    key={index + 1}
+                    size="sm"
+                    variant={
+                      pagination.page === index + 1 ? "solid" : "outlined"
+                    }
+                    color={
+                      pagination.page === index + 1 ? "primary" : "neutral"
+                    }
+                    onClick={() => {
+                      setPagination((prev) => ({ ...prev, page: index + 1 }));
+                      setUserState((prev) => ({
+                        ...prev,
+                        responseStore: true,
+                      }));
+                    }}
+                  >
+                    {index + 1}
+                  </Button>
+                ))}
+                <Button
+                  size="sm"
+                  variant="solid"
+                  disabled={pagination.page >= pagination.lastPage}
+                  onClick={() => {
+                    setPagination((prev) => ({ ...prev, page: prev.page + 1 }));
+                    setUserState((prev) => ({ ...prev, responseStore: true }));
+                  }}
+                >
+                  Next
+                </Button>
+              </Box>
+            </Box>
+          </Sheet>
         </Card>
         <SBComponent
           open={snackbarState.open}

@@ -310,7 +310,7 @@ const BrandComponent = () => {
             </Box>
           </Paper>
         </Box>
-        {/* Add/Edit Modal */}
+
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingBrandId ? "Edit Brand" : "Add Brand"}
@@ -361,7 +361,7 @@ const BrandComponent = () => {
             </form>
           </DialogContent>
         </Dialog>
-        {/* View Modal */}
+
         <Dialog
           open={viewOpen}
           onClose={handleViewClose}

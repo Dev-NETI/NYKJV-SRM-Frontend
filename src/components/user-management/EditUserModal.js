@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Divider,
+  IconButton,
   Modal,
   ModalClose,
   Sheet,
@@ -71,18 +72,14 @@ function EditUserModal({ slug }) {
 
   return (
     <React.Fragment>
-      {/* <Button
-        startDecorator={<Edit />}
-        variant="soft"
+      <IconButton
+        key={`edit-user-${slug}`}
+        variant="solid"
+        size="sm"
         onClick={handleOpenEditModal}
-      ></Button> */}
-      <Button
-        startDecorator={<Edit />}
-        variant="outlined" // Optional: use "outlined" or "contained" for visual distinction
-        size="small" // Optional: "small" for compact styling
-        sx={{ minWidth: "auto", padding: "4px" }}
-        onClick={handleOpenEditModal}
-      ></Button>
+      >
+        <Edit />
+      </IconButton>
       <Modal
         open={openEditModal}
         onClose={handleCloseEditModal}
