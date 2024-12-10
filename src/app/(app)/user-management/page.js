@@ -67,6 +67,9 @@ function page() {
           page: pagination.page,
           f_name: searchParams.f_name,
           l_name: searchParams.l_name,
+          company_info: true,
+          department_info: true,
+          supplier_info: true,
         });
         setUserState((prevState) => ({
           ...prevState,
@@ -173,9 +176,9 @@ function page() {
     setUserState((prev) => ({ ...prev, responseStore: true }));
   };
 
-  if (loading) {
-    return <Loading />;
-  }
+  // if (loading) {
+  //   return <Loading />;
+  // }
 
   return (
     <>
@@ -284,80 +287,84 @@ function page() {
               height: "70vh",
             }}
           >
-            <Table
-              borderAxis="bothBetween"
-              size="md"
-              stickyHeader
-              variant="outlined"
-              hoverRow
-              sx={{
-                "--TableCell-headBackground":
-                  "var(--joy-palette-background-level2)",
-                "--Table-headerUnderlineThickness": "1px",
-                "--TableRow-hoverBackground":
-                  "var(--joy-palette-background-level1)",
-                "--TableCell-paddingY": "12px",
-                "--TableCell-paddingX": "16px",
-                minWidth: "1000px",
-                tableLayout: "fixed",
-                "& tbody": {
-                  bgcolor: "background.surface",
-                },
-                "& thead th": {
-                  fontWeight: "bold",
-                  color: "text.primary",
-                  backgroundColor: "var(--TableCell-headBackground)",
-                  borderBottom: "2px solid var(--joy-palette-divider)",
-                  whiteSpace: "normal",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                },
-                "& tbody tr": {
-                  transition: "background-color 0.2s",
-                },
-                "& td": {
-                  color: "text.secondary",
-                  padding: "12px",
-                  whiteSpace: "normal",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  maxWidth: 0,
-                  "&[title]": {
-                    cursor: "pointer",
+            {loading ? (
+              <Loading />
+            ) : (
+              <Table
+                borderAxis="bothBetween"
+                size="md"
+                stickyHeader
+                variant="outlined"
+                hoverRow
+                sx={{
+                  "--TableCell-headBackground":
+                    "var(--joy-palette-background-level2)",
+                  "--Table-headerUnderlineThickness": "1px",
+                  "--TableRow-hoverBackground":
+                    "var(--joy-palette-background-level1)",
+                  "--TableCell-paddingY": "12px",
+                  "--TableCell-paddingX": "16px",
+                  minWidth: "1000px",
+                  tableLayout: "fixed",
+                  "& tbody": {
+                    bgcolor: "background.surface",
                   },
-                },
-              }}
-            >
-              <thead>
-                <tr>
-                  {columns.map((column) => (
-                    <th key={column.field} style={{ width: column.width }}>
-                      {column.headerName}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
+                  "& thead th": {
+                    fontWeight: "bold",
+                    color: "text.primary",
+                    backgroundColor: "var(--TableCell-headBackground)",
+                    borderBottom: "2px solid var(--joy-palette-divider)",
+                    whiteSpace: "normal",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  },
+                  "& tbody tr": {
+                    transition: "background-color 0.2s",
+                  },
+                  "& td": {
+                    color: "text.secondary",
+                    padding: "12px",
+                    whiteSpace: "normal",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    maxWidth: 0,
+                    "&[title]": {
+                      cursor: "pointer",
+                    },
+                  },
+                }}
+              >
+                <thead>
+                  <tr>
                     {columns.map((column) => (
-                      <td
-                        key={`${row.id}-${column.field}`}
-                        title={column.renderCell ? null : row[column.field]}
-                        sx={{
-                          maxHeight: "100px",
-                          lineHeight: "1.5",
-                        }}
-                      >
-                        {column.renderCell
-                          ? column.renderCell({ row })
-                          : row[column.field]}
-                      </td>
+                      <th key={column.field} style={{ width: column.width }}>
+                        {column.headerName}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.id}>
+                      {columns.map((column) => (
+                        <td
+                          key={`${row.id}-${column.field}`}
+                          title={column.renderCell ? null : row[column.field]}
+                          sx={{
+                            maxHeight: "100px",
+                            lineHeight: "1.5",
+                          }}
+                        >
+                          {column.renderCell
+                            ? column.renderCell({ row })
+                            : row[column.field]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
 
             <Box
               sx={{
