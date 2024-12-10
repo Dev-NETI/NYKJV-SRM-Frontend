@@ -50,8 +50,13 @@ const routes = [
       },
       { href: "/orders", label: "Orders", icon: <ShoppingCartIcon /> },
       {
+        href: "/supplier-document/compliance",
+        label: "Compliance Documents",
+        icon: <ArticleIcon />,
+      },
+      {
         href: "/supplier-document",
-        label: "Documents",
+        label: "Order Documents",
         icon: <ArticleIcon />,
       },
     ],
