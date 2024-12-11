@@ -11,13 +11,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useOrder } from "@/hooks/api/order";
 import axios from "@/lib/axios";
 import { useAuth } from "@/hooks/auth";
 import SnackBarComponent from "../material-ui/SnackBarComponent";
 
 export default function EmailFileUploadForm() {
-  const { store: sendQuotation } = useOrder("send-quotation");
   const [file, setFile] = useState(null);
   const { user } = useAuth({ middleware: "auth" });
   const [snackbarState, setSnackbarState] = useState({
@@ -42,6 +40,10 @@ export default function EmailFileUploadForm() {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       values.company = user?.company?.name;
+      values.supplierId = user?.supplier_id;
+      values.orderDocumentTypeId = 1;
+      values.fileName = values.fileQuotation.name;
+      // console.log(values);
 
       const { data: response } = await axios.post(
         "/api/order/send-quotation",
@@ -53,17 +55,11 @@ export default function EmailFileUploadForm() {
         }
       );
 
-      response.response
-        ? setSnackbarState({
-            open: true,
-            message: "Quotation sent successfully!",
-            severity: "success",
-          })
-        : setSnackbarState({
-            open: true,
-            message: "Whoops! Something went wrong!",
-            severity: "error",
-          });
+      setSnackbarState({
+        open: true,
+        message: response.message,
+        severity: response.severity,
+      });
 
       resetForm();
       setFile(null);

@@ -175,7 +175,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
       // Check if user is verified
       if (response.data.status === true) {
         // Allow access only if the currentPath matches one of the roles or if user has any roles
-        if (roles && roles.length > 0) {
+        if (roles.length > 0) {
           const hasRoleForPath = roles.some((role) => {
             const rolePath = "/" + role.url;
             return (
