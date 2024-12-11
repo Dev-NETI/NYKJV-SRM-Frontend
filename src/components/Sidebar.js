@@ -32,7 +32,7 @@ import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useAuth } from "@/hooks/auth";
 import Image from "next/image";
-import { Tooltip } from "@mui/material";
+import { Grow, Tooltip } from "@mui/material";
 
 const routes = [
   {
@@ -112,18 +112,15 @@ export default function Sidebar({ open, user, toggleSidebar }) {
           zIndex: 100,
           height: "100dvh",
           width: "var(--Sidebar-width)",
-          top: 0,
           p: 2,
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
           borderRight: "1px solid",
           borderColor: "divider",
-          backgroundColor: "#FEFEFE",
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 400'%3E%3Cdefs%3E%3CradialGradient id='a' cx='396' cy='281' r='514' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%232A2ADD'/%3E%3Cstop offset='1' stop-color='%23FEFEFE'/%3E%3C/radialGradient%3E%3ClinearGradient id='b' gradientUnits='userSpaceOnUse' x1='400' y1='148' x2='400' y2='333'%3E%3Cstop offset='0' stop-color='%23000000' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23000000' stop-opacity='0.5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23a)' width='800' height='400'/%3E%3Cg fill-opacity='0.4'%3E%3Ccircle fill='url(%23b)' cx='267.5' cy='61' r='300'/%3E%3Ccircle fill='url(%23b)' cx='532.5' cy='61' r='300'/%3E%3Ccircle fill='url(%23b)' cx='400' cy='30' r='300'/%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundAttachment: "fixed",
-          backgroundSize: "cover",
+          backgroundColor: "#FFF",
           boxShadow: "xl",
+          overflow: "visible",
         }}
       >
         <Box sx={{ display: { xs: "flex", md: "none" } }}>
@@ -151,17 +148,6 @@ export default function Sidebar({ open, user, toggleSidebar }) {
             priority={true}
           />
         </Box>
-
-        <Input
-          size="sm"
-          startDecorator={<SearchRoundedIcon />}
-          placeholder="Search"
-          sx={{
-            borderRadius: "8px",
-            boxShadow: "sm",
-            mt: 2,
-          }}
-        />
 
         <Box
           sx={{
@@ -196,34 +182,51 @@ export default function Sidebar({ open, user, toggleSidebar }) {
                   {group.group}
                 </Typography>
                 <List>
-                  {group.items.map((route) => (
-                    <ListItem key={route.href}>
-                      <ListItemButton
-                        component={Link}
-                        href={route.href}
-                        selected={pathname === route.href}
-                        sx={{
-                          pl: 2,
-                          gap: 1.5,
-                          "&.Mui-selected": {
-                            backgroundColor: "primary.softBg",
-                            "&:hover": {
-                              backgroundColor: "primary.softHover",
+                  {group.items.map((route, index) => (
+                    <Grow
+                      in={true}
+                      timeout={index * 200 + 200}
+                      key={route.href}
+                    >
+                      <ListItem>
+                        <ListItemButton
+                          component={Link}
+                          href={route.href}
+                          selected={pathname === route.href}
+                          sx={{
+                            marginTop: 1,
+                            marginRight: 0.2,
+                            gap: 1.5,
+                            borderRadius: 10,
+                            transition: "transform 0.2s, box-shadow 0.3s",
+                            "&.Mui-selected": {
+                              backgroundColor: "darkblue", // Dark blue for the selected item
+                              color: "white", // White text color for the selected item
+                              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                              transform: "scale(1.02)",
+                              "&:hover": {
+                                backgroundColor: "darkblue", // Keep dark blue when hovering over selected
+                                color: "white", // Ensure text stays white when hovering over selected
+                                transform: "scale(1.05)",
+                              },
                             },
-                          },
-                          "&:hover": {
-                            backgroundColor: "neutral.softHover",
-                          },
-                        }}
-                      >
-                        {route.icon}
-                        <ListItemContent>
-                          <Typography level="title-sm">
-                            {route.label}
-                          </Typography>
-                        </ListItemContent>
-                      </ListItemButton>
-                    </ListItem>
+                            "&:hover": {
+                              backgroundColor: "transparent", // No background change on hover for non-selected
+                              color: "inherit", // Keep default text color for non-selected
+                              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                              transform: "scale(1.03)",
+                            },
+                          }}
+                        >
+                          {route.icon}
+                          <ListItemContent>
+                            <Typography level="title-sm" color="inherit">
+                              {route.label}
+                            </Typography>
+                          </ListItemContent>
+                        </ListItemButton>
+                      </ListItem>
+                    </Grow>
                   ))}
                 </List>
               </ListItem>
@@ -241,7 +244,7 @@ export default function Sidebar({ open, user, toggleSidebar }) {
             p: 2,
             borderRadius: "sm",
             bgcolor: "background.surface",
-            boxShadow: "sm",
+            boxShadow: "lg",
           }}
         >
           <Avatar
