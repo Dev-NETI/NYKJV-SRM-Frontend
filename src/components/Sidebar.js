@@ -38,11 +38,11 @@ const routes = [
   {
     group: "Main",
     items: [
-      {
-        href: "/dashboard",
-        label: "Dashboard",
-        icon: <DashboardRoundedIcon />,
-      },
+      // {
+      //   href: "/dashboard",
+      //   label: "Dashboard",
+      //   icon: <DashboardRoundedIcon />,
+      // },
       {
         href: "/product",
         label: "Products",
@@ -82,7 +82,7 @@ const routes = [
         label: "Supplier Admin",
         icon: <SupervisorAccountIcon />,
       },
-      { href: "/supplier-user", label: "Supplier User", icon: <PersonIcon /> },
+      // { href: "/supplier-user", label: "Supplier User", icon: <PersonIcon /> },
       {
         href: "/user-management",
         label: "User Management",
