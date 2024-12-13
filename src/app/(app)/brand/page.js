@@ -59,7 +59,7 @@ const BrandComponent = () => {
       }
     };
     fetchBrands();
-  }, [showBrand]);
+  }, []);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },

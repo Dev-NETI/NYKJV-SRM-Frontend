@@ -25,7 +25,7 @@ import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import GroupsIcon from "@mui/icons-material/Groups";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 
 const FormSchema = z
   .object({
@@ -293,7 +293,6 @@ const StoreSupplierDrawer = () => {
     }
   };
 
-  
   const submitForm = async (data) => {
     try {
       const response = await local_axios.post("/api/supplier", data);
@@ -537,7 +536,7 @@ const StoreSupplierDrawer = () => {
         onClick={toggleDrawer("right", true)}
         sx={{ color: "white", background: "green" }}
       >
-        <AddIcon/> SUPPLIER
+        <AddIcon /> SUPPLIER
       </Button>
       <Drawer
         anchor="right"

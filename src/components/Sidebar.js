@@ -38,11 +38,11 @@ const routes = [
   {
     group: "Main",
     items: [
-      {
-        href: "/dashboard",
-        label: "Dashboard",
-        icon: <DashboardRoundedIcon />,
-      },
+      // {
+      //   href: "/dashboard",
+      //   label: "Dashboard",
+      //   icon: <DashboardRoundedIcon />,
+      // },
       {
         href: "/product",
         label: "Products",
@@ -50,8 +50,13 @@ const routes = [
       },
       { href: "/orders", label: "Orders", icon: <ShoppingCartIcon /> },
       {
+        href: "/supplier-document/compliance",
+        label: "Compliance Documents",
+        icon: <ArticleIcon />,
+      },
+      {
         href: "/supplier-document",
-        label: "Documents",
+        label: "Order Documents",
         icon: <ArticleIcon />,
       },
     ],
@@ -77,7 +82,7 @@ const routes = [
         label: "Supplier Admin",
         icon: <SupervisorAccountIcon />,
       },
-      { href: "/supplier-user", label: "Supplier User", icon: <PersonIcon /> },
+      // { href: "/supplier-user", label: "Supplier User", icon: <PersonIcon /> },
       {
         href: "/user-management",
         label: "User Management",
@@ -138,7 +143,13 @@ export default function Sidebar({ open, user, toggleSidebar }) {
             justifyContent: "center",
           }}
         >
-          <Image src="/SRM.png" alt="NYKJV-SRM-Logo" width={170} height={170} />
+          <Image
+            src="/SRM.png"
+            alt="NYKJV-SRM-Logo"
+            width={170}
+            height={170}
+            priority={true}
+          />
         </Box>
 
         <Input
