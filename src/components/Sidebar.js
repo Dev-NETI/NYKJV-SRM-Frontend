@@ -55,7 +55,7 @@ const routes = [
         icon: <ArticleIcon />,
       },
       {
-        href: "/supplier-document",
+        href: "/supplier-document/orders",
         label: "Order Documents",
         icon: <ArticleIcon />,
       },

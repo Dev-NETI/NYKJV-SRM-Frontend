@@ -9,6 +9,7 @@ function SelectComponent({ label, data = null, ...props }) {
     <FormControl>
       <InputLabel id="demo-simple-select-label">{label}</InputLabel>
       <Select {...props}>
+        <MenuItem value="">Select</MenuItem>
         {data &&
           data.map((item) => (
             <MenuItem key={item.id} value={item.id}>
