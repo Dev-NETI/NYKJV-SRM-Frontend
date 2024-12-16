@@ -1,6 +1,5 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import { EdgeStoreProvider } from "@/lib/edgestore";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -16,9 +15,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={poppins.className}>
-        <EdgeStoreProvider>{children}</EdgeStoreProvider>
-      </body>
+      <body className={poppins.className}>{children}</body>
     </html>
   );
 }
