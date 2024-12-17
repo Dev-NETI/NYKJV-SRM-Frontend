@@ -6,18 +6,23 @@ import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import TextFieldComponent from "../tailwind/TextFieldComponent";
 import SearchIcon from "@mui/icons-material/Search";
 import SelectComponent from "../material-ui/SelectComponent";
-import { FormControl } from "@mui/material";
 import { useOrderDocument } from "@/hooks/api/order-document";
 import { useOrderDocumentType } from "@/hooks/api/order-document-type";
+import { useDepartmentSupplier } from "@/hooks/api/department-supplier";
+import DataArrayIcon from "@mui/icons-material/DataArray";
 
 function DocumentListComponent() {
   const { user } = useAuth({ middleware: "auth" });
   const { show: getOrderDocument } = useOrderDocument();
   const { index: getDocumentType } = useOrderDocumentType();
+  const { show: getDepartmentSupplier } =
+    useDepartmentSupplier("get-per-department");
   const [documentListState, setDocumentListState] = useState({
     documentData: [],
     filteredData: [],
     documentTypeData: [],
+    departmentSupplierData: [],
+    selectedDepartmentSupplier: "",
     selectedDocumentType: "",
   });
   const { supplierDocumentState, setSupplierDocumentState } = useContext(
@@ -28,10 +33,22 @@ function DocumentListComponent() {
     const fetchData = async () => {
       const { data: orderDocumentData } = await getOrderDocument(14);
       const { data: documentTypeData } = await getDocumentType();
+      const { data: departmentSupplierData } = await getDepartmentSupplier(
+        user.department_id
+      );
+
       setDocumentListState((prevState) => ({
         ...prevState,
         documentData: orderDocumentData,
         documentTypeData: documentTypeData,
+        departmentSupplierData: user.supplier_id
+          ? []
+          : departmentSupplierData.map((item) => {
+              return {
+                id: item.supplier_id,
+                name: item.supplier.name,
+              };
+            }),
       }));
       setSupplierDocumentState((prevState) => ({
         ...prevState,
@@ -44,23 +61,15 @@ function DocumentListComponent() {
     }
   }, [user, supplierDocumentState.reload]);
 
+  // documentListState.filteredData.length > 0 &&
+  //   console.log(documentListState.filteredData);
+
   const handleSearch = (value) => {
     setDocumentListState((prevState) => ({
       ...prevState,
       filteredData: documentListState.documentData.filter((item) =>
         item.file_name.toLowerCase().includes(value.toLowerCase())
       ),
-    }));
-  };
-
-  const handleDropdownChange = (value) => {
-    setDocumentListState((prevState) => ({
-      ...prevState,
-      filteredData:
-        value !== "" &&
-        documentListState.documentData.filter(
-          (item) => item.order_document_type_id === value
-        ),
     }));
   };
 
@@ -83,12 +92,14 @@ function DocumentListComponent() {
           />
         </div>
       </div>
-      {/* document type dropdown */}
-      {documentListState.documentTypeData && (
-        <div className="flex justify-center items-center">
-          <div className="w-4/12 flex justify-end ">
-            <FormControl sx={{ m: 1, minWidth: 120 }}>
+
+      <div className="flex flex-row justify-center items-center gap-2">
+        {/* document type dropdown */}
+        {documentListState.documentTypeData && (
+          <div className="flex justify-center items-center">
+            <div className="w-4/12 flex justify-end ">
               <SelectComponent
+                size="small"
                 value={documentListState.selectedDocumentType || ""}
                 label="Document Type"
                 data={documentListState.documentTypeData}
@@ -96,23 +107,57 @@ function DocumentListComponent() {
                   setDocumentListState((prevState) => ({
                     ...prevState,
                     selectedDocumentType: event.target.value,
+                    filteredData:
+                      event.target.value !== "" &&
+                      documentListState.documentData.filter(
+                        (item) =>
+                          item.order_document_type_id === event.target.value
+                      ),
                   }));
-                  handleDropdownChange(event.target.value);
                 }}
               />
-            </FormControl>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* supplier dropdown */}
+        {!user?.supplier_id && (
+          <div className="flex justify-center items-center">
+            <div className="w-4/12 flex justify-end ">
+              <SelectComponent
+                size="small"
+                value={documentListState.selectedDepartmentSupplier || ""}
+                label="Supplier"
+                data={documentListState.departmentSupplierData}
+                onChange={(event) => {
+                  setDocumentListState((prevState) => ({
+                    ...prevState,
+                    selectedDepartmentSupplier: event.target.value,
+                    filteredData:
+                      event.target.value !== "" &&
+                      documentListState.documentData.filter(
+                        (item) => item.supplier_id === event.target.value
+                      ),
+                  }));
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* document list */}
       <div
         className="rounded-xl   
-      grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-5 
-      gap-4 p-2"
+  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-5 
+  gap-4 p-2"
       >
-        {documentListState.filteredData.length > 0
-          ? documentListState.filteredData.map((item) => (
+        {/* Check for dropdown values */}
+        {documentListState.selectedDocumentType === "" &&
+        documentListState.selectedDepartmentSupplier === "" ? (
+          // Display original documentData when no dropdowns are selected
+          documentListState.documentData.length > 0 ? (
+            documentListState.documentData.map((item) => (
               <OrderDocumentListItemComponent
                 id={item.id}
                 key={item.id}
@@ -124,21 +169,40 @@ function DocumentListComponent() {
                 supplier={item?.supplier?.name}
               />
             ))
-          : documentListState.documentData.map((item) => (
-              <OrderDocumentListItemComponent
-                id={item.id}
-                key={item.id}
-                fileName={item.file_name}
-                modifiedBy={item.modified_by}
-                updatedAt={item.updated_at}
-                filePath={item.file_path}
-                orderDocumentType={item?.order_document_type?.name}
-                supplier={item?.supplier?.name}
-              />
-            ))}
+          ) : (
+            <DataNotFound />
+          )
+        ) : // If dropdowns are selected, show filteredData
+        documentListState.filteredData.length > 0 ? (
+          documentListState.filteredData.map((item) => (
+            <OrderDocumentListItemComponent
+              id={item.id}
+              key={item.id}
+              fileName={item.file_name}
+              modifiedBy={item.modified_by}
+              updatedAt={item.updated_at}
+              filePath={item.file_path}
+              orderDocumentType={item?.order_document_type?.name}
+              supplier={item?.supplier?.name}
+            />
+          ))
+        ) : (
+          <DataNotFound />
+        )}
       </div>
     </div>
   );
 }
+
+const DataNotFound = () => {
+  return (
+    <div className="col-span-full flex flex-col gap-2 items-center justify-center">
+      <DataArrayIcon sx={{ fontSize: 100 }} color="error" />
+      <div className=" text-center text-red-800 text-5xl font-bold">
+        No data available.
+      </div>
+    </div>
+  );
+};
 
 export default DocumentListComponent;
