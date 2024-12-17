@@ -37,8 +37,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         setTimeout(() => {}, 3000);
         toast({
           variant: "secondary",
-          title: "Login Successful",
-          description: "You have successfully logged in.",
+          title: "Registration Successful",
+          description: "You have successfully registered.",
         });
       })
       .then(() => mutate())
@@ -170,27 +170,31 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
 
       console.log("Current Path:", currentPath);
 
-      const roles = user?.roles; // Ensure user is defined
+      const roles = user?.roles || []; // Ensure roles is an array, default to empty if undefined
 
       // Check if user is verified
       if (response.data.status === true) {
-        // Allow access only if the currentPath matches one of the roles or if user has any roles
-        if (roles?.length > 0) {
-          const hasRoleForPath = roles.some((role) => {
-            const rolePath = "/" + role.url;
-            return (
-              currentPath === rolePath || currentPath.startsWith(rolePath + "/")
-            ); // Allow dynamic paths
-          });
+        // If user has no roles or roles array is empty, redirect to unauthorized
+        if (!roles.length) {
+          router.push("/unauthorized");
+          return;
+        }
 
-          if (!hasRoleForPath) {
-            router.push("/unauthorized"); // Redirect to unauthorized if no role matches
-          }
+        // Check if current path matches any of the user's role paths
+        const hasRoleForPath = roles.some((role) => {
+          const rolePath = "/" + role.url;
+          return (
+            currentPath === rolePath || currentPath.startsWith(rolePath + "/")
+          );
+        });
+
+        if (!hasRoleForPath) {
+          router.push("/unauthorized");
         }
       } else {
         // If user is not verified, restrict access to login-otp only
         if (currentPath !== "/login-otp") {
-          router.push("/login-otp"); // Redirect to login-otp
+          router.push("/login-otp");
         }
       }
     } catch (error) {
