@@ -4,9 +4,9 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
-function SelectComponent({ label, data = null, ...props }) {
+function SelectComponent({ label, data = null, size = "medium", ...props }) {
   return (
-    <FormControl>
+    <FormControl sx={{ m: 1, minWidth: 120 }} size={size}>
       <InputLabel id="demo-simple-select-label">{label}</InputLabel>
       <Select {...props}>
         <MenuItem value="">Select</MenuItem>
