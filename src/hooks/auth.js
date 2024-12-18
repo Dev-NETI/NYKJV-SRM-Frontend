@@ -163,9 +163,9 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     window.location.pathname = "/login";
   };
 
-  const checkVerified = async ({ user, pathname }) => {
+  const checkVerified = async ({ user, pathname, router }) => {
     try {
-      const response = await axios.get("api/checking-status-otp");
+      const response = await axios.get("/api/checking-status-otp"); // Fix API route (ensure `/api` is prefixed)
       const currentPath = pathname;
 
       console.log("Current Path:", currentPath);
@@ -182,14 +182,15 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
 
         // Check if current path matches any of the user's role paths
         const hasRoleForPath = roles.some((role) => {
-          const rolePath = "/" + role.url;
+          const rolePath = `/${role.url}`;
           return (
-            currentPath === rolePath || currentPath.startsWith(rolePath + "/")
+            currentPath === rolePath || currentPath.startsWith(`${rolePath}/`)
           );
         });
 
         if (!hasRoleForPath) {
           router.push("/unauthorized");
+          return;
         }
       } else {
         // If user is not verified, restrict access to login-otp only
@@ -199,7 +200,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
       }
     } catch (error) {
       console.error("Error checking verification status:", error);
-      // Handle the error accordingly, e.g., redirect or notify user
+      // Optionally handle the error, e.g., redirect or notify the user
     }
   };
 
