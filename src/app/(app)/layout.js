@@ -10,7 +10,7 @@ import Footer from "@/components/Footer";
 import { Box } from "@mui/joy";
 
 const AppLayout = ({ children }) => {
-  const { user, checkVerified } = useAuth({
+  const { user, checkVerified, isVerifying } = useAuth({
     middleware: "auth",
   });
   const pathname = usePathname();
@@ -23,7 +23,7 @@ const AppLayout = ({ children }) => {
     }
   }, [pathname, user]); // Ensure dependencies are correct
 
-  if (!user) {
+  if (isVerifying) {
     return <Loading />;
   }
 

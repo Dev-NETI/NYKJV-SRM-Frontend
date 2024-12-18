@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   const router = useRouter();
   const params = useParams();
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const {
     data: user,
@@ -164,23 +165,21 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   };
 
   const checkVerified = async ({ user, pathname, router }) => {
+    setIsVerifying(true);
     try {
-      const response = await axios.get("/api/checking-status-otp"); // Fix API route (ensure `/api` is prefixed)
+      const response = await axios.get("/api/checking-status-otp");
       const currentPath = pathname;
 
       console.log("Current Path:", currentPath);
 
-      const roles = user?.roles || []; // Ensure roles is an array, default to empty if undefined
+      const roles = user?.roles || [];
 
-      // Check if user is verified
       if (response.data.status === true) {
-        // If user has no roles or roles array is empty, redirect to unauthorized
         if (!roles.length) {
           router.push("/unauthorized");
           return;
         }
 
-        // Check if current path matches any of the user's role paths
         const hasRoleForPath = roles.some((role) => {
           const rolePath = `/${role.url}`;
           return (
@@ -193,14 +192,19 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
           return;
         }
       } else {
-        // If user is not verified, restrict access to login-otp only
         if (currentPath !== "/login-otp") {
           router.push("/login-otp");
         }
       }
     } catch (error) {
       console.error("Error checking verification status:", error);
-      // Optionally handle the error, e.g., redirect or notify the user
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to verify access permissions",
+      });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -223,5 +227,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     resendEmailVerification,
     checkVerified,
     logout,
+    isVerifying,
   };
 };
