@@ -10,10 +10,12 @@ import { useOrderDocument } from "@/hooks/api/order-document";
 import { useOrderDocumentType } from "@/hooks/api/order-document-type";
 import { useDepartmentSupplier } from "@/hooks/api/department-supplier";
 import DataArrayIcon from "@mui/icons-material/DataArray";
+import Skeleton from "@mui/material/Skeleton";
 
 function DocumentListComponent() {
   const { user } = useAuth({ middleware: "auth" });
-  const { show: getOrderDocument } = useOrderDocument();
+  const { showWith2Parameter: getOrderDocument } =
+    useOrderDocument("get-documents");
   const { index: getDocumentType } = useOrderDocumentType();
   const { show: getDepartmentSupplier } =
     useDepartmentSupplier("get-per-department");
@@ -24,14 +26,19 @@ function DocumentListComponent() {
     departmentSupplierData: [],
     selectedDepartmentSupplier: "",
     selectedDocumentType: "",
+    searchedValue: "",
   });
+  const [loading, setLoading] = useState(true);
   const { supplierDocumentState, setSupplierDocumentState } = useContext(
     SupplierDocumentContext
   );
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: orderDocumentData } = await getOrderDocument(14);
+      const { data: orderDocumentData } = await getOrderDocument(
+        user.supplier_id ? user.supplier_id : "null",
+        user.supplier_id ? "null" : user.department_id
+      );
       const { data: documentTypeData } = await getDocumentType();
       const { data: departmentSupplierData } = await getDepartmentSupplier(
         user.department_id
@@ -54,6 +61,7 @@ function DocumentListComponent() {
         ...prevState,
         reload: false,
       }));
+      setLoading(false);
     };
 
     if (user) {
@@ -61,12 +69,10 @@ function DocumentListComponent() {
     }
   }, [user, supplierDocumentState.reload]);
 
-  // documentListState.filteredData.length > 0 &&
-  //   console.log(documentListState.filteredData);
-
   const handleSearch = (value) => {
     setDocumentListState((prevState) => ({
       ...prevState,
+      searchedValue: value,
       filteredData: documentListState.documentData.filter((item) =>
         item.file_name.toLowerCase().includes(value.toLowerCase())
       ),
@@ -147,47 +153,50 @@ function DocumentListComponent() {
       </div>
 
       {/* document list */}
-      <div
-        className="rounded-xl   
-  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-5 
-  gap-4 p-2"
-      >
-        {/* Check for dropdown values */}
-        {documentListState.selectedDocumentType === "" &&
-        documentListState.selectedDepartmentSupplier === "" ? (
-          // Display original documentData when no dropdowns are selected
-          documentListState.documentData.length > 0 ? (
-            documentListState.documentData.map((item) => (
-              <OrderDocumentListItemComponent
-                id={item.id}
-                key={item.id}
-                fileName={item.file_name}
-                modifiedBy={item.modified_by}
-                updatedAt={item.updated_at}
-                filePath={item.file_path}
-                orderDocumentType={item?.order_document_type?.name}
-                supplier={item?.supplier?.name}
-              />
-            ))
-          ) : (
-            <DataNotFound />
-          )
-        ) : // If dropdowns are selected, show filteredData
-        documentListState.filteredData.length > 0 ? (
-          documentListState.filteredData.map((item) => (
-            <OrderDocumentListItemComponent
-              id={item.id}
-              key={item.id}
-              fileName={item.file_name}
-              modifiedBy={item.modified_by}
-              updatedAt={item.updated_at}
-              filePath={item.file_path}
-              orderDocumentType={item?.order_document_type?.name}
-              supplier={item?.supplier?.name}
-            />
-          ))
+      <div className="rounded-xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-5 gap-4 p-2">
+        {loading ? (
+          <ListSkeleton />
         ) : (
-          <DataNotFound />
+          // Check for dropdown values
+          <>
+            {documentListState.selectedDocumentType === "" &&
+            documentListState.selectedDepartmentSupplier === "" &&
+            documentListState.searchedValue === "" ? (
+              // Display original documentData when no dropdowns are selected
+              documentListState.documentData.length > 0 ? (
+                documentListState.documentData.map((item) => (
+                  <OrderDocumentListItemComponent
+                    id={item.id}
+                    key={item.id}
+                    fileName={item.file_name}
+                    modifiedBy={item.modified_by}
+                    updatedAt={item.updated_at}
+                    filePath={item.file_path}
+                    orderDocumentType={item?.order_document_type?.name}
+                    supplier={item?.supplier?.name}
+                  />
+                ))
+              ) : (
+                <DataNotFound />
+              )
+            ) : // If dropdowns are selected, show filteredData
+            documentListState.filteredData.length > 0 ? (
+              documentListState.filteredData.map((item) => (
+                <OrderDocumentListItemComponent
+                  id={item.id}
+                  key={item.id}
+                  fileName={item.file_name}
+                  modifiedBy={item.modified_by}
+                  updatedAt={item.updated_at}
+                  filePath={item.file_path}
+                  orderDocumentType={item?.order_document_type?.name}
+                  supplier={item?.supplier?.name}
+                />
+              ))
+            ) : (
+              <DataNotFound />
+            )}
+          </>
         )}
       </div>
     </div>
@@ -196,12 +205,26 @@ function DocumentListComponent() {
 
 const DataNotFound = () => {
   return (
-    <div className="col-span-full flex flex-col gap-2 items-center justify-center">
-      <DataArrayIcon sx={{ fontSize: 100 }} color="error" />
-      <div className=" text-center text-red-800 text-5xl font-bold">
-        No data available.
+    <div className="col-span-full flex flex-col gap-2 items-center justify-center mt-20">
+      <div className=" text-center text-red-700 text-7xl font-bold">
+        No data found.
       </div>
+      <DataArrayIcon sx={{ fontSize: 140 }} color="error" />
     </div>
+  );
+};
+
+const ListSkeleton = () => {
+  const width = 250;
+  const height = 170;
+  return (
+    <>
+      <Skeleton variant="rectangular" width={width} height={height} />
+      <Skeleton variant="rectangular" width={width} height={height} />
+      <Skeleton variant="rectangular" width={width} height={height} />
+      <Skeleton variant="rectangular" width={width} height={height} />
+      <Skeleton variant="rectangular" width={width} height={height} />
+    </>
   );
 };
 
