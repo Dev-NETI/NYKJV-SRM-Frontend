@@ -38,40 +38,58 @@ const routes = [
   {
     group: "Main",
     items: [
-      // {
-      //   href: "/dashboard",
-      //   label: "Dashboard",
-      //   icon: <DashboardRoundedIcon />,
-      // },
       {
         href: "/product",
         label: "Products",
         icon: <ProductionQuantityLimitsIcon />,
+        allowedRoles: ["Product"],
       },
-      { href: "/orders", label: "Orders", icon: <ShoppingCartIcon /> },
+      {
+        href: "/orders",
+        label: "Orders",
+        icon: <ShoppingCartIcon />,
+        allowedRoles: ["Orders"],
+      },
       {
         href: "/supplier-document/compliance",
         label: "Compliance Documents",
         icon: <ArticleIcon />,
+        allowedRoles: ["Supplier Document"],
       },
       {
         href: "/supplier-document",
         label: "Order Documents",
         icon: <ArticleIcon />,
+        allowedRoles: ["Order Documents"],
       },
     ],
   },
   {
     group: "Communication",
     items: [
-      { href: "/chat", label: "Chat", icon: <QuestionAnswerRoundedIcon /> },
+      {
+        href: "/chat",
+        label: "Chat",
+        icon: <QuestionAnswerRoundedIcon />,
+        allowedRoles: ["Admin", "Supplier", "User"],
+      },
     ],
   },
   {
     group: "Maintenance",
     items: [
-      { href: "/brand", label: "Brand", icon: <ShoppingCartRoundedIcon /> },
-      { href: "/category", label: "Category", icon: <AssignmentRoundedIcon /> },
+      {
+        href: "/brand",
+        label: "Brand",
+        icon: <ShoppingCartRoundedIcon />,
+        allowedRoles: ["Brand"],
+      },
+      {
+        href: "/category",
+        label: "Category",
+        icon: <AssignmentRoundedIcon />,
+        allowedRoles: ["Category"],
+      },
     ],
   },
   {
@@ -81,12 +99,13 @@ const routes = [
         href: "/supplier",
         label: "Supplier Admin",
         icon: <SupervisorAccountIcon />,
+        allowedRoles: ["Supplier Admin"],
       },
-      // { href: "/supplier-user", label: "Supplier User", icon: <PersonIcon /> },
       {
         href: "/user-management",
         label: "User Management",
         icon: <ManageAccountsIcon />,
+        allowedRoles: ["User Management"],
       },
     ],
   },
@@ -97,6 +116,21 @@ export default function Sidebar({ open, user, toggleSidebar }) {
     middleware: "auth",
   });
   const pathname = usePathname();
+
+  // Add a check to safely access the role name
+  const userRoles = user?.role_users?.map((role) => role.role?.name) || [];
+
+  // Filter routes based on user roles
+  const filteredRoutes = routes
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((route) =>
+        route.allowedRoles.some((role) => userRoles.includes(role))
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  console.log("User Roles:", userRoles); // For debugging
 
   return (
     open && (
@@ -156,7 +190,7 @@ export default function Sidebar({ open, user, toggleSidebar }) {
             overflow: "hidden auto",
           }}
         >
-          {routes.map((group) => (
+          {filteredRoutes.map((group) => (
             <List
               key={group.group}
               size="sm"
