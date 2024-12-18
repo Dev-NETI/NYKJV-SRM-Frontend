@@ -57,7 +57,7 @@ const routes = [
         allowedRoles: ["Supplier Document"],
       },
       {
-        href: "/supplier-document",
+        href: "/supplier-document/orders",
         label: "Order Documents",
         icon: <ArticleIcon />,
         allowedRoles: ["Order Documents"],
