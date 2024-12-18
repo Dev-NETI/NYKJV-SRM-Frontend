@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -18,9 +19,10 @@ import { z } from "zod";
 import Image from "next/image";
 const FormSchema = z
   .object({
-    f_name: z.string().nonempty(),
-    m_name: z.string().nonempty(),
-    l_name: z.string().nonempty(),
+    f_name: z.string().optional(),
+    m_name: z.string().nullable(),
+    l_name: z.string().optional(),
+    contact_number: z.string().optional(),
     email: z.string().email({
       message: "Invalid email format.",
     }),
@@ -32,6 +34,7 @@ const FormSchema = z
   .strict();
 
 const Page = () => {
+  const router = useRouter();
   const { register } = useAuth({
     middleware: "guest",
     redirectIfAuthenticated: "/dashboard",
@@ -41,8 +44,9 @@ const Page = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       f_name: "",
-      m_name: "",
+      m_name: null,
       l_name: "",
+      contact_number: "",
       email: "",
       password: "",
       passwordConfirmation: "",
@@ -52,15 +56,18 @@ const Page = () => {
   const [errors, setErrors] = useState([]);
 
   const submitForm = async (data) => {
-    register({
+    await register({
       f_name: data.f_name,
       m_name: data.m_name,
       l_name: data.l_name,
+      contact_number: data.contact_number,
       email: data.email,
       password: data.password,
       password_confirmation: data.passwordConfirmation,
       setErrors,
     });
+
+    router.push("/login");
   };
 
   return (
@@ -118,6 +125,23 @@ const Page = () => {
                   <FormLabel>Last name</FormLabel>
                   <FormControl>
                     <Input type="text" placeholder="Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contact_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Contact Number"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
