@@ -130,8 +130,6 @@ export default function Sidebar({ open, user, toggleSidebar }) {
     }))
     .filter((group) => group.items.length > 0);
 
-  console.log("User Roles:", userRoles); // For debugging
-
   return (
     open && (
       <Sheet

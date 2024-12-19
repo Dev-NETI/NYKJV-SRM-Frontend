@@ -92,7 +92,7 @@ function page() {
       ...prevState,
       open: false,
     }));
-  }, 3000); // 3 seconds
+  }, 5000); // 3 seconds
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -190,14 +190,15 @@ function page() {
             </IconButton>
           </Link>
           <EditUserModal slug={params.row.slug} />
-          <Button
+
+          <IconButton
             variant="solid"
             color="danger"
             size="sm"
             onClick={() => handleOpenModal(params.row.slug)} // Pass the id of the item to delete
           >
             <DeleteForever />
-          </Button>
+          </IconButton>
         </Box>
       ),
     },
@@ -228,7 +229,11 @@ function page() {
       <UserContext.Provider
         value={{ setUserState, storeUser, showSnackbar, updateUser }}
       >
-        <Card variant="soft" sx={{ p: 2, mb: 2 }}>
+        <Card
+          variant="soft"
+          sx={{ p: 2, mb: 2 }}
+          className="animate-in fade-in duration-700"
+        >
           <Box
             sx={{
               borderBottom: "2px solid",
@@ -296,7 +301,11 @@ function page() {
           </Box>
         </Card>
 
-        <Card variant="soft" sx={{ p: 2 }}>
+        <Card
+          variant="soft"
+          sx={{ p: 2 }}
+          className="animate-in fade-in duration-700"
+        >
           <Box
             sx={{
               borderBottom: "2px solid",

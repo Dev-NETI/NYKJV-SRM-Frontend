@@ -62,6 +62,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   const login = async ({ setErrors, setStatus, ...props }) => {
     setErrors([]);
     setStatus(null);
+    setIsVerifying(true);
 
     try {
       await csrf();
@@ -96,6 +97,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         title: "Uh oh! Something went wrong.",
         description: "Authentication are not working. Please try again.",
       });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
