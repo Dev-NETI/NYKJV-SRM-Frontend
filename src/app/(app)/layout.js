@@ -3,24 +3,27 @@
 import { useAuth } from "@/hooks/auth";
 import Loading from "@/app/(app)/Loading";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Box } from "@mui/joy";
 
 const AppLayout = ({ children }) => {
-  const { user, checkVerified } = useAuth({
+  const { user, checkVerified, isVerifying } = useAuth({
     middleware: "auth",
   });
   const pathname = usePathname();
+  const router = useRouter(); // Use `useRouter` for navigation
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    checkVerified({ user, pathname });
-  }, [pathname, user]);
+    if (user) {
+      checkVerified({ user, pathname, router });
+    }
+  }, [pathname, user]); // Ensure dependencies are correct
 
-  if (!user) {
+  if (isVerifying) {
     return <Loading />;
   }
 
