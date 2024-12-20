@@ -11,8 +11,8 @@ import {
   FormLabel,
   Input,
 } from "@mui/joy";
-import { Table, Sheet, IconButton } from "@mui/joy";
-import { Search, Add as AddIcon, DeleteForever } from "@mui/icons-material";
+import { Table, Sheet, Checkbox, IconButton, Select, Option } from "@mui/joy";
+import { Search, Add as AddIcon } from "@mui/icons-material";
 import { UserContext } from "@/stores/UserContext";
 import { useUser } from "@/hooks/api/user";
 import Loading from "../Loading";
@@ -20,13 +20,10 @@ import AddUserModal from "../../../components/user-management/AddUserModal";
 import SBComponent from "@/components/snackbar/SBComponent";
 import EditUserModal from "@/components/user-management/EditUserModal";
 import { EyeIcon } from "lucide-react";
-import DeleteConfirmationModal from "@/components/user-management/DeleteUserModal";
-import axios from "axios";
 
 function page() {
   const { index: getUsers, store: storeUser, update: updateUser } = useUser();
-
-  const { patch: patchUser } = useUser("soft-delete");
+  const [loading, setLoading] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     message: "",
@@ -54,55 +51,22 @@ function page() {
     });
   };
 
-  const [openModal, setOpenModal] = useState(false);
-  const [itemIdToDelete, setItemIdToDelete] = useState(null);
-
-  const handleDelete = async (slug) => {
-    try {
-      // Await the patchUser function to complete
-      const { data } = await patchUser(slug);
-
-      // Reload the users list after the patch request is successful
-      await setUserState((prevState) => ({
-        ...prevState,
-        responseStore: true,
-      }));
-
-      console.log("Item deleted with id:", data);
-    } catch (error) {
-      // Handle any errors that occur during the request
-      console.error("Error deleting item:", error);
-    }
-  };
-
-  const handleOpenModal = (slug) => {
-    setItemIdToDelete(slug);
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setItemIdToDelete(null);
-  };
-
   // Auto-close snackbar after a few seconds (optional)
   setTimeout(() => {
     setSnackbarState((prevState) => ({
       ...prevState,
       open: false,
     }));
-  }, 5000); // 3 seconds
+  }, 3000); // 3 seconds
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setLoading(true);
       try {
         const { data } = await getUsers({
           page: pagination.page,
           f_name: searchParams.f_name,
           l_name: searchParams.l_name,
-          company_info: true,
-          department_info: true,
-          supplier_info: true,
         });
         setUserState((prevState) => ({
           ...prevState,
@@ -116,6 +80,8 @@ function page() {
         }));
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -186,15 +152,6 @@ function page() {
             </IconButton>
           </Link>
           <EditUserModal slug={params.row.slug} />
-
-          <IconButton
-            variant="solid"
-            color="danger"
-            size="sm"
-            onClick={() => handleOpenModal(params.row.slug)} // Pass the id of the item to delete
-          >
-            <DeleteForever />
-          </IconButton>
         </Box>
       ),
     },
@@ -216,16 +173,16 @@ function page() {
     setUserState((prev) => ({ ...prev, responseStore: true }));
   };
 
+  if (loading) {
+    return <Loading />;
+  }
+
   return (
     <>
       <UserContext.Provider
         value={{ setUserState, storeUser, showSnackbar, updateUser }}
       >
-        <Card
-          variant="soft"
-          sx={{ p: 2, mb: 2 }}
-          className="animate-in fade-in duration-700"
-        >
+        <Card variant="soft" sx={{ p: 2, mb: 2 }}>
           <Box
             sx={{
               borderBottom: "2px solid",
@@ -293,11 +250,7 @@ function page() {
           </Box>
         </Card>
 
-        <Card
-          variant="soft"
-          sx={{ p: 2 }}
-          className="animate-in fade-in duration-700"
-        >
+        <Card variant="soft" sx={{ p: 2 }}>
           <Box
             sx={{
               borderBottom: "2px solid",
@@ -353,7 +306,7 @@ function page() {
                 "& thead th": {
                   fontWeight: "bold",
                   color: "text.primary",
-                  backgroundColor: "#fff",
+                  backgroundColor: "var(--TableCell-headBackground)",
                   borderBottom: "2px solid var(--joy-palette-divider)",
                   whiteSpace: "normal",
                   overflow: "hidden",
@@ -472,13 +425,6 @@ function page() {
           open={snackbarState.open}
           message={snackbarState.message}
           color={snackbarState.color}
-        />
-
-        <DeleteConfirmationModal
-          open={openModal}
-          onClose={handleCloseModal}
-          handleDelete={handleDelete}
-          id={itemIdToDelete}
         />
       </UserContext.Provider>
     </>

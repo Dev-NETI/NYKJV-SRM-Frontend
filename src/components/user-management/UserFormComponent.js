@@ -166,7 +166,7 @@ function UserFormComponent({
             form={form}
             name="company_id"
             label="Company"
-            DataState={DataState.company_data} // Pass only the array, not the whole object
+            DataState={DataState.company_data}
             defaultValue="0"
           />
         </Box>
@@ -184,7 +184,7 @@ function UserFormComponent({
             form={form}
             name="supplier_id"
             label="Supplier"
-            DataState={DataState.supplier_data.suppliers}
+            DataState={DataState.supplier_data}
             defaultValue="0"
           />
         </Box>

@@ -61,7 +61,6 @@ const useResource = ({ route }) => {
    * @return {*}
    */
   const destroy = (id) => axios.delete(`${route}/${id}`);
-
   const destroy2Parameter = (id, id2) => axios.delete(`${route}/${id}/${id2}`);
 
   return {

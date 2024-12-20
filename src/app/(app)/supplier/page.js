@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import React, { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
@@ -79,7 +79,7 @@ export default function DataTable() {
             className="flex items-center bg-green-600 p-2 rounded-md text-white"
             onClick={() => handleEdit(params.id)} // Open drawer and set supplier ID on edit
           >
-            <Edit className="w-4 h-4" />
+            <Edit className="w-4 h-4"/>
           </button>
           <button
             className="flex items-center bg-red-600 p-2 rounded-md text-white"
