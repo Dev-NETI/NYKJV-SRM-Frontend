@@ -25,7 +25,10 @@ import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import GroupsIcon from "@mui/icons-material/Groups";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
+
+import Alert from "@mui/material/Alert";
+import CheckIcon from "@mui/icons-material/Check";
 
 const FormSchema = z
   .object({
@@ -113,6 +116,8 @@ const StoreSupplierDrawer = () => {
   const [cityGroups, setCityGroups] = React.useState([]);
   const [municipalityGroups, setMunicipalityGroups] = React.useState([]);
   const [barangayGroups, setBarangayGroups] = React.useState([]);
+
+  const [alert, setAlert] = React.useState(false);
   const [streetAddressGroups, setStreetAddressGroups] = React.useState([]);
 
   const [selectedIsland, setSelectedIsland] = React.useState(null);
@@ -194,6 +199,13 @@ const StoreSupplierDrawer = () => {
     setDistrictGroups([]);
     setCityGroups([]);
     setMunicipalityGroups([]);
+  };
+
+  const handleAlert = () => {
+    setAlert(true);
+    setTimeout(() => {
+      setAlert(false);
+    }, 3000);
   };
 
   const fetchMunicipalities = async (provinceId) => {
@@ -293,12 +305,14 @@ const StoreSupplierDrawer = () => {
     }
   };
 
-  
   const submitForm = async (data) => {
     try {
       const response = await local_axios.post("/api/supplier", data);
       console.log("Supplier Created Successfully", response.data);
+      handleAlert();
       reset(); // This clears your form; ensure this function is defined in your code
+      setState({ ...state, right: false });
+      // toggleDrawer("right", false);
     } catch (error) {
       if (error.response) {
         // Backend errors (like validation errors)
@@ -311,12 +325,6 @@ const StoreSupplierDrawer = () => {
   };
 
   const toggleDrawer = (anchor, open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
-      return;
-    }
     setState({ ...state, [anchor]: open });
   };
 
@@ -537,15 +545,22 @@ const StoreSupplierDrawer = () => {
         onClick={toggleDrawer("right", true)}
         sx={{ color: "white", background: "green" }}
       >
-        <AddIcon/> SUPPLIER
+        <AddIcon /> SUPPLIER
       </Button>
       <Drawer
         anchor="right"
         open={state["right"]}
         onClose={toggleDrawer("right", false)}
-      >
+      > 
         {formList("right")}
       </Drawer>
+      {alert ? (
+        <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
+            <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+              Successfully Added
+            </Alert>
+        </div>
+      ) : null}
     </div>
   );
 };
