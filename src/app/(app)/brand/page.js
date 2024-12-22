@@ -26,6 +26,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 
+// Constants
+const EMPTY_RESPONSE_ERROR = "Failed to load brands. Please try again later.";
+const BRAND_NAME_REQUIRED = "Brand Name is required.";
+const NO_BRANDS_SELECTED = "No brands selected for deactivation.";
+const MULTIPLE_DEACTIVATION_FLAG = "multiple";
+
 const BrandComponent = () => {
   const {
     index: showBrand,
@@ -33,6 +39,7 @@ const BrandComponent = () => {
     update: updateBrand,
     destroy: deactivateBrand,
   } = useBrand();
+
   const [brands, setBrand] = useState([]);
   const [open, setOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
@@ -42,7 +49,8 @@ const BrandComponent = () => {
   const [viewBrand, setViewBrand] = useState(null);
   const [loading, setLoading] = useState(false);
   const [deactivatingId, setDeactivatingId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // Add search query state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBrandIds, setSelectedBrandIds] = useState([]);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -55,11 +63,11 @@ const BrandComponent = () => {
         }
       } catch (error) {
         console.error("Failed to fetch brands:", error);
-        toast.error("Failed to load brands. Please try again later.");
+        toast.error(EMPTY_RESPONSE_ERROR);
       }
     };
     fetchBrands();
-  }, []);
+  }, [showBrand]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
@@ -109,6 +117,7 @@ const BrandComponent = () => {
     },
   ];
 
+
   // Filter brands based on the search query
   const filteredRows = brands
     .filter((brand) =>
@@ -139,7 +148,6 @@ const BrandComponent = () => {
           })
         : "N/A",
     }));
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -166,20 +174,6 @@ const BrandComponent = () => {
     setViewOpen(true);
   };
 
-  const handleDeactivate = async (id) => {
-    setDeactivatingId(id);
-    try {
-      await deactivateBrand(id);
-      setBrand(brands.filter((brand) => brand.id !== id));
-      toast.success("Brand deactivated successfully!");
-    } catch (error) {
-      console.error("Error deactivating brand:", error);
-      toast.error("Failed to deactivate brand. Please try again.");
-    } finally {
-      setDeactivatingId(null);
-    }
-  };
-
   async function handleSubmit(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -203,11 +197,7 @@ const BrandComponent = () => {
       handleClose();
     } catch (error) {
       console.error("Error submitting brand:", error);
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
-      } else {
-        setErrors({ form: "An error occurred. Please try again." });
-      }
+      handleServerError(error);
     } finally {
       setLoading(false);
     }
@@ -215,33 +205,51 @@ const BrandComponent = () => {
 
   function validateForm(object) {
     const errors = {};
-    if (!object.brandName) errors.brandName = "Brand Name is required.";
+    if (!object.brandName) errors.brandName = BRAND_NAME_REQUIRED;
     return errors;
   }
-  const [selectedBrandIds, setSelectedBrandIds] = useState([]); // New state for selected brands
-  const paginationModel = { page: 0, pageSize: 10 };
+
+  const handleServerError = (error) => {
+    if (error.response && error.response.status === 422) {
+      setErrors(error.response.data.errors);
+    } else {
+      setErrors({ form: "An error occurred. Please try again." });
+    }
+  };
+
+  const handleDeactivate = async (id) => {
+    setDeactivatingId(id);
+    try {
+      await deactivateBrand(id);
+      setBrand(brands.filter((brand) => brand.id !== id));
+      toast.success("Brand deactivated successfully!");
+    } catch (error) {
+      console.error("Error deactivating brand:", error);
+      toast.error("Failed to deactivate brand. Please try again.");
+    } finally {
+      setDeactivatingId(null);
+    }
+  };
+
   const handleMultipleDeactivation = async () => {
     if (selectedBrandIds.length === 0) {
-      toast.error("No brands selected for deactivation.");
+      toast.error(NO_BRANDS_SELECTED);
       return;
     }
-
-    setDeactivatingId("multiple"); // Temporarily set a flag for multiple deactivations
-
+    setDeactivatingId(MULTIPLE_DEACTIVATION_FLAG);
     try {
-      // Loop over the selectedBrandIds and deactivate each brand
-      for (const id of selectedBrandIds) {
-        await deactivateBrand(id);
-        // Remove the deactivated brand from the state
-        setBrand((prev) => prev.filter((brand) => brand.id !== id));
-      }
+      await Promise.all(
+        selectedBrandIds.map((id) => deactivateBrand(id).then(() => {
+          setBrand((prev) => prev.filter((brand) => brand.id !== id));
+        }))
+      );
       toast.success("Selected brands deactivated successfully!");
-      setSelectedBrandIds([]); // Clear selection after deactivation
+      setSelectedBrandIds([]);
     } catch (error) {
       console.error("Error deactivating brands:", error);
       toast.error("Failed to deactivate brands. Please try again.");
     } finally {
-      setDeactivatingId(null); // Reset deactivating flag
+      setDeactivatingId(null);
     }
   };
 
@@ -254,7 +262,7 @@ const BrandComponent = () => {
             <Box display="flex" justifyContent="space-between" mt={2}>
               <TextField
                 variant="outlined"
-                placeholder="Search Products"
+                placeholder="Search Brands"
                 size="small"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -282,10 +290,10 @@ const BrandComponent = () => {
                   onClick={handleMultipleDeactivation}
                   disabled={
                     selectedBrandIds.length === 0 ||
-                    deactivatingId === "multiple"
+                    deactivatingId === MULTIPLE_DEACTIVATION_FLAG
                   }
                 >
-                  {deactivatingId === "multiple" ? (
+                  {deactivatingId === MULTIPLE_DEACTIVATION_FLAG ? (
                     <CircularProgress size={24} color="inherit" />
                   ) : (
                     "Deactivate"
@@ -298,133 +306,148 @@ const BrandComponent = () => {
               <DataGrid
                 rows={filteredRows}
                 columns={columns}
-                initialState={{
-                  pagination: { paginationModel },
-                }}
+                pagination
                 pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
-                disableRowSelectionOnClick // This disables row selection when clicking anywhere else
-                onRowSelectionModelChange={(ids) => setSelectedBrandIds(ids)} // Track selected rows
+                disableRowSelectionOnClick
+                onRowSelectionModelChange={(ids) => setSelectedBrandIds(ids)}
                 sx={{ border: 0 }}
               />
             </Box>
           </Paper>
         </Box>
-
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-          <DialogTitle>
-            {editingBrandId ? "Edit Brand" : "Add Brand"}
-          </DialogTitle>
-          <DialogContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="brandName"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Brand Name:
-                </label>
-                <input
-                  type="text"
-                  id="brandName"
-                  name="brandName"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                {errors.brandName && (
-                  <p className="text-red-500 text-sm">{errors.brandName}</p>
-                )}
-              </div>
-              {errors.form && (
-                <p className="text-red-500 text-sm">{errors.form}</p>
-              )}
-              <DialogActions>
-                <Button onClick={handleClose} color="primary">
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : editingBrandId ? (
-                    "Update"
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
-              </DialogActions>
-            </form>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={viewOpen}
-          onClose={handleViewClose}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-            Brand Details
-          </DialogTitle>
-          <DialogContent dividers>
-            {viewBrand && (
-              <Box p={2}>
-                <Grid2 container spacing={2}>
-                  <Grid2 item size={{ xs: 8 }}>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>Brand Name:</strong>
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                      {viewBrand.name || "N/A"}
-                    </Typography>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 4 }}>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>Modified By:</strong>
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                      {viewBrand.modified_by || "N/A"}
-                    </Typography>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>Updated At:</strong>
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                      {viewBrand.updated_at
-                        ? new Date(viewBrand.updated_at).toLocaleString()
-                        : "N/A"}
-                    </Typography>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body2" color="textSecondary">
-                      <strong>Created At:</strong>
-                    </Typography>
-                    <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
-                      {viewBrand.created_at
-                        ? new Date(viewBrand.created_at).toLocaleString()
-                        : "N/A"}
-                    </Typography>
-                  </Grid2>
-                </Grid2>
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleViewClose} color="error" variant="contained">
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <AddEditBrandDialog
+          open={open}
+          handleClose={handleClose}
+          brandName={brandName}
+          setBrandName={setBrandName}
+          errors={errors}
+          handleSubmit={handleSubmit}
+          loading={loading}
+          editingBrandId={editingBrandId}
+        />
+        <ViewBrandDialog 
+          open={viewOpen} 
+          handleClose={handleViewClose} 
+          brand={viewBrand} 
+        />
         <ToastContainer />
       </Container>
     </>
   );
 };
+
+const AddEditBrandDialog = ({
+  open,
+  handleClose,
+  brandName,
+  setBrandName,
+  errors,
+  handleSubmit,
+  loading,
+  editingBrandId,
+}) => (
+  <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <DialogTitle>{editingBrandId ? "Edit Brand" : "Add Brand"}</DialogTitle>
+    <DialogContent>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="brandName"
+            className="block text-sm font-medium text-gray-600"
+          >
+            Brand Name:
+          </label>
+          <input
+            type="text"
+            id="brandName"
+            name="brandName"
+            value={brandName}
+            onChange={(e) => setBrandName(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          {errors.brandName && (
+            <p className="text-red-500 text-sm">{errors.brandName}</p>
+          )}
+        </div>
+        {errors.form && (
+          <p className="text-red-500 text-sm">{errors.form}</p>
+        )}
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? (
+              <CircularProgress size={24} />
+            ) : editingBrandId ? (
+              "Update"
+            ) : (
+              "Save"
+            )}
+          </Button>
+        </DialogActions>
+      </form>
+    </DialogContent>
+  </Dialog>
+);
+
+const ViewBrandDialog = ({ open, handleClose, brand }) => (
+  <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+    <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
+      Brand Details
+    </DialogTitle>
+    <DialogContent dividers>
+      {brand && (
+        <Box p={2}>
+          <Grid2 container spacing={2}>
+            <Grid2 item xs={8}>
+              <Typography variant="body2" color="textSecondary">
+                <strong>Brand Name:</strong>
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
+                {brand.name || "N/A"}
+              </Typography>
+            </Grid2>
+            <Grid2 item xs={4}>
+              <Typography variant="body2" color="textSecondary">
+                <strong>Modified By:</strong>
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
+                {brand.modified_by || "N/A"}
+              </Typography>
+            </Grid2>
+            <Grid2 item xs={6}>
+              <Typography variant="body2" color="textSecondary">
+                <strong>Updated At:</strong>
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
+                {brand.updated_at ? new Date(brand.updated_at).toLocaleString() : "N/A"}
+              </Typography>
+            </Grid2>
+            <Grid2 item xs={6}>
+              <Typography variant="body2" color="textSecondary">
+                <strong>Created At:</strong>
+              </Typography>
+              <Typography variant="body1" sx={{ fontSize: "1.1rem" }}>
+                {brand.created_at ? new Date(brand.created_at).toLocaleString() : "N/A"}
+              </Typography>
+            </Grid2>
+          </Grid2>
+        </Box>
+      )}
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleClose} color="error" variant="contained">
+        Close
+      </Button>
+    </DialogActions>
+  </Dialog>
+);
 
 export default BrandComponent;

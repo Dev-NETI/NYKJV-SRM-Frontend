@@ -68,7 +68,7 @@ export default function EmailFileUploadForm() {
       values.orderDocumentTypeId = 1;
       values.fileName = values.fileQuotation.name;
       values.emailBody = rteRef.current?.editor?.getHTML();
-
+ 
       const { data: response } = await axios.post(
         "/api/order/send-quotation",
         values,

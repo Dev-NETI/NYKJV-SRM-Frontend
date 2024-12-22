@@ -59,7 +59,7 @@ const CategoryComponent = () => {
       }
     };
     fetchCategorys();
-  }, []);
+  }, [showCategory]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
@@ -109,6 +109,7 @@ const CategoryComponent = () => {
     },
   ];
 
+  // Filter categorys based on the search query
   const filteredRows = categorys
     .filter((category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -310,7 +311,7 @@ const CategoryComponent = () => {
             </Box>
           </Paper>
         </Box>
-
+        {/* Add/Edit Modal */}
         <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
           <DialogTitle>
             {editingCategoryId ? "Edit Category" : "Add Category"}
@@ -356,12 +357,14 @@ const CategoryComponent = () => {
                   ) : (
                     "Save"
                   )}
-                </Button>
+                </Button> 
               </DialogActions>
             </form>
           </DialogContent>
         </Dialog>
-
+        
+        {/* View Modal */}
+        
         <Dialog
           open={viewOpen}
           onClose={handleViewClose}

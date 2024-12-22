@@ -18,35 +18,38 @@ import {
   Grid2,
   Typography,
   IconButton,
+  TextField,
+  CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { Search as SearchIcon } from "@mui/icons-material";
 
 const ProductComponent = () => {
-  const {
-    index: showProduct,
-    store,
-    update: updateProduct,
-    destroy : deactivateProduct,
-  } = useProduct();
+  const { index: showProduct, store, update: updateProduct, destroy: deactivateProduct } = useProduct();
+  const { index: showBrand } = useBrand();
+  const { index: showCategory } = useCategory();
+
   const [products, setProducts] = useState([]);
-  const [open, setOpen] = useState(false); // State for add/edit modal
-  const [viewOpen, setViewOpen] = useState(false); // State for view modal
-  const [viewProduct, setViewProduct] = useState({}); // Product to view
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewProduct, setViewProduct] = useState({});
   const [productName, setProductName] = useState("");
+  const [productImage, setProductImage] = useState(null);
   const [productCategory, setProductCategory] = useState("");
   const [productBrand, setProductBrand] = useState("");
   const [productPrice, setProductPrice] = useState("");
   const [productSpecification, setProductSpecification] = useState("");
   const [errors, setErrors] = useState({});
-  const [editingProductId, setEditingProductId] = useState(null); // ID for editing a product
-
-  const { index: showBrand } = useBrand();
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState({ adding: false, updating: false, deactivating: false });
   const [brandItems, setBrand] = useState([]);
-
-  const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
 
   useEffect(() => {
@@ -58,26 +61,32 @@ const ProductComponent = () => {
         setBrand(brandData);
         setCategory(categoryData);
         setProducts(productData);
+        setFilteredProducts(productData);
       } catch (error) {
-        toast.error("Failed to load categorys. Please try again later.");
+        toast.error("Failed to load data. Please try again later.");
       }
     };
-
     fetchData();
   }, [showBrand, showCategory, showProduct]);
 
+  useEffect(() => {
+    if (search) {
+      const result = products.filter((product) =>
+        product.name.toLowerCase().includes(search.toLowerCase())
+      );
+      setFilteredProducts(result);
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [search, products]);
+
   const columns = [
-    { field: "id", headerName: "#", width: 5 },
+    { field: "id", headerName: "#", width: 50 },
     { field: "name", headerName: "Product Name", flex: 1, minWidth: 180 },
     { field: "category_name", headerName: "Category", width: 200 },
     { field: "brand_name", headerName: "Brand", width: 200 },
     { field: "price", headerName: "Price", width: 100 },
-    {
-      field: "specification",
-      headerName: "Specification",
-      width: 250,
-    },
-    // { field: "modified_by", headerName: "Modified By", width: 150 },
+    { field: "specification", headerName: "Specification", width: 250 },
     {
       field: "actions",
       headerName: "Actions",
@@ -107,131 +116,171 @@ const ProductComponent = () => {
             size="small"
             onClick={() => handleDeactivate(params.row.id)}
             sx={{ ml: 1 }}
+            disabled={loading.deactivating}
           >
-            <DeleteIcon />
+            {loading.deactivating ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              <DeleteIcon />
+            )}
           </IconButton>
         </>
       ),
     },
   ];
 
-  const paginationModel = { page: 0, pageSize: 10 };
-  const rows = products.map((product) => ({
+  const rows = filteredProducts.map((product) => ({
     id: product.id,
     category_name: product.category.name,
     brand_name: product.brand.name,
-    category_id: product.category_id,
-    brand_id: product.brand_id,
     name: product.name,
     price: product.price,
     specification: product.specification,
-    modified_by: product.modified_by,
-    updated_at: new Date(product.updated_at).toLocaleString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }),
-    created_at: new Date(product.created_at).toLocaleString("en-US", {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }),
   }));
 
-  const handleOpen = () => setOpen(true); // Open add/edit modal
+  const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    resetForm(); // Reset the form when modal is closed
+    resetForm();
   };
 
   const resetForm = () => {
     setProductName("");
+    setProductImage(null);
     setProductCategory("");
     setProductBrand("");
     setProductPrice("");
     setProductSpecification("");
     setErrors({});
-    setEditingProductId(null); // Reset editing ID
+    setEditingProductId(null);
   };
 
   const handleEdit = (product) => {
     setEditingProductId(product.id);
     setProductName(product.name);
-    setProductCategory(product.category_id); // Ensure this matches the category ID
-    setProductBrand(product.brand_id); // Ensure this matches the brand ID
+    setProductImage(null); // Reset the image state for editing
+    setProductCategory(product.category_id);
+    setProductBrand(product.brand_id);
     setProductPrice(product.price);
     setProductSpecification(product.specification);
     setOpen(true);
   };
 
   const handleDeactivate = async (id) => {
+    setLoading((prev) => ({ ...prev, deactivating: true }));
     try {
-      await deactivateProduct(id); // Call the deactivate function from your API hook
+      await deactivateProduct(id);
       setProducts(products.filter((product) => product.id !== id));
+      setFilteredProducts(filteredProducts.filter((product) => product.id !== id));
+      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
       toast.success("Product deactivated successfully!");
     } catch (error) {
-      console.error("Error deleting product:", error);
-      toast.error("Failed to deactivated product. Please try again.");
+      console.error("Error deactivating product:", error);
+      toast.error("Failed to deactivate product. Please try again.");
+    } finally {
+      setLoading((prev) => ({ ...prev, deactivating: false }));
     }
   };
 
+  const handleMultipleDeactivate = async () => {
+    setLoading((prev) => ({ ...prev, deactivating: true }));
+    try {
+      await Promise.all(selectedIds.map((id) => deactivateProduct(id)));
+      setProducts(
+        products.filter((product) => !selectedIds.includes(product.id))
+      );
+      setFilteredProducts(
+        filteredProducts.filter((product) => !selectedIds.includes(product.id))
+      );
+      setSelectedIds([]);
+      toast.success("Selected products deactivated successfully!");
+    } catch (error) {
+      console.error("Error deactivating products:", error);
+      toast.error("Failed to deactivate products. Please try again.");
+    } finally {
+      setLoading((prev) => ({ ...prev, deactivating: false }));
+    }
+  };
+  
   const handleView = (product) => {
     setViewProduct(product);
     setViewOpen(true);
   };
 
-  async function handleSubmit(event) {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    const object = Object.fromEntries(formData.entries());
 
-    const validationErrors = validateForm(object);
+    const formData = new FormData();
+    formData.append('productName', productName);
+    formData.append('productCategory', productCategory);
+    formData.append('productBrand', productBrand);
+    formData.append('productPrice', productPrice);
+    formData.append('productSpecification', productSpecification);
+    
+    if (productImage) {
+      formData.append('productImage', productImage);
+    }
+
+    const validationErrors = validateForm({
+      productName,
+      productCategory,
+      productBrand,
+      productPrice,
+      productSpecification,
+      productImage,
+    });
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
+    setLoading((prev) => ({
+      ...prev,
+      adding: !editingProductId,
+      updating: !!editingProductId,
+    }));
+
     try {
       if (editingProductId) {
-        await updateProduct(editingProductId, object); // Update product if editing
+        await updateProduct(editingProductId, formData);
         toast.success("Product updated successfully!");
       } else {
-        await store(object); // Add new product
+        await store(formData);
         toast.success("Product added successfully!");
       }
-      handleClose(); // Close the modal and reset form
+      handleClose();
     } catch (error) {
       console.error("Error submitting product:", error);
-      if (error.response && error.response.status === 422) {
-          setErrors(error.response.data.errors);
+      if (error.response?.status === 422) {
+        setErrors(error.response.data.errors);
       } else {
-          setErrors({ form: "An error occurred. Please try again." });
+        toast.error("An unexpected error occurred. Please try again.");
       }
+    } finally {
+      setLoading((prev) => ({
+        ...prev,
+        adding: false,
+        updating: false,
+      }));
     }
-  }
+  };
 
-  function validateForm(object) {
+  const validateForm = (object) => {
     const errors = {};
+    if (!object.productImage) errors.productImage = "Product Image is required.";
     if (!object.productName) errors.productName = "Product Name is required.";
     if (!object.productPrice) {
       errors.productPrice = "Product Price is required.";
     } else if (isNaN(object.productPrice)) {
       errors.productPrice = "Product Price must be a number.";
     }
-    if (!object.productSpecification)
-      errors.productSpecification = "Product Specification is required.";
-    if (!object.productCategory)
-      errors.productCategory = "Please select a category.";
-    if (!object.productBrand) errors.productBrand = "Please select a category.";
+    if (!object.productSpecification) errors.productSpecification = "Product Specification is required.";
+    if (!object.productCategory) errors.productCategory = "Please select a category.";
+    if (!object.productBrand) errors.productBrand = "Please select a brand.";
 
     return errors;
-  }
+  };
 
   return (
     <>
@@ -239,18 +288,53 @@ const ProductComponent = () => {
       <Container maxWidth="xl" sx={{ mt: 3 }}>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ width: "100%", p: 2 }}>
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button variant="contained" color="primary" onClick={handleOpen}>
-                Add Product
-              </Button>
+            <Box display="flex" justifyContent="space-between" mt={2}>
+              <Box display="flex" alignItems="center">
+                <TextField
+                  variant="outlined"
+                  placeholder="Search Products"
+                  size="small"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  sx={{ mr: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+              <Box display="flex" alignItems="center">
+                <Button variant="contained" color="primary" onClick={handleOpen}>
+                  Add
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleMultipleDeactivate}
+                  disabled={selectedIds.length === 0 || loading.deactivating}
+                  sx={{ ml: 2 }}
+                >
+                  {loading.deactivating ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    "Deactivate"
+                  )}
+                </Button>
+              </Box>
             </Box>
+
             <Box sx={{ p: 2 }}>
               <DataGrid
                 rows={rows}
                 columns={columns}
-                initialState={{ pagination: { paginationModel } }}
+                pagination
                 pageSizeOptions={[5, 10, 20, 30, 40, 50]}
                 checkboxSelection
+                disableRowSelectionOnClick
+                onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
                 sx={{ border: 0 }}
               />
             </Box>
@@ -263,143 +347,133 @@ const ProductComponent = () => {
           </DialogTitle>
           <DialogContent>
             <Box>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit}>
                 <Grid2 container spacing={2}>
-                  <Grid2 item size={{ xs: 8 }}>
+
+                  <Grid2 item xs={12}>
+                    <Typography variant="body1" color="textSecondary">
+                      <strong>Product Image:</strong>
+                    </Typography>
+                    <input
+                      type="file"
+                      id="productImage"
+                      name="productImage"
+                      accept="image/*"
+                      onChange={(e) => setProductImage(e.target.files[0])}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    />
+                    {errors.productImage && (
+                      <p className="text-red-500 text-sm">
+                        {errors.productImage}
+                      </p>
+                    )}
+                  </Grid2>
+
+                  <Grid2 item xs={8}>
                     <Typography variant="body1" color="textSecondary">
                       <strong>Product Name:</strong>
                     </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <input
-                        type="text"
-                        id="productName"
-                        name="productName"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </item>
-                    {errors.productName && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productName}
-                      </p>
-                    )}
+                    <input
+                      type="text"
+                      id="productName"
+                      name="productName"
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    />
+                    {errors.productName && <p className="text-red-500 text-sm">{errors.productName}</p>}
                   </Grid2>
 
-                  <Grid2 item size={{ xs: 4 }}>
+                  <Grid2 item xs={4}>
                     <Typography variant="body1" color="textSecondary">
                       <strong>Price:</strong>
                     </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <input
-                        type="text"
-                        id="productPrice"
-                        name="productPrice"
-                        value={productPrice}
-                        onChange={(e) => setProductPrice(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </item>
-                    {errors.productPrice && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productPrice}
-                      </p>
-                    )}
+                    <input
+                      type="text"
+                      id="productPrice"
+                      name="productPrice"
+                      value={productPrice}
+                      onChange={(e) => setProductPrice(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    />
+                    {errors.productPrice && <p className="text-red-500 text-sm">{errors.productPrice}</p>}
                   </Grid2>
 
-                  <Grid2 item size={{ xs: 6 }}>
+                  <Grid2 item xs={6}>
                     <Typography variant="body1" color="textSecondary">
                       <strong>Category:</strong>
                     </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <select
-                        id="productCategory"
-                        name="productCategory"
-                        value={productCategory}
-                        onChange={(e) => setProductCategory(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Select a category</option>
-                        {categoryItems.map(({ id, name }) => (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </item>
-                    {errors.productCategory && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productCategory}
-                      </p>
-                    )}
+                    <select
+                      id="productCategory"
+                      name="productCategory"
+                      value={productCategory}
+                      onChange={(e) => setProductCategory(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    >
+                      <option value="">Select a category</option>
+                      {categoryItems.map(({ id, name }) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.productCategory && <p className="text-red-500 text-sm">{errors.productCategory}</p>}
                   </Grid2>
 
-
-                  <Grid2 item size={{ xs: 6 }}>
+                  <Grid2 item xs={6}>
                     <Typography variant="body1" color="textSecondary">
                       <strong>Brand:</strong>
                     </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <select
-                        id="productBrand"
-                        name="productBrand"
-                        value={productBrand} // Update this state variable accordingly
-                        onChange={(e) => setProductBrand(e.target.value)} // Update the state function accordingly
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Select a brand</option>
-                        {brandItems.map(({ id, name }) => (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </item>
-                    {errors.productBrand && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productBrand}
-                      </p>
-                    )}
+                    <select
+                      id="productBrand"
+                      name="productBrand"
+                      value={productBrand}
+                      onChange={(e) => setProductBrand(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    >
+                      <option value="">Select a brand</option>
+                      {brandItems.map(({ id, name }) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.productBrand && <p className="text-red-500 text-sm">{errors.productBrand}</p>}
                   </Grid2>
 
-                  <Grid2 item size={{ xs: 12 }}>
+                  <Grid2 item xs={12}>
                     <Typography variant="body1" color="textSecondary">
                       <strong>Specification:</strong>
                     </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <textarea
-                        id="productSpecification"
-                        name="productSpecification"
-                        value={productSpecification}
-                        onChange={(e) =>
-                          setProductSpecification(e.target.value)
-                        }
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </item>
+                    <textarea
+                      id="productSpecification"
+                      name="productSpecification"
+                      value={productSpecification}
+                      onChange={(e) => setProductSpecification(e.target.value)}
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                    />
                     {errors.productSpecification && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productSpecification}
-                      </p>
+                      <p className="text-red-500 text-sm">{errors.productSpecification}</p>
                     )}
                   </Grid2>
                 </Grid2>
-                {errors.form && (
-                  <p className="text-red-500 text-sm">{errors.form}</p>
-                )}
+                {errors.form && <p className="text-red-500 text-sm">{errors.form}</p>}
                 <div className="pt-2 flex justify-end">
                   <DialogActions>
-                    <Button
-                      onClick={handleClose}
-                      variant="contained"
-                      color="error"
-                      className="mr-2"
-                    >
+                    <Button onClick={handleClose} variant="contained" color="error" className="mr-2">
                       Cancel
                     </Button>
-                    <Button variant="contained" color="primary" type="submit">
-                      {" "}
-                      {editingProductId ? "Update Product" : "Add Product"}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      disabled={loading.adding || loading.updating}
+                    >
+                      {loading.adding || loading.updating ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        editingProductId ? "Update Product" : "Add Product"
+                      )}
                     </Button>
                   </DialogActions>
                 </div>
@@ -408,98 +482,70 @@ const ProductComponent = () => {
           </DialogContent>
         </Dialog>
 
-        {/* View Modal */}
-        <Dialog
-          open={viewOpen}
-          onClose={() => setViewOpen(false)}
-          fullWidth
-          maxWidth="sm"
-        >
+        <Dialog open={viewOpen} onClose={() => setViewOpen(false)} fullWidth maxWidth="sm">
           <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
             Product Details
           </DialogTitle>
           <DialogContent dividers>
-            {viewProduct && (
-              <Box p={2}>
-                <Grid2 container spacing={2}>
-                  <Grid2 item size={{ xs: 12 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Product Name:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.name || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Category:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.category_name || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Brand:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.brand_name || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Price:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.price || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Specification:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.specification || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Modified By:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.modified_by || "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Updated At:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.updated_at
-                        ? new Date(viewProduct.updated_at).toLocaleString()
-                        : "N/A"}
-                    </item>
-                  </Grid2>
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Created At:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      {viewProduct.created_at
-                        ? new Date(viewProduct.created_at).toLocaleString()
-                        : "N/A"}
-                    </item>
-                  </Grid2>
+            <Box p={2}>
+              <Grid2 container spacing={2}>
+                <Grid2 item xs={8}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Product Name:</strong>
+                  </Typography>
+                  <Typography>{viewProduct.name || "N/A"}</Typography>
                 </Grid2>
-              </Box>
-            )}
+                <Grid2 item xs={4}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Price:</strong>
+                  </Typography>
+                  <Typography>{viewProduct.price || "N/A"}</Typography>
+                </Grid2>
+                <Grid2 item xs={6}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Category:</strong>
+                  </Typography>
+                  <Typography>{viewProduct.category_name || "N/A"}</Typography>
+                </Grid2>
+                <Grid2 item xs={6}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Brand:</strong>
+                  </Typography>
+                  <Typography>{viewProduct.brand_name || "N/A"}</Typography>
+                </Grid2>
+                <Grid2 item xs={12}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Specification:</strong>
+                  </Typography>
+                  <Typography>{viewProduct.specification || "N/A"}</Typography>
+                </Grid2>
+                <Grid2 item xs={4}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Modified By:</strong>
+                  </Typography>
+                  <Typography>{viewProduct.modified_by || "N/A"}</Typography>
+                </Grid2>
+                <Grid2 item xs={4}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Updated At:</strong>
+                  </Typography>
+                  <Typography>
+                    {viewProduct.updated_at ? new Date(viewProduct.updated_at).toLocaleString() : "N/A"}
+                  </Typography>
+                </Grid2>
+                <Grid2 item xs={4}>
+                  <Typography variant="body1" color="textSecondary">
+                    <strong>Created At:</strong>
+                  </Typography>
+                  <Typography>
+                    {viewProduct.created_at ? new Date(viewProduct.created_at).toLocaleString() : "N/A"}
+                  </Typography>
+                </Grid2>
+              </Grid2>
+            </Box>
           </DialogContent>
           <DialogActions>
-            <Button
-              onClick={() => setViewOpen(false)}
-              color="error"
-              variant="contained"
-            >
+            <Button onClick={() => setViewOpen(false)} color="error" variant="contained">
               Close
             </Button>
           </DialogActions>
