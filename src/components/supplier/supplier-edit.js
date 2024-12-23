@@ -21,56 +21,22 @@ import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 
-import Alert from "@mui/material/Alert";
-import NotificationsIcon from '@mui/icons-material/Notifications';
+// Import skeleton
 import Skeleton from "@mui/material/Skeleton";
-import { TimerOutlined } from "@mui/icons-material";
-const FormSchema = z
-  .object({
-    name: z.string().nonempty({ message: "Required" }),
-    island: z.string().nonempty({ message: "Required" }),
-    region_id: z
-      .string()
-      .nonempty("Required")
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), { message: "Required" })
-      .transform((val) => (val ? Number(val) : null)),
-    province_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), { message: "Required" })
-      .transform((val) => (val ? Number(val) : null)),
-    district_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), { message: "Required" })
-      .transform((val) => (val ? Number(val) : null)),
-    city_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-    municipality_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-    brgy_id: z
-      .string()
-      .nonempty({ message: "Required" })
-      .transform((val) => (val ? Number(val) : null)),
-    street_address: z.string().nonempty({ message: "Required" }),
-  })
-  .strict();
+
+// Define the schema
+const FormSchema = z.object({
+  name: z.string().nonempty({ message: "Required" }),
+  island: z.string().nonempty({ message: "Required" }),
+  region_id: z.string().nonempty("Required").optional().nullable().refine((val) => !val || !isNaN(Number(val)), { message: "Required" }).transform((val) => (val ? Number(val) : null)),
+  province_id: z.string().optional().nullable().refine((val) => !val || !isNaN(Number(val)), { message: "Required" }).transform((val) => (val ? Number(val) : null)),
+  district_id: z.string().optional().nullable().refine((val) => !val || !isNaN(Number(val)), { message: "Required" }).transform((val) => (val ? Number(val) : null)),
+  city_id: z.string().optional().nullable().refine((val) => !val || !isNaN(Number(val)), { message: "Must be a number" }).transform((val) => (val ? Number(val) : null)),
+  municipality_id: z.string().optional().nullable().refine((val) => !val || !isNaN(Number(val)), { message: "Must be a number" }).transform((val) => (val ? Number(val) : null)),
+  brgy_id: z.string().nonempty({ message: "Required" }).transform((val) => (val ? Number(val) : null)),
+  street_address: z.string().nonempty({ message: "Required" })
+}).strict();
+
 
 export default function SupplierEdit({ supplierId, onClose, isOpen }) {
   const [islandsGroups, setIslandGroups] = React.useState([]);
@@ -82,14 +48,9 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
   const [barangayGroups, setBarangayGroups] = React.useState([]);
   const [selectedIsland, setSelectedIsland] = React.useState("");
   const [loading, setLoading] = React.useState(true); // Loading state
-  const [editAlert, setEditAlert] = React.useState(false);
 
   const {
-    control,
-    handleSubmit,
-    reset,
-    clearErrors,
-    formState: { errors },
+    control,handleSubmit,reset,clearErrors,formState: { errors },
   } = useForm({
     resolver: zodResolver(FormSchema),
   });
@@ -118,6 +79,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
     fetchOptions();
   }, []);
 
+
   React.useEffect(() => {
     const fetchData = async () => {
       if (supplierId) {
@@ -127,7 +89,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
           const response = await local_axios.get(`/api/supplier/${supplierId}`);
           const data = response.data;
           console.log("Supplier Data: ", data);
-
+  
           // Find the selected island and fetch regions for it
           const matchedIsland = islandsGroups.find(
             (island) => island.code === data.island
@@ -135,50 +97,38 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
           if (matchedIsland) {
             setSelectedIsland(matchedIsland.code);
             await fetchRegions(matchedIsland.code); // Fetch regions for the matched island
-
+  
             // Fetch provinces, districts, and cities conditionally
             await fetchProvinces(data.region_id);
             await fetchDistrict(data.region_id);
-
+  
             // Prioritize cities by province, then district if necessary
             if (data.province_id) {
               await fetchCitiesByProvince(data.province_id);
             } else if (data.district_id) {
               await fetchCitiesByDistrict(data.district_id);
             }
-
+  
             await fetchMunicipality(data.province_id);
-
+  
             // Fetch barangays based on municipality or city
             if (data.municipality_id) {
               await fetchBarangayByMunicipality(data.municipality_id);
             } else {
               await fetchBarangayByCities(data.city_id);
             }
-
+  
             // Reset the form with fetched data
             reset({
               name: data?.name ?? "",
               island: data?.island ?? "",
-              region_id: data?.region_id
-                ? String(data.region_id).padStart(9, "0")
-                : "",
-              province_id: data?.province_id
-                ? String(data.province_id).padStart(9, "0")
-                : "",
-              district_id: data?.district_id
-                ? String(data.district_id).padStart(9, "0")
-                : "",
-              city_id: data?.city_id
-                ? String(data.city_id).padStart(9, "0")
-                : "",
-              municipality_id: data?.municipality_id
-                ? String(data.municipality_id).padStart(9, "0")
-                : "",
-              brgy_id: data?.brgy_id
-                ? String(data.brgy_id).padStart(9, "0")
-                : "",
-              street_address: data?.street_address ?? "",
+              region_id: data?.region_id ? String(data.region_id).padStart(9, "0") : "",
+              province_id: data?.province_id ? String(data.province_id).padStart(9, "0") : "",
+              district_id: data?.district_id ? String(data.district_id).padStart(9, "0") : "",
+              city_id: data?.city_id ? String(data.city_id).padStart(9, "0") : "",
+              municipality_id: data?.municipality_id ? String(data.municipality_id).padStart(9, "0") : "",
+              brgy_id: data?.brgy_id ? String(data.brgy_id).padStart(9, "0") : "",
+              street_address: data?.street_address ?? ""
             });
           }
         } catch (error) {
@@ -188,19 +138,12 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         }
       }
     };
-
-    if (isOpen) {
-      // Ensure fetch only runs when modal is open
+  
+    if (isOpen) { // Ensure fetch only runs when modal is open
       fetchData(); // Fetch supplier data
     }
   }, [supplierId, isOpen, reset, islandsGroups]);
-
-  const handleEditAlert = () => {
-    setEditAlert(true);
-    setTimeout(() => {
-      setEditAlert(false);
-    }, 3000);
-  };
+  
   // Fetch regions based on island code
   const fetchRegions = async (islandCode) => {
     setLoading(true);
@@ -375,9 +318,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
     }
 
     const formattedBarangayMunicipalityId =
-      municipalityId.length === 9
-        ? municipalityId
-        : String(municipalityId).padStart(9, "0");
+      municipalityId.length === 9 ? municipalityId : String(municipalityId).padStart(9, "0");
 
     try {
       const response = await axios.get(
@@ -390,6 +331,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       setBarangayGroups([]); // Reset barangay groups on error
     }
   };
+  
 
   // Update the handleDistrictChange function
   const handleIslandChange = async (e) => {
@@ -397,7 +339,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
     setSelectedIsland(islandCode);
     clearErrors("island");
     setLoading(true);
-
+  
     try {
       await fetchRegions(islandCode);
       reset((formValues) => ({
@@ -415,12 +357,12 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       setLoading(false);
     }
   };
-
+  
   const handleRegionChange = async (e) => {
     const regionId = e.target.value;
     clearErrors("region_id");
     setLoading(true);
-
+  
     try {
       await fetchProvinces(regionId);
       await fetchDistrict(regionId);
@@ -443,30 +385,30 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
     const provinceId = e.target.value;
     clearErrors("province_id");
     setLoading(true);
-
+ 
     try {
-      await fetchCitiesByProvince(provinceId); // Fetch cities
-      await fetchMunicipality(provinceId); // Also fetch municipalities
-
-      reset((formValues) => ({
-        ...formValues,
-        district_id: "",
-        city_id: "",
-        municipality_id: "", // Reset this only if necessary
-        brgy_id: "",
-      }));
+       await fetchCitiesByProvince(provinceId); // Fetch cities
+       await fetchMunicipality(provinceId); // Also fetch municipalities
+ 
+       reset((formValues) => ({
+          ...formValues,
+          district_id: "",
+          city_id: "",
+          municipality_id: "", // Reset this only if necessary
+          brgy_id: "",
+       }));
     } catch (error) {
-      console.error("Error handling province change:", error);
+       console.error("Error handling province change:", error);
     } finally {
-      setLoading(false);
+       setLoading(false);
     }
-  };
-
+ };
+ 
   const handleDistrictChange = async (e) => {
     const districtId = e.target.value;
     clearErrors("district_id");
     setLoading(true);
-
+  
     try {
       await fetchCitiesByDistrict(districtId);
       reset((formValues) => ({
@@ -481,77 +423,83 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       setLoading(false);
     }
   };
-  const handleCityChange = async (e) => {
-    const cityId = e.target.value;
-    clearErrors("city_id");
-    setLoading(true);
+const handleCityChange = async (e) => {
+  const cityId = e.target.value;
+  clearErrors("city_id");
+  setLoading(true);
 
-    try {
-      await fetchBarangayByCities(cityId);
-      reset((formValues) => ({
-        ...formValues,
-        brgy_id: "",
-      }));
-    } catch (error) {
-      console.error("Error handling city change:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await fetchBarangayByCities(cityId);
+    reset((formValues) => ({
+      ...formValues,
+      brgy_id: "",
+    }));
+  } catch (error) {
+    console.error("Error handling city change:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const handleMunicipalityChange = async (e) => {
-    const municipalityId = e.target.value; // Get selected municipality ID
-    clearErrors("municipality_id"); // Clear any validation errors for municipality_id
-    setLoading(true); // Set loading state to true
+const handleMunicipalityChange = async (e) => {
+  const municipalityId = e.target.value; // Get selected municipality ID
+  clearErrors("municipality_id"); // Clear any validation errors for municipality_id
+  setLoading(true); // Set loading state to true
 
-    try {
-      // Fetch barangays based on the selected municipality
-      await fetchBarangayByMunicipality(municipalityId);
+  try {
+    // Fetch barangays based on the selected municipality
+    await fetchBarangayByMunicipality(municipalityId);
+  
+    // Reset barangay ID to blank when municipality changes
+    reset((formValues) => ({
+      ...formValues,
+      brgy_id: "", // Reset barangay ID when municipality changes
+    }));
+  } catch (error) {
+    console.error("Error handling municipality change:", error);
+  } finally {
+    setLoading(false); // Reset loading state
+  }
+};
 
-      // Reset barangay ID to blank when municipality changes
-      reset((formValues) => ({
-        ...formValues,
-        brgy_id: "", // Reset barangay ID when municipality changes
-      }));
-    } catch (error) {
-      console.error("Error handling municipality change:", error);
-    } finally {
-      setLoading(false); // Reset loading state
-    }
-  };
+  
+  // Inside fetchBarangayByMunicipality after setting barangay groups
+  console.log("Available barangays after fetching:", barangayGroups);
+  
+
   const submitForm = async (data) => {
     try {
       // Format the data and remove null fields for optional IDs
       const normalizedData = {
         ...data,
         region_id: data.region_id,
-        province_id: data.province_id,
+        province_id: data.province_id ,
         district_id: data.district_id,
-        city_id: data.city_id,
-        municipality_id: data.municipality_id,
+        city_id: data.city_id ,
+        municipality_id: data.municipality_id ,
         brgy_id: data.brgy_id,
       };
-      console.log("Updating supplier with data:", normalizedData);
-      const response = await local_axios.put(
-        `/api/supplier/${supplierId}`,
-        normalizedData
-      );
+  
+      console.log("Updating supplier with data:", normalizedData); // Debug the payload
+  
+      // Send the updated data to the server
+      const response = await local_axios.put(`/api/supplier/${supplierId}`, normalizedData);
       console.log("Update successful:", response.data);
-      handleEditAlert();
+  
+      // Close modal on success
       onClose();
     } catch (error) {
       if (error.response) {
         console.error("Error response from server:", error.response.data);
-        alert(
-          `Error updating supplier: ${error.response.data.message || "Please check the data and try again."}`
-        );
+        alert(`Error updating supplier: ${error.response.data.message || 'Please check the data and try again.'}`);
       } else {
         console.error("Error updating supplier:", error);
         alert("An unexpected error occurred. Please try again.");
       }
     }
   };
-
+  
+  
   const handleClear = () => {
     reset();
     setIslandGroups([]);
@@ -657,7 +605,8 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
                       icon: <LocationCityIcon fontSize="lg" />,
                       type: "text",
                       component: "input",
-                    },
+                    
+                    }
                   ].map(
                     ({ name, label, icon, type, component, options }, idx) => (
                       <Grid item xs={12} key={idx}>
@@ -696,7 +645,8 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
                                           handleProvinceChange(e); // Pass event
                                         } else if (name === "city_id") {
                                           handleCityChange(e); // Pass event
-                                        } else if (name === "municipality_id") {
+                                        }
+                                        else if (name === "municipality_id") {
                                           handleMunicipalityChange(e); // Pass event
                                         }
                                         if (value) clearErrors(name);
@@ -793,17 +743,8 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
   );
 
   return (
-    <div>
-      <Drawer anchor="right" open={isOpen} onClose={onClose}>
-        {DrawerList("right")}
-      </Drawer>
-      {editAlert ? (
-        <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
-          <Alert icon={<NotificationsIcon fontSize="inherit" />} severity="info">
-            Successfully Changed
-          </Alert>
-        </div>
-      ) : null}
-    </div>
+    <Drawer anchor="right" open={isOpen} onClose={onClose}>
+      {DrawerList("right")}
+    </Drawer>
   );
 }
