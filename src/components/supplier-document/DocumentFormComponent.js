@@ -1,3 +1,4 @@
+import axios from "@/lib/axios";
 import React, { useEffect, useState } from "react";
 import SelectComponent from "../material-ui/SelectComponent";
 import FileUploadComponent from "../material-ui/FileUploadComponent";
@@ -11,9 +12,11 @@ import { useContext } from "react";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import axios from "@/lib/axios";
 
 const validationSchema = Yup.object({
+  documentType: Yup.string()
+    .required("Document Type is required")
+    .test("notDefault", "Document Type is required", (value) => value !== "0"),
   documentType: Yup.string()
     .required("Document Type is required")
     .test("notDefault", "Document Type is required", (value) => value !== "0"),
@@ -22,7 +25,7 @@ const validationSchema = Yup.object({
     .test(
       "fileFormat",
       "Only PDF files are allowed",
-      (value) => value && value.type === "application/pdf"
+      (value) => value && value.type === "application/pdf",
     ),
 });
 
@@ -33,12 +36,14 @@ function DocumentFormComponent({ setSnackbarMethod }) {
     uploadProgress: 0,
     isExpirable: false,
   });
+  
   const { index: getDocumentType } = useDocumentType();
+  
   const { user } = useAuth({ middleware: "auth" });
   const { supplierDocumentState, setSupplierDocumentState, initialDocumentTypeInForm } = useContext(
     SupplierDocumentContext
   );
-
+  
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getDocumentType();
@@ -77,6 +82,21 @@ function DocumentFormComponent({ setSnackbarMethod }) {
       }
     );
 
+    setDocumentFormState((prevState) => ({ ...prevState, uploadProgress: 0 }));
+    const uploadResponse = await handleUpload(values.fileDocument);
+    if (!uploadResponse) {
+      console.log(false);
+    }
+    const documentObject = {
+      supplierId: 1,
+      documentTypeId: values.documentType,
+      fileName: values.fileDocument.name,
+      filePath: uploadResponse.url,
+      expiration: values.expirationField || null,
+    };
+    
+    const { data: requestResponse } = await store(documentObject);
+     
     setSnackbarMethod((prevState) => ({
       ...prevState,
       modal: false,
@@ -122,7 +142,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
                     onChange={(event) => {
                       setFieldValue(
                         "fileDocument",
-                        event.currentTarget.files[0]
+                        event.currentTarget.files[0],
                       );
                     }}
                   />
