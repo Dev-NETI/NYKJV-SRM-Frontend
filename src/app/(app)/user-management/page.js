@@ -27,7 +27,6 @@ function page() {
   const { index: getUsers, store: storeUser, update: updateUser } = useUser();
 
   const { patch: patchUser } = useUser("soft-delete");
-  const [loading, setLoading] = useState(false);
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     message: "",
@@ -92,11 +91,10 @@ function page() {
       ...prevState,
       open: false,
     }));
-  }, 3000); // 3 seconds
+  }, 5000); // 3 seconds
 
   useEffect(() => {
     const fetchUserData = async () => {
-      setLoading(true);
       try {
         const { data } = await getUsers({
           page: pagination.page,
@@ -118,8 +116,6 @@ function page() {
         }));
       } catch (error) {
         console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -190,14 +186,15 @@ function page() {
             </IconButton>
           </Link>
           <EditUserModal slug={params.row.slug} />
-          <Button
+
+          <IconButton
             variant="solid"
             color="danger"
             size="sm"
             onClick={() => handleOpenModal(params.row.slug)} // Pass the id of the item to delete
           >
             <DeleteForever />
-          </Button>
+          </IconButton>
         </Box>
       ),
     },
@@ -219,16 +216,16 @@ function page() {
     setUserState((prev) => ({ ...prev, responseStore: true }));
   };
 
-  // if (loading) {
-  //   return <Loading />;
-  // }
-
   return (
     <>
       <UserContext.Provider
         value={{ setUserState, storeUser, showSnackbar, updateUser }}
       >
-        <Card variant="soft" sx={{ p: 2, mb: 2 }}>
+        <Card
+          variant="soft"
+          sx={{ p: 2, mb: 2 }}
+          className="animate-in fade-in duration-700"
+        >
           <Box
             sx={{
               borderBottom: "2px solid",
@@ -296,7 +293,11 @@ function page() {
           </Box>
         </Card>
 
-        <Card variant="soft" sx={{ p: 2 }}>
+        <Card
+          variant="soft"
+          sx={{ p: 2 }}
+          className="animate-in fade-in duration-700"
+        >
           <Box
             sx={{
               borderBottom: "2px solid",
@@ -330,84 +331,80 @@ function page() {
               height: "70vh",
             }}
           >
-            {loading ? (
-              <Loading />
-            ) : (
-              <Table
-                borderAxis="bothBetween"
-                size="md"
-                stickyHeader
-                variant="outlined"
-                hoverRow
-                sx={{
-                  "--TableCell-headBackground":
-                    "var(--joy-palette-background-level2)",
-                  "--Table-headerUnderlineThickness": "1px",
-                  "--TableRow-hoverBackground":
-                    "var(--joy-palette-background-level1)",
-                  "--TableCell-paddingY": "12px",
-                  "--TableCell-paddingX": "16px",
-                  minWidth: "1000px",
-                  tableLayout: "fixed",
-                  "& tbody": {
-                    bgcolor: "background.surface",
+            <Table
+              borderAxis="bothBetween"
+              size="md"
+              stickyHeader
+              variant="outlined"
+              hoverRow
+              sx={{
+                "--TableCell-headBackground":
+                  "var(--joy-palette-background-level2)",
+                "--Table-headerUnderlineThickness": "1px",
+                "--TableRow-hoverBackground":
+                  "var(--joy-palette-background-level1)",
+                "--TableCell-paddingY": "12px",
+                "--TableCell-paddingX": "16px",
+                minWidth: "1000px",
+                tableLayout: "fixed",
+                "& tbody": {
+                  bgcolor: "background.surface",
+                },
+                "& thead th": {
+                  fontWeight: "bold",
+                  color: "text.primary",
+                  backgroundColor: "#fff",
+                  borderBottom: "2px solid var(--joy-palette-divider)",
+                  whiteSpace: "normal",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                },
+                "& tbody tr": {
+                  transition: "background-color 0.2s",
+                },
+                "& td": {
+                  color: "text.secondary",
+                  padding: "12px",
+                  whiteSpace: "normal",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  maxWidth: 0,
+                  "&[title]": {
+                    cursor: "pointer",
                   },
-                  "& thead th": {
-                    fontWeight: "bold",
-                    color: "text.primary",
-                    backgroundColor: "#fff",
-                    borderBottom: "2px solid var(--joy-palette-divider)",
-                    whiteSpace: "normal",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  },
-                  "& tbody tr": {
-                    transition: "background-color 0.2s",
-                  },
-                  "& td": {
-                    color: "text.secondary",
-                    padding: "12px",
-                    whiteSpace: "normal",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    maxWidth: 0,
-                    "&[title]": {
-                      cursor: "pointer",
-                    },
-                  },
-                }}
-              >
-                <thead>
-                  <tr>
+                },
+              }}
+            >
+              <thead>
+                <tr>
+                  {columns.map((column) => (
+                    <th key={column.field} style={{ width: column.width }}>
+                      {column.headerName}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.id}>
                     {columns.map((column) => (
-                      <th key={column.field} style={{ width: column.width }}>
-                        {column.headerName}
-                      </th>
+                      <td
+                        key={`${row.id}-${column.field}`}
+                        title={column.renderCell ? null : row[column.field]}
+                        sx={{
+                          maxHeight: "100px",
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        {column.renderCell
+                          ? column.renderCell({ row })
+                          : row[column.field]}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row) => (
-                    <tr key={row.id}>
-                      {columns.map((column) => (
-                        <td
-                          key={`${row.id}-${column.field}`}
-                          title={column.renderCell ? null : row[column.field]}
-                          sx={{
-                            maxHeight: "100px",
-                            lineHeight: "1.5",
-                          }}
-                        >
-                          {column.renderCell
-                            ? column.renderCell({ row })
-                            : row[column.field]}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            )}
+                ))}
+              </tbody>
+            </Table>
 
             <Box
               sx={{

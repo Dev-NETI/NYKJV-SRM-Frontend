@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Header from "../Header";
 import { Button } from "@mui/material";
@@ -5,40 +6,17 @@ import { Button } from "@mui/material";
 function Dashboard() {
   return (
     <>
-      <div className="py-12">
-        {/* <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div className="flex justify-between items-center px-4 py-2">
-              <Button onClick={() => router.push("/dashboard/store")}>
-                Add Supplier
-              </Button>
-              <input
-                type="text"
-                placeholder="Search suppliers..."
-                value={searchQuery}
-                onChange={handleSearch}
-                className="border rounded-2xl w-1/2 p-2"
-              />
-              <div className="flex justify-center items-center mt-4">
-                <span className="mx-2">{`${currentPage} of ${totalPages}`}</span>
-                <Button
-                  disabled={currentPage === 1}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  className="bg-transparent hover:bg-transparent"
-                >
-                  <ChevronLeftIcon className="text-black" />
-                </Button>
-                <Button
-                  disabled={currentPage === totalPages}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  className="bg-transparent hover:bg-transparent"
-                >
-                  <ChevronRightIcon className="text-black" />
-                </Button>
+      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 flex">
+        <div className="w-2/3 h-auto p-4">
+          <div className="flex justify-between">
+            <div className="">
+              <div>
+                <span className="font-semibold text-lg">Overview</span>
+              </div>
+              <div>
+                <span className="text-gray-400 text-md">
+                  Track your supplier and performance strategy
+                </span>
               </div>
             </div>
             {loading && (
@@ -111,23 +89,37 @@ function Dashboard() {
               </TableBody>
             </Table>
           </div>
-        </div> */}
+          <div className="mt-[1.5em] rounded-xl bg-[#fff] border-[1px] border-gray-300">
+            <GraphChart />
+          </div>
+          <div className="flex mt-[1.5em] gap-4 ">
+            <div className="w-1/2 h-1/2 ">
+              <div className="flex gap-3">
+                <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
+                  <TotalSupplier />
+                </div>
+                <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
+                  <TotalSupplier />
+                </div>
+              </div>
+              <div className="mt-[1.5em] bg-[#fff] border-[1px] border-gray-300 rounded-xl">
+                <ProductsAnalysis />
+              </div>
+            </div>
+
+            <div className="w-1/2 h-auto">
+              <NewSupplier />
+            </div>
+          </div>
+        </div>
+        <div className="w-1/3 h-auto p-3">
+          <div className="w-full h-1/2 rounded-xl bg-[#fff] border-[1px] border-gray-300 mb-4">
+            <PerformanceAnalysis />
+          </div>
+          <div className="w-full h-1/4 rounded-xl bg-[#fff] border-[1px] border-gray-300 mb-4"></div>
+          <div className="w-full h-1/4 rounded-xl bg-[#fff] border-[1px] border-gray-300"></div>
+        </div>
       </div>
-      <div className="py-12">
-        {/* <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          {success && <Alert severity="success">{success}</Alert>}
-        </div> */}
-      </div>
-      {/* Modal for delete confirmation */}
-      {/* {isModalOpen && (
-        <BasicModal
-          open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onConfirm={confirmDelete}
-          title="Confirm Deletion"
-          description="Are you sure you want to delete this supplier?"
-        />
-      )} */}
     </>
   );
 }
