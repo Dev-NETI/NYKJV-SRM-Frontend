@@ -35,7 +35,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
   });
   const { index: getDocumentType } = useDocumentType();
   const { user } = useAuth({ middleware: "auth" });
-  const { setSupplierDocumentState, initialDocumentTypeInForm } = useContext(
+  const { supplierDocumentState, setSupplierDocumentState, initialDocumentTypeInForm } = useContext(
     SupplierDocumentContext
   );
 
@@ -62,7 +62,8 @@ function DocumentFormComponent({ setSnackbarMethod }) {
   };
 
   const handleSubmit = async (values) => {
-    values.supplierId = user?.supplier?.id;
+    console.log(supplierDocumentState);
+    values.supplierId = user?.supplier?.id || supplierDocumentState.supplierId;
     values.fileName = values.fileDocument.name;
     values.documentTypeId = values.documentType;
 

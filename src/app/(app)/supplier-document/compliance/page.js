@@ -18,7 +18,8 @@ function page() {
     snackbarHorizontal: "right",
     snackBarSeverity: "success",
     reload: true,
-    activePage: 1, //1 - documents, 0 - trash
+    activePage: 1, //1 - documents, 0 - trash  
+    supplierId: 0,
   });
 
   const [initialDocumentTypeInForm, setInitialDocumentTypeInForm] =
