@@ -14,8 +14,8 @@ import PerformanceAnalysis from "@/components/dashboard/PerformanceAnalyst";
 function Dashboard() {
   return (
     <>
-      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 flex">
-        <div className="w-2/3 h-auto p-4">
+      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-4 lg:flex">  
+        <div className="w-full lg:w-2/3 h-auto p-4">
           <div className="flex justify-between">
             <div className="">
               <div>
@@ -32,8 +32,8 @@ function Dashboard() {
           <div className="mt-[1.5em] rounded-xl bg-[#fff] border-[1px] border-gray-300">
             <GraphChart />
           </div>
-          <div className="flex mt-[1.5em] gap-4 ">
-            <div className="w-1/2 h-1/2 ">
+          <div className="sm:grid grid-cols-1 md:flex mt-[1.5em] gap-4 ">
+            <div className="w-full md:w-1/2 h-1/2 ">
               <div className="flex gap-3">
                 <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
                   <TotalSupplier />
@@ -46,14 +46,13 @@ function Dashboard() {
                 <ProductsAnalysis />
               </div>
             </div>
-
-            <div className="w-1/2 h-auto">
+            <div className="mt-[1.5em] md:mt-0 w-full md:w-1/2 h-auto">
               <NewSupplier />
             </div>
           </div>
         </div>
-        <div className="w-1/3 h-auto p-3">
-          <div className="w-full h-1/2 rounded-xl bg-[#fff] border-[1px] border-gray-300 mb-4">
+        <div className="w-full lg:w-1/3 h-auto p-3">
+          <div className="w-full h-auto lg:h-1/2 rounded-xl bg-[#fff] border-[1px] border-gray-300 mb-4">
             <PerformanceAnalysis />
           </div>
           <div className="w-full h-1/4 rounded-xl bg-[#fff] border-[1px] border-gray-300 mb-4"></div>

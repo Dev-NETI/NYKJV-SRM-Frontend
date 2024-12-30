@@ -12,7 +12,6 @@ const NewSupplier = () => {
     "Supplier 4",
     "Supplier 5",
   ];
-
   const createdAt = [
     "Nov 10, 2024",
     "Nov 11, 2024",
@@ -20,11 +19,8 @@ const NewSupplier = () => {
     "Nov 13, 2024",
     "Nov 14, 2024",
   ];
-
   const status = ["Active", "Active", "Active", "Active", "Active"];
-
   const avatar = [UserImage, UserImage, UserImage, UserImage, UserImage];
-
   return (
     <div className="w-full h-full p-4 rounded-xl bg-[#fff] border-[1px] border-gray-300">
       <div className="mb-4">
@@ -36,13 +32,11 @@ const NewSupplier = () => {
             <Image
               src={avatar[index]}
               alt={`Avatar of ${supplier}`}
-              width={50}
-              height={50}
-              className="rounded-full"
+              className="rounded-full w-[50px] h-[50px]"
             />
             <div>
-              <div className="font-semibold text-lg">{supplier}</div>
-              <div className="text-gray-400 text-md">{createdAt[index]}</div>
+              <div className="font-semibold text-[14px] xl:text-lg">{supplier}</div>
+              <div className="text-gray-400 text-[10px] xl:text-lg">{createdAt[index]}</div>
             </div>
           </div>
           <div className="flex items-center">
@@ -55,5 +49,4 @@ const NewSupplier = () => {
     </div>
   );
 };
-
 export default NewSupplier;

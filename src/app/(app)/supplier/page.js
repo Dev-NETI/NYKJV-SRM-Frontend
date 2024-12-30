@@ -62,20 +62,11 @@ export default function DataTable() {
   });
   const handleSearch = () => {
     if (searchParams.name.trim() === "") {
-      showSnackbar("Please enter a search term", "warning");
       return;
     }
     console.log("Search Query:", searchParams.name); // Debugging
     setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page when search is triggered
     fetchSuppliers();
-  };
-
-  const showSnackbar = (message, color) => {
-    setSnackbarState({
-      open: true,
-      message,
-      color,
-    });
   };
 
   const fetchSuppliers = async () => {
@@ -101,7 +92,6 @@ export default function DataTable() {
       }
     } catch (error) {
       console.error("Error fetching suppliers:", error);
-      showSnackbar("Failed to load suppliers", "danger");
     } finally {
       setLoading(false);
     }
@@ -114,30 +104,14 @@ export default function DataTable() {
     }, 3000);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/api/supplier/${id}`);
-      setSuppliers((prevSuppliers) =>
-        prevSuppliers.filter((supplier) => supplier.id !== id)
-      );
-      handleAlert();
-    } catch (error) {
-      console.error("Error deleting supplier:", error);
-      setSnackbarMessage("Failed to delete supplier");
-      setSnackbarOpen(true);
-    }
-  };
-
-  const handleEdit = (id) => {
-    setEditSupplierId(id);
-    setIsDrawerOpen(true); // Open drawer when editing
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
 
   const columns = [
+
+
+
+
+
+
     {
       field: "id",
       headerName: "ID",
@@ -395,7 +369,7 @@ export default function DataTable() {
   return (
     <>
       <UserContext.Provider
-        value={{ setUserState, storeUser, showSnackbar, updateUser }}
+        value={{ setUserState, storeUser, updateUser }}
       >
         <Card variant="soft" sx={{ p: 2, mb: 2 }}>
           <Box
@@ -631,9 +605,6 @@ export default function DataTable() {
           onClose={() => setIsDrawerOpen(false)}
           isOpen={isDrawerOpen}
         />
-        {/* <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-          Here is a gentle confirmation that your action was successful.
-        </Alert> */}
       </UserContext.Provider>
     </>
   );
