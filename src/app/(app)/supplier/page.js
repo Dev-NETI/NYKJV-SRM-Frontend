@@ -104,6 +104,28 @@ export default function DataTable() {
     }, 3000);
   };
 
+  const handleEdit = (id) => {
+    setEditSupplierId(id);
+    setIsDrawerOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await axios.delete(`/api/supplier/${id}`);
+      console.log("Delete response:", response.data);
+      setSuppliers((prevSuppliers) =>
+        prevSuppliers.filter((supplier) => supplier.id !== id)
+      );
+    } catch (error) {
+      if (error.response) {
+        console.error("Error response from server:", error.response.data.message);
+      } else {
+        console.error("Error deleting supplier:", error.message);
+      }
+    }
+  };
+  
+
 
   const columns = [
 
