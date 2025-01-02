@@ -89,9 +89,12 @@ function UserFormComponent({
     email: z.string().email({
       message: "Email must be a valid email address.",
     }),
-    password: z.string().min(8, {
-      message: "Password must be at least 8 characters.",
-    }),
+    password:
+      mode === 1
+        ? z
+            .string()
+            .min(8, { message: "Password must be at least 8 characters." })
+        : z.string().nullable(),
     company_id: z.number().default(0),
     department_id: z.number().default(0),
     supplier_id: z.number().default(0),
@@ -214,7 +217,9 @@ function UserFormComponent({
             form={form}
             name="password"
             type="password"
-            label="Password"
+            label={
+              mode === 1 ? "Password" : "Password (Leave blank to keep current)"
+            }
             variant="filled"
           />
         </Box>

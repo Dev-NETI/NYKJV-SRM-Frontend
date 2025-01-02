@@ -20,7 +20,11 @@ import { useUser } from "@/hooks/api/user";
 
 function EditUserModal({ slug }) {
   const [openEditModal, setOpenEditModal] = useState(false);
-  const handleOpenEditModal = () => setOpenEditModal(true);
+  const handleOpenEditModal = () => {
+    setOpenEditModal(true);
+    setUser(null);
+    fetchUserData();
+  };
   const handleCloseEditModal = () => setOpenEditModal(false);
   const [user, setUser] = useState();
 
@@ -35,39 +39,35 @@ function EditUserModal({ slug }) {
   const { index: getDepartmentData } = useDepartment();
   const { index: getSupplierData } = useSupplier();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
+  const fetchUserData = async () => {
+    try {
       const response = await getUser(slug);
       setUser(response.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [companyRes, departmentRes, supplierRes] = await Promise.all([
+          getCompanyData(),
+          getDepartmentData(),
+          getSupplierData(),
+        ]);
+
+        setDataState({
+          company_data: companyRes.data,
+          department_data: departmentRes.data,
+          supplier_data: supplierRes.data,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    const fetchCompanyData = async () => {
-      const response = await getCompanyData();
-      setDataState((prevState) => ({
-        ...prevState,
-        company_data: response.data,
-      }));
-    };
-
-    const fetchDepartmentData = async () => {
-      const response = await getDepartmentData();
-      setDataState((prevState) => ({
-        ...prevState,
-        department_data: response.data,
-      }));
-    };
-
-    const fetchSupplierData = async () => {
-      const response = await getSupplierData();
-      setDataState((prevState) => ({
-        ...prevState,
-        supplier_data: response.data,
-      }));
-    };
-    fetchUserData();
-    fetchCompanyData();
-    fetchDepartmentData();
-    fetchSupplierData();
+    fetchData();
   }, []);
 
   return (
@@ -124,12 +124,25 @@ function EditUserModal({ slug }) {
               <ModalClose variant="plain" sx={{ m: 1 }} />
             </Box>
             <Divider sx={{ mb: 2 }} />
-            <UserFormComponent
-              mode={2}
-              handleCloseEditModal={handleCloseEditModal}
-              DataState={DataState}
-              user={user}
-            />
+            {user ? (
+              <UserFormComponent
+                mode={2}
+                handleCloseEditModal={handleCloseEditModal}
+                DataState={DataState}
+                user={user}
+              />
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flex: 1,
+                }}
+              >
+                <Typography>Loading...</Typography>
+              </Box>
+            )}
           </Sheet>
         </Slide>
       </Modal>
