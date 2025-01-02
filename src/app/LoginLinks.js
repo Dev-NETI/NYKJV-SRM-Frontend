@@ -74,14 +74,14 @@ const LoginLinks = () => {
               }}
               whileTap={{ scale: 0.95 }}
             >
-              <Link
+              {/* <Link
                 href="/register"
                 className="text-stone-950 font-semibold 
                 text-sm md:text-lg lg:text-lg 
                 py-1 md:py-3 lg:py-3"
               >
                 Don't have an account? Click here to get started!
-              </Link>
+              </Link> */}
             </motion.div>
           </motion.div>
         </div>
