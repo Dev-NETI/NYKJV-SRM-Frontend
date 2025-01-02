@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DocumentListItemComponent from "../DocumentListItemComponent";
 import DocumentListMissingItemComponent from "../DocumentListMissingItemComponent";
+import ComplianceDocumentListSupplierSelection from "./ComplianceDocumentListSupplierSelection";
 
 import ExpiredNotificationComponent from "./notification/expired";
 import WarningNotificationComponent from "./notification/warning";
@@ -91,10 +92,11 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
 
   useEffect(() => {
     const fetchData = async () => {
-      const uploadedDocs = await getUploadedDocuments(user.supplierId, 1, supplierDocumentState.activePage);
+      const COMPLIANCE_DOCUMENT_CATEGORY_ID = 1;
+      const uploadedDocs = await getUploadedDocuments(user?.supplier_id || supplierDocumentState.supplierId, COMPLIANCE_DOCUMENT_CATEGORY_ID, supplierDocumentState.activePage);
       setDocumentListState((prevState) => ({...prevState, documentData: uploadedDocs}));
 
-      const missingDocs = await getMissingDocuments(user.supplierId, 1);
+      const missingDocs = await getMissingDocuments(user?.supplier?.id || supplierDocumentState.supplierId, COMPLIANCE_DOCUMENT_CATEGORY_ID);
       setMissing(missingDocs);
 
       const expiredDocs = getExpiredDocuments(uploadedDocs);
@@ -156,7 +158,19 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
           />
         </Space>
       </div>
-      <div className="flex flex-col bg-white border-gray-500 rounded-xl p-4">
+      
+      {user?.supplier_id ?  (
+      <></>  
+      ) : 
+        <div className="">
+          { supplierDocumentState.activePage == 1? <ComplianceDocumentListSupplierSelection/>: <></> } 
+        </div>
+      }
+
+      { supplierDocumentState.supplierId == 0 ? 
+      (<div>Please select a supplier.</div>)
+      :
+      (<div className="flex flex-col bg-white border-gray-500 rounded-xl p-4">
         { supplierDocumentState.activePage == 1
           ?
             <div className="flex flex-col gap-2 bg-white p-4">
@@ -199,7 +213,6 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
                   filePath={item.file_path}
                 />
          ))}
-
               {supplierDocumentState.activePage == 1 && missing.length > 0 && missing.map((item) => (
                 <DocumentListMissingItemComponent
                   id={item.id}
@@ -210,6 +223,6 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
               ))}
         </div>
         </div>
-    </div>
-  );
-}
+  )}
+  </div>
+)}
