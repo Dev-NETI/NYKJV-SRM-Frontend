@@ -64,7 +64,7 @@ export default function DataTable() {
     if (searchParams.name.trim() === "") {
       return;
     }
-    console.log("Search Query:", searchParams.name); // Debugging
+    // console.log("Search Query:", searchParams.name); // Debugging
     setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page when search is triggered
     fetchSuppliers();
   };
@@ -91,7 +91,7 @@ export default function DataTable() {
         setSuppliers([]);
       }
     } catch (error) {
-      console.error("Error fetching suppliers:", error);
+      // console.error("Error fetching suppliers:", error);
     } finally {
       setLoading(false);
     }
@@ -112,15 +112,15 @@ export default function DataTable() {
   const handleDelete = async (id) => {
     try {
       const response = await axios.delete(`/api/supplier/${id}`);
-      console.log("Delete response:", response.data);
+      handleAlert();
       setSuppliers((prevSuppliers) =>
         prevSuppliers.filter((supplier) => supplier.id !== id)
       );
     } catch (error) {
       if (error.response) {
-        console.error("Error response from server:", error.response.data.message);
+        // console.error("Error response from server:", error.response.data.message);
       } else {
-        console.error("Error deleting supplier:", error.message);
+        // console.error("Error deleting supplier:", error.message);
       }
     }
   };
@@ -128,12 +128,6 @@ export default function DataTable() {
 
 
   const columns = [
-
-
-
-
-
-
     {
       field: "id",
       headerName: "ID",
@@ -224,7 +218,7 @@ export default function DataTable() {
       const response = await external_axios.get(
         "https://psgc.gitlab.io/api/regions/"
       );
-      console.log("Fetched Regions:", response.data);
+      // console.log("Fetched Regions:", response.data);
 
       const regions = response.data.map((region) => ({
         id: region.code,
@@ -232,7 +226,7 @@ export default function DataTable() {
       }));
       setApiRegion(regions);
     } catch (error) {
-      console.error("Error fetching regions from the API:", error);
+      // console.error("Error fetching regions from the API:", error);
     }
   };
 
@@ -241,15 +235,14 @@ export default function DataTable() {
       const response = await external_axios.get(
         "https://psgc.gitlab.io/api/provinces/"
       );
-      console.log("Fetched Provinces:", response.data);
-
+      // console.log("Fetched Provinces:", response.data);
       const provinces = response.data.map((province) => ({
         id: province.code,
         name: province.name,
       }));
       setApiProvince(provinces);
     } catch (error) {
-      console.log("Error fetching province", error);
+      // console.log("Error fetching province", error);
     }
   };
 
@@ -264,7 +257,7 @@ export default function DataTable() {
       const response = await external_axios.get(
         "https://psgc.gitlab.io/api/districts/"
       );
-      console.log("Fetched Districts", response.data);
+      // console.log("Fetched Districts", response.data);
 
       const districts = response.data.map((district) => ({
         id: district.code,
@@ -272,7 +265,7 @@ export default function DataTable() {
       }));
       setApiDistrict(districts);
     } catch (error) {
-      console.log("Error fetching district", error);
+      // console.log("Error fetching district", error);
     }
   };
 
@@ -281,7 +274,7 @@ export default function DataTable() {
       const response = await external_axios.get(
         "https://psgc.gitlab.io/api/cities/"
       );
-      console.log("Fetched City", response.data);
+      // console.log("Fetched City", response.data);
 
       const cities = response.data.map((city) => ({
         id: city.code,
@@ -289,7 +282,7 @@ export default function DataTable() {
       }));
       setApiCity(cities);
     } catch (error) {
-      console.log("Fetched City", error);
+      // console.log("Fetched City", error);
     }
   };
 
@@ -298,7 +291,7 @@ export default function DataTable() {
       const response = await external_axios.get(
         "https://psgc.gitlab.io/api/municipalities/"
       );
-      console.log("Fetched Municipality", response.data);
+      // console.log("Fetched Municipality", response.data);
 
       const municipalities = response.data.map((municipality) => ({
         id: municipality.code,
@@ -306,7 +299,7 @@ export default function DataTable() {
       }));
       setApiMunicipality(municipalities);
     } catch (error) {
-      console.log("Error fetching municipality", error);
+      // console.log("Error fetching municipality", error);
     }
   };
 
@@ -315,7 +308,7 @@ export default function DataTable() {
       const response = await external_axios.get(
         "https://psgc.gitlab.io/api/barangays/"
       );
-      console.log("Fetched Barangay", response.data);
+      // console.log("Fetched Barangay", response.data);
 
       const barangays = response.data.map((brgy) => ({
         id: brgy.code,
@@ -323,7 +316,7 @@ export default function DataTable() {
       }));
       setApiBrgy(barangays);
     } catch (error) {
-      console.log("Error fetching barangay", error);
+      // console.log("Error fetching barangay", error);
     }
   };
 

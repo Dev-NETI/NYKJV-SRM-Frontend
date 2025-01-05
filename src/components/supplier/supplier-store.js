@@ -138,7 +138,7 @@ const StoreSupplierDrawer = () => {
       );
       setIslandGroups(response.data || []);
     } catch (error) {
-      console.error("Error fetching island groups:", error);
+      // console.error("Error fetching island groups:", error);
       setIslandGroups([]);
     }
   };
@@ -150,7 +150,7 @@ const StoreSupplierDrawer = () => {
       );
       setRegionGroups(response.data || []);
     } catch (error) {
-      console.error("Error fetching region groups:", error);
+      // console.error("Error fetching region groups:", error);
     }
   };
 
@@ -160,9 +160,9 @@ const StoreSupplierDrawer = () => {
         `https://psgc.gitlab.io/api/regions/${regionId}/provinces/`
       );
       setProvinceGroups(response.data || []);
-      console.log("Fetch Provinces: ", response.data);
+      // console.log("Fetch Provinces: ", response.data);
     } catch (error) {
-      console.error("Error Fetching Provinces:", error);
+      // console.error("Error Fetching Provinces:", error);
       setProvinceGroups([]);
     }
   };
@@ -173,9 +173,9 @@ const StoreSupplierDrawer = () => {
         `https://psgc.gitlab.io/api/regions/${regionId}/districts/`
       );
       setDistrictGroups(response.data || []);
-      console.log("Fetch Districts: ", response.data);
+      // console.log("Fetch Districts: ", response.data);
     } catch (error) {
-      console.error("Error Fetching Districts:", error);
+      // console.error("Error Fetching Districts:", error);
       setDistrictGroups([]);
     }
   };
@@ -186,9 +186,9 @@ const StoreSupplierDrawer = () => {
         `https://psgc.gitlab.io/api/districts/${districtId}/cities/`
       );
       setCityGroups(response.data || []);
-      console.log("Fetch Cities: ", response.data);
+      // console.log("Fetch Cities: ", response.data);
     } catch (error) {
-      console.error("Error fetching city groups:", error);
+      // console.error("Error fetching city groups:", error);
       setCityGroups([]);
     }
   };
@@ -216,7 +216,7 @@ const StoreSupplierDrawer = () => {
       );
       setMunicipalityGroups(response.data || []);
     } catch (error) {
-      console.error("Error fetching municipalities:", error);
+      // console.error("Error fetching municipalities:", error);
       setMunicipalityGroups([]);
     }
   };
@@ -230,7 +230,7 @@ const StoreSupplierDrawer = () => {
       const response = await axios.get(endpoint);
       setBarangayGroups(response.data || []);
     } catch (error) {
-      console.error("Error fetching barangays:", error);
+      // console.error("Error fetching barangays:", error);
       setBarangayGroups([]);
     }
   };
@@ -301,7 +301,7 @@ const StoreSupplierDrawer = () => {
       );
       setCityGroups(response.data || []);
     } catch (error) {
-      console.error("Error fetching cities for province:", error);
+      // console.error("Error fetching cities for province:", error);
       setCityGroups([]);
     }
   };
@@ -309,7 +309,7 @@ const StoreSupplierDrawer = () => {
   const submitForm = async (data) => {
     try {
       const response = await local_axios.post("/api/supplier", data);
-      console.log("Supplier Created Successfully", response.data);
+      // console.log("Supplier Created Successfully", response.data);
       handleAlert();
       reset(); // This clears your form; ensure this function is defined in your code
       setState({ ...state, right: false });
@@ -317,10 +317,10 @@ const StoreSupplierDrawer = () => {
     } catch (error) {
       if (error.response) {
         // Backend errors (like validation errors)
-        console.error("Error response:", error.response.data);
+        // console.error("Error response:", error.response.data);
       } else {
         // Other errors (like network issues)
-        console.error("Error submitting the form:", error.message);
+        // console.error("Error submitting the form:", error.message);
       }
     }
   };
