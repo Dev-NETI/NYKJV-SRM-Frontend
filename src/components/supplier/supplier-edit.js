@@ -109,7 +109,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
           setSelectedIsland(firstIslandId); // Set first island as selected
         }
       } catch (error) {
-        console.error("Error fetching islands:", error);
+        // console.error("Error fetching islands:", error);
       } finally {
         setLoading(false); // Stop loading
       }
@@ -126,7 +126,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         try {
           const response = await local_axios.get(`/api/supplier/${supplierId}`);
           const data = response.data;
-          console.log("Supplier Data: ", data);
+          // console.log("Supplier Data: ", data);
 
           // Find the selected island and fetch regions for it
           const matchedIsland = islandsGroups.find(
@@ -182,7 +182,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
             });
           }
         } catch (error) {
-          console.error("Error fetching supplier data:", error);
+          // console.error("Error fetching supplier data:", error);
         } finally {
           setLoading(false); // Stop loading
         }
@@ -208,13 +208,13 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const regionsResponse = await axios.get(
         `https://psgc.gitlab.io/api/island-groups/${islandCode}/regions/`
       );
-      console.log(
-        `Fetched regions for island ${islandCode}:`,
-        regionsResponse.data
-      );
+      // console.log(
+      //   `Fetched regions for island ${islandCode}:`,
+      //   regionsResponse.data
+      // );
       setRegionGroups(regionsResponse.data);
     } catch (error) {
-      console.error("Error fetching regions:", error);
+      // console.error("Error fetching regions:", error);
     } finally {
       setLoading(false);
     }
@@ -227,13 +227,13 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const provincesResponse = await axios.get(
         `https://psgc.gitlab.io/api/regions/${formattedRegionId}/provinces/`
       );
-      console.log(
-        `Fetched provinces for region ${formattedRegionId}:`,
-        provincesResponse.data
-      );
+      // console.log(
+      //   `Fetched provinces for region ${formattedRegionId}:`,
+      //   provincesResponse.data
+      // );
       setProvinceGroups(provincesResponse.data);
     } catch (error) {
-      console.error("Error fetching provinces:", error);
+      // console.error("Error fetching provinces:", error);
     } finally {
       setLoading(false);
     }
@@ -245,13 +245,13 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const districtsResponse = await axios.get(
         `https://psgc.gitlab.io/api/regions/${formattedRegionId}/districts/`
       );
-      console.log(
-        `Fetched districts for region ${formattedRegionId}:`,
-        districtsResponse.data
-      );
+      // console.log(
+      //   `Fetched districts for region ${formattedRegionId}:`,
+      //   districtsResponse.data
+      // );
       setDistrictGroups(districtsResponse.data || []);
     } catch (error) {
-      console.error("Error fetching districts:", error);
+      // console.error("Error fetching districts:", error);
     } finally {
       setLoading(false);
     }
@@ -259,10 +259,10 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
 
   const fetchCitiesByProvince = async (provinceId) => {
     setLoading(true);
-    console.log("Fetching city groups for:", { provinceId });
+    // console.log("Fetching city groups for:", { provinceId });
 
     if (!provinceId) {
-      console.warn("Province ID is null or undefined");
+      // console.warn("Province ID is null or undefined");
       setCityGroups([]); // Reset city groups if no province ID
       return;
     }
@@ -276,20 +276,20 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const response = await axios.get(
         `https://psgc.gitlab.io/api/provinces/${formattedProvinceId}/cities/`
       );
-      console.log("Fetched cities:", response.data);
+      // console.log("Fetched cities:", response.data);
       setCityGroups(response.data || []); // Set city groups to the fetched data
     } catch (error) {
-      console.error("Error fetching city groups:", error);
+      // console.error("Error fetching city groups:", error);
       setCityGroups([]); // Reset city groups on error
     }
   };
 
   const fetchCitiesByDistrict = async (districtId) => {
     setLoading(true);
-    console.log("Fetching city groups for:", { districtId });
+    // console.log("Fetching city groups for:", { districtId });
 
     if (!districtId) {
-      console.warn("District ID is null or undefined");
+      // console.warn("District ID is null or undefined");
       setCityGroups([]); // Reset city groups if no district ID
       return;
     }
@@ -303,20 +303,20 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const response = await axios.get(
         `https://psgc.gitlab.io/api/districts/${formattedDistrictId}/cities/`
       );
-      console.log("Fetched cities:", response.data);
+      // console.log("Fetched cities:", response.data);
       setCityGroups(response.data || []); // Set city groups to the fetched data
     } catch (error) {
-      console.error("Error fetching city groups:", error);
+      // console.error("Error fetching city groups:", error);
       setCityGroups([]); // Reset city groups on error
     }
   };
 
   const fetchMunicipality = async (provinceId) => {
     setLoading(true);
-    console.log("Fetching municipality groups for: ", { provinceId });
+    // console.log("Fetching municipality groups for: ", { provinceId });
 
     if (!provinceId) {
-      console.warn("Province ID is null or undefined");
+      // console.warn("Province ID is null or undefined");
       setMunicipalityGroups([]);
       return;
     }
@@ -330,10 +330,10 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const response = await axios.get(
         `https://psgc.gitlab.io/api/provinces/${formattedMunicipalityId}/municipalities/`
       );
-      console.log("Fetched municipality groups:", response.data);
+      // console.log("Fetched municipality groups:", response.data);
       setMunicipalityGroups(response.data || []);
     } catch (error) {
-      console.error("Error fetching municipality groups:", error);
+      // console.error("Error fetching municipality groups:", error);
       setMunicipalityGroups([]);
     }
   };
@@ -341,10 +341,10 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
   // Fetch barangays based on city ID
   const fetchBarangayByCities = async (cityId) => {
     setLoading(true);
-    console.log("Fetching barangay groups for:", { cityId });
+    // console.log("Fetching barangay groups for:", { cityId });
 
     if (!cityId) {
-      console.warn("City ID is null or undefined");
+      // console.warn("City ID is null or undefined");
       setBarangayGroups([]); // Reset barangay groups if no city ID
       return;
     }
@@ -356,20 +356,20 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const response = await axios.get(
         `https://psgc.gitlab.io/api/cities/${formattedCityId}/barangays/`
       );
-      console.log("Fetched barangays:", response.data);
+      // console.log("Fetched barangays:", response.data);
       setBarangayGroups(response.data || []); // Set barangay groups to the fetched data
     } catch (error) {
-      console.error("Error fetching barangay groups:", error);
+      // console.error("Error fetching barangay groups:", error);
       setBarangayGroups([]); // Reset barangay groups on error
     }
   };
 
   const fetchBarangayByMunicipality = async (municipalityId) => {
     setLoading(true);
-    console.log("Fetching barangay groups for:", { municipalityId });
+    // console.log("Fetching barangay groups for:", { municipalityId });
 
     if (!municipalityId) {
-      console.warn("Municipality ID is null or undefined");
+      // console.warn("Municipality ID is null or undefined");
       setBarangayGroups([]); // Reset barangay groups if no municipality ID
       return;
     }
@@ -383,10 +383,10 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       const response = await axios.get(
         `https://psgc.gitlab.io/api/municipalities/${formattedBarangayMunicipalityId}/barangays/`
       );
-      console.log("Fetched barangays:", response.data);
+      // console.log("Fetched barangays:", response.data);
       setBarangayGroups(response.data || []); // Set barangay groups to the fetched data
     } catch (error) {
-      console.error("Error fetching barangay groups:", error);
+      // console.error("Error fetching barangay groups:", error);
       setBarangayGroups([]); // Reset barangay groups on error
     }
   };
@@ -410,7 +410,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         brgy_id: "",
       }));
     } catch (error) {
-      console.error("Error handling island change:", error);
+      // console.error("Error handling island change:", error);
     } finally {
       setLoading(false);
     }
@@ -433,7 +433,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         brgy_id: "",
       }));
     } catch (error) {
-      console.error("Error handling region change:", error);
+      // console.error("Error handling region change:", error);
     } finally {
       setLoading(false);
     }
@@ -456,7 +456,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         brgy_id: "",
       }));
     } catch (error) {
-      console.error("Error handling province change:", error);
+      // console.error("Error handling province change:", error);
     } finally {
       setLoading(false);
     }
@@ -476,7 +476,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         brgy_id: "",
       }));
     } catch (error) {
-      console.error("Error handling district change:", error);
+      // console.error("Error handling district change:", error);
     } finally {
       setLoading(false);
     }
@@ -493,7 +493,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         brgy_id: "",
       }));
     } catch (error) {
-      console.error("Error handling city change:", error);
+      // console.error("Error handling city change:", error);
     } finally {
       setLoading(false);
     }
@@ -514,7 +514,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         brgy_id: "", // Reset barangay ID when municipality changes
       }));
     } catch (error) {
-      console.error("Error handling municipality change:", error);
+      // console.error("Error handling municipality change:", error);
     } finally {
       setLoading(false); // Reset loading state
     }
@@ -531,22 +531,22 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         municipality_id: data.municipality_id,
         brgy_id: data.brgy_id,
       };
-      console.log("Updating supplier with data:", normalizedData);
+      // console.log("Updating supplier with data:", normalizedData);
       const response = await local_axios.put(
         `/api/supplier/${supplierId}`,
         normalizedData
       );
-      console.log("Update successful:", response.data);
+      // console.log("Update successful:", response.data);
       handleEditAlert();
       onClose();
     } catch (error) {
       if (error.response) {
-        console.error("Error response from server:", error.response.data);
+        // console.error("Error response from server:", error.response.data);
         alert(
           `Error updating supplier: ${error.response.data.message || "Please check the data and try again."}`
         );
       } else {
-        console.error("Error updating supplier:", error);
+        // console.error("Error updating supplier:", error);
         alert("An unexpected error occurred. Please try again.");
       }
     }
