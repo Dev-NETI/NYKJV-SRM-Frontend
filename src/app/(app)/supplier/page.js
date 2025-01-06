@@ -9,8 +9,10 @@ import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
 import StoreSupplierDrawer from "@/components/supplier/supplier-store";
 import SupplierEdit from "@/components/supplier/supplier-edit";
+import SupplierRead from "@/components/supplier/supplier-read";
 import { Edit } from "lucide-react";
 import { Trash } from "lucide-react";
+import { Eye } from "lucide-react";
 import Link from "next/link";
 import {
   Box,
@@ -32,13 +34,16 @@ import SBComponent from "@/components/snackbar/SBComponent";
 import EditUserModal from "@/components/user-management/EditUserModal";
 import { EyeIcon } from "lucide-react";
 import Alert from "@mui/material/Alert";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
+import { setISODay } from "date-fns";
 
 export default function DataTable() {
   const { index: getUsers, store: storeUser, update: updateUser } = useUser();
   const [loading, setLoading] = useState(false);
+  const [readSupplierId, setReadSupplierId] = useState(null);
   const [editSupplierId, setEditSupplierId] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isReadDrawerOpen, setReadDrawerOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [apiRegion, setApiRegion] = useState([]);
   const [apiProvince, setApiProvince] = useState([]);
@@ -104,10 +109,19 @@ export default function DataTable() {
     }, 3000);
   };
 
-  const handleEdit = (id) => {
-    setEditSupplierId(id);
-    setIsDrawerOpen(true);
-  };
+const handleRead = (id) => {
+  setReadSupplierId(id);
+  setEditSupplierId(null); // Reset edit state
+  setReadDrawerOpen(true);
+};
+
+const handleEdit = (id) => {
+  setEditSupplierId(id);
+  setReadSupplierId(null); // Reset read state
+  setIsDrawerOpen(true);
+};
+
+
 
   const handleDelete = async (id) => {
     try {
@@ -124,8 +138,6 @@ export default function DataTable() {
       }
     }
   };
-  
-
 
   const columns = [
     {
@@ -193,6 +205,12 @@ export default function DataTable() {
             flexWrap: "nowrap",
           }}
         >
+          <button
+            className="flex items-center bg-blue-600 p-2 rounded-md text-white"
+            onClick={() => handleRead(params.row.id)}
+          >
+            <Eye className="w-4 h-4" />
+          </button>
           <button
             className="flex items-center bg-green-600 p-2 rounded-md text-white"
             onClick={() => handleEdit(params.row.id)}
@@ -383,9 +401,7 @@ export default function DataTable() {
   }
   return (
     <>
-      <UserContext.Provider
-        value={{ setUserState, storeUser, updateUser }}
-      >
+      <UserContext.Provider value={{ setUserState, storeUser, updateUser }}>
         <Card variant="soft" sx={{ p: 2, mb: 2 }}>
           <Box
             sx={{
@@ -615,6 +631,11 @@ export default function DataTable() {
             </Alert>
           </div>
         ) : null}
+        <SupplierRead
+          supplierId={readSupplierId}
+          onClose={() => setReadDrawerOpen(false)}
+          isOpen={isReadDrawerOpen}
+        />        
         <SupplierEdit
           supplierId={editSupplierId}
           onClose={() => setIsDrawerOpen(false)}
