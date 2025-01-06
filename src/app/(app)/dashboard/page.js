@@ -9,6 +9,7 @@ import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDa
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import NewSupplier from "@/components/dashboard/NewSupplier";
 import TotalSupplier from "@/components/dashboard/TotalSupplier";
+import TotalProduct from "@/components/dashboard/TotalProduct";
 import ProductsAnalysis from "@/components/dashboard/ProductsAnalyst";
 import PerformanceAnalysis from "@/components/dashboard/PerformanceAnalyst";
 function Dashboard() {
@@ -39,7 +40,7 @@ function Dashboard() {
                   <TotalSupplier />
                 </div>
                 <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
-                  <TotalSupplier />
+                  <TotalProduct />
                 </div>
               </div>
               <div className="mt-[1.5em] bg-[#fff] border-[1px] border-gray-300 rounded-xl">
