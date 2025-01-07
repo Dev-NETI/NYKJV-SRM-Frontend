@@ -9,6 +9,7 @@ import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDa
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import NewSupplier from "@/components/dashboard/NewSupplier";
 import TotalSupplier from "@/components/dashboard/TotalSupplier";
+import TotalProduct from "@/components/dashboard/TotalProduct";
 import ProductsAnalysis from "@/components/dashboard/ProductsAnalyst";
 import PerformanceAnalysis from "@/components/dashboard/PerformanceAnalyst";
 function Dashboard() {

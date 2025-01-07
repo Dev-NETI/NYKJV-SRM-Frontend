@@ -20,10 +20,10 @@ import TerrainIcon from "@mui/icons-material/Terrain";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
-
 import Alert from "@mui/material/Alert";
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Skeleton from "@mui/material/Skeleton";
+
 import { TimerOutlined } from "@mui/icons-material";
 const FormSchema = z
   .object({
@@ -72,7 +72,7 @@ const FormSchema = z
   })
   .strict();
 
-export default function SupplierEdit({ supplierId, onClose, isOpen }) {
+export default function SupplierRead({ supplierId, onClose, isOpen }) {
   const [islandsGroups, setIslandGroups] = React.useState([]);
   const [regionsGroups, setRegionGroups] = React.useState([]);
   const [provinceGroups, setProvinceGroups] = React.useState([]);
@@ -126,7 +126,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         try {
           const response = await local_axios.get(`/api/supplier/${supplierId}`);
           const data = response.data;
-          // console.log("Supplier Data: ", data);
+          console.log("Supplier Data: ", data);
 
           // Find the selected island and fetch regions for it
           const matchedIsland = islandsGroups.find(
@@ -536,7 +536,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         `/api/supplier/${supplierId}`,
         normalizedData
       );
-      // console.log("Update successful:", response.data);
+      console.log("Update successful:", response.data);
       handleEditAlert();
       onClose();
     } catch (error) {
@@ -759,7 +759,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
                     )
                   )}
                   <Grid item xs={12}>
-                    <div className="mt-5 flex gap-3">
+                    {/* <div className="mt-5 flex gap-3">
                       <Button
                         sx={{
                           color: "black",
@@ -781,7 +781,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
                       >
                         Save
                       </Button>
-                    </div>
+                    </div> */}
                   </Grid>
                 </Grid>
               </form>
@@ -797,13 +797,13 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       <Drawer anchor="right" open={isOpen} onClose={onClose}>
         {DrawerList("right")}
       </Drawer>
-      {editAlert ? (
+      {/* {editAlert ? (
         <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
           <Alert icon={<NotificationsIcon fontSize="inherit" />} severity="info">
             Successfully Changed
           </Alert>
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }
