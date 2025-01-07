@@ -29,7 +29,7 @@ const TotalSupplier = () => {
       </div>
       <div className="flex text-center items-center justify-center gap-2">
         <TrendingUpIcon sx={{ color: "#36bf5a" }} />
-        <div className="lg:text-[10px] xl:text-xl">24% from Etibac</div>
+        <div className="lg:text-[10px] xl:text-xl">24% from Manila</div>
       </div>
     </div>
   );
