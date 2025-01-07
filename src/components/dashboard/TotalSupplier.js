@@ -25,7 +25,7 @@ const TotalSupplier = () => {
     <div className="p-4 text-center">
       <div className="font-semibold text-lg mb-4">Total Supplier</div>
       <div className="font-bold lg:text-5xl xl:text-7xl mb-4">
-        {totalSuzpplier} {/* Display totalSupplier count */}
+        {totalSupplier} {/* Display totalSupplier count */}
       </div>
       <div className="flex text-center items-center justify-center gap-2">
         <TrendingUpIcon sx={{ color: "#36bf5a" }} />
