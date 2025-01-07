@@ -15,7 +15,7 @@ import PerformanceAnalysis from "@/components/dashboard/PerformanceAnalyst";
 function Dashboard() {
   return (
     <>
-      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-4 lg:flex">  
+      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-4 lg:flex">
         <div className="w-full lg:w-2/3 h-auto p-4">
           <div className="flex justify-between">
             <div className="">
@@ -38,9 +38,6 @@ function Dashboard() {
               <div className="flex gap-3">
                 <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
                   <TotalSupplier />
-                </div>
-                <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
-                  <TotalProduct />
                 </div>
               </div>
               <div className="mt-[1.5em] bg-[#fff] border-[1px] border-gray-300 rounded-xl">
