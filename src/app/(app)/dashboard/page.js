@@ -41,6 +41,9 @@ function Dashboard() {
                 <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
                   <TotalSupplier />
                 </div>
+                <div className="w-full h-1/2 flex items-center justify-center text-center rounded-xl bg-[#fff] border-[1px] border-gray-300">
+                  <TotalProduct />
+                </div>
               </div>
               <div className="mt-[1.5em] bg-[#fff] border-[1px] border-gray-300 rounded-xl">
                 <ProductsAnalysis />
