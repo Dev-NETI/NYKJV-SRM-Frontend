@@ -19,7 +19,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import Loading from "@/app/(app)/Loading";
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -32,7 +31,7 @@ const FormSchema = z.object({
 
 const Login = () => {
   const router = useRouter();
-  const { login, isVerifying } = useAuth({
+  const { login } = useAuth({
     middleware: "guest",
     redirectIfAuthenticated: "/login-otp",
   });
@@ -64,11 +63,9 @@ const Login = () => {
       setErrors,
       setStatus,
     });
-  };
 
-  if (isVerifying) {
-    return <Loading />;
-  }
+    // await axios.post("/login-otp", data);
+  };
 
   const googleLogin = async () => {
     try {

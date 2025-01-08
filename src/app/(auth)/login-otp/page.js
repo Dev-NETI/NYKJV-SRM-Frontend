@@ -27,7 +27,6 @@ import { Button } from "@/components/ui/button";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Loading from "@/app/(app)/Loading";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -44,8 +43,6 @@ function LoginOtp() {
     Math.floor(100000 + Math.random() * 900000)
   );
 
-  const [isVerifying, setIsVerifying] = useState(false);
-
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -54,7 +51,6 @@ function LoginOtp() {
   });
 
   const onSubmit = async (data) => {
-    setIsVerifying(true);
     axios
       .post("/api/verify-otp", { otp: data.pin, temp_otp: tempt_otp })
       .then((response) => {
@@ -73,14 +69,11 @@ function LoginOtp() {
           variant: "destructive",
           description: error.response.data.status,
         });
-      })
-      .finally(() => {
-        setIsVerifying(false);
       });
   };
 
   async function generateOtp() {
-    setIsVerifying(true);
+    // console.log(user);
     await axios
       .post("/api/authenticating", { temp_otp: tempt_otp })
       .then((response) => {
@@ -88,9 +81,6 @@ function LoginOtp() {
       })
       .catch((error) => {
         console.error("Error authenticating:", error);
-      })
-      .finally(() => {
-        setIsVerifying(false);
       });
   }
 
@@ -103,10 +93,6 @@ function LoginOtp() {
       }
     });
   }, []);
-
-  if (isVerifying) {
-    return <Loading />;
-  }
 
   return (
     <>

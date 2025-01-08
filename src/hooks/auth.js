@@ -8,7 +8,6 @@ import Cookies from "js-cookie";
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   const router = useRouter();
   const params = useParams();
-  const [isVerifying, setIsVerifying] = useState(false);
 
   const {
     data: user,
@@ -38,8 +37,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         setTimeout(() => {}, 3000);
         toast({
           variant: "secondary",
-          title: "Registration Successful",
-          description: "You have successfully registered.",
+          title: "Login Successful",
+          description: "You have successfully logged in.",
         });
       })
       .then(() => mutate())
@@ -62,7 +61,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
   const login = async ({ setErrors, setStatus, ...props }) => {
     setErrors([]);
     setStatus(null);
-    setIsVerifying(true);
 
     try {
       await csrf();
@@ -97,8 +95,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         title: "Uh oh! Something went wrong.",
         description: "Authentication are not working. Please try again.",
       });
-    } finally {
-      setIsVerifying(false);
     }
   };
 
@@ -167,47 +163,39 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     window.location.pathname = "/login";
   };
 
-  const checkVerified = async ({ user, pathname, router }) => {
-    setIsVerifying(true);
+  const checkVerified = async ({ user, pathname }) => {
     try {
-      const response = await axios.get("/api/checking-status-otp");
+      const response = await axios.get("api/checking-status-otp");
       const currentPath = pathname;
 
       console.log("Current Path:", currentPath);
 
-      const roles = user?.roles || [];
+      const roles = user?.roles; // Ensure user is defined
 
+      // Check if user is verified
       if (response.data.status === true) {
-        if (!roles.length) {
-          router.push("/unauthorized");
-          return;
-        }
+        // Allow access only if the currentPath matches one of the roles or if user has any roles
+        if (roles && roles.length > 0) {
+          const hasRoleForPath = roles.some((role) => {
+            const rolePath = "/" + role.url;
+            return (
+              currentPath === rolePath || currentPath.startsWith(rolePath + "/")
+            ); // Allow dynamic paths
+          });
 
-        const hasRoleForPath = roles.some((role) => {
-          const rolePath = `/${role.url}`;
-          return (
-            currentPath === rolePath || currentPath.startsWith(`${rolePath}/`)
-          );
-        });
-
-        if (!hasRoleForPath) {
-          router.push("/unauthorized");
-          return;
+          if (!hasRoleForPath) {
+            router.push("/unauthorized"); // Redirect to unauthorized if no role matches
+          }
         }
       } else {
+        // If user is not verified, restrict access to login-otp only
         if (currentPath !== "/login-otp") {
-          router.push("/login-otp");
+          router.push("/login-otp"); // Redirect to login-otp
         }
       }
     } catch (error) {
       console.error("Error checking verification status:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to verify access permissions",
-      });
-    } finally {
-      setIsVerifying(false);
+      // Handle the error accordingly, e.g., redirect or notify user
     }
   };
 
@@ -230,6 +218,5 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     resendEmailVerification,
     checkVerified,
     logout,
-    isVerifying,
   };
 };

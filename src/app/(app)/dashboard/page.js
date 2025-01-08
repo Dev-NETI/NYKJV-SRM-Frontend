@@ -12,6 +12,8 @@ import TotalSupplier from "@/components/dashboard/TotalSupplier";
 import TotalProduct from "@/components/dashboard/TotalProduct";
 import ProductsAnalysis from "@/components/dashboard/ProductsAnalyst";
 import PerformanceAnalysis from "@/components/dashboard/PerformanceAnalyst";
+import Skeleton from '@mui/material/Skeleton';
+
 function Dashboard() {
   return (
     <>
