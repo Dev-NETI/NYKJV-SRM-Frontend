@@ -42,6 +42,10 @@ const routes = [
         href: "/dashboard",
         label: "Dashboard",
         icon: <DashboardRoundedIcon />,
+
+
+        allowedRoles: ["Dashboard"],
+
       },
       {
         href: "/product",
