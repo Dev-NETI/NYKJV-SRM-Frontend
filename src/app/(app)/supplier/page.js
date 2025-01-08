@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "@/lib/axios";
 import external_axios from "axios";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
@@ -74,7 +74,7 @@ export default function DataTable() {
     fetchSuppliers();
   };
 
-  const fetchSuppliers = async () => {
+  const fetchSuppliers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/supplier", {
@@ -100,7 +100,7 @@ export default function DataTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchParams.name, pagination.page]); // Add dependencies here
 
   const handleAlert = () => {
     setDeleteAlert(true);
@@ -109,19 +109,17 @@ export default function DataTable() {
     }, 3000);
   };
 
-const handleRead = (id) => {
-  setReadSupplierId(id);
-  setEditSupplierId(null); // Reset edit state
-  setReadDrawerOpen(true);
-};
+  const handleRead = (id) => {
+    setReadSupplierId(id);
+    setEditSupplierId(null); // Reset edit state
+    setReadDrawerOpen(true);
+  };
 
-const handleEdit = (id) => {
-  setEditSupplierId(id);
-  setReadSupplierId(null); // Reset read state
-  setIsDrawerOpen(true);
-};
-
-
+  const handleEdit = (id) => {
+    setEditSupplierId(id);
+    setReadSupplierId(null); // Reset read state
+    setIsDrawerOpen(true);
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -394,7 +392,7 @@ const handleEdit = (id) => {
     convertedCity();
     convertedMunicipality();
     convertedBrgy();
-  }, [pagination.page]);
+  }, [pagination.page, fetchSuppliers]);
 
   if (loading) {
     return <Loading />;
@@ -635,7 +633,7 @@ const handleEdit = (id) => {
           supplierId={readSupplierId}
           onClose={() => setReadDrawerOpen(false)}
           isOpen={isReadDrawerOpen}
-        />        
+        />
         <SupplierEdit
           supplierId={editSupplierId}
           onClose={() => setIsDrawerOpen(false)}

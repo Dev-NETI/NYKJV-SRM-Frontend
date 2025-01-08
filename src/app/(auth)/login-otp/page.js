@@ -1,6 +1,6 @@
 "use client";
 
-import { React, useEffect, useState } from "react";
+import { React, useCallback, useEffect, useState } from "react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -79,20 +79,19 @@ function LoginOtp() {
       });
   };
 
-  async function generateOtp() {
+  const generateOtp = useCallback(async () => {
     setIsVerifying(true);
-    await axios
-      .post("/api/authenticating", { temp_otp: tempt_otp })
-      .then((response) => {
-        console.log(response.data.status);
-      })
-      .catch((error) => {
-        console.error("Error authenticating:", error);
-      })
-      .finally(() => {
-        setIsVerifying(false);
+    try {
+      const response = await axios.post("/api/authenticating", {
+        tempt_otp: tempt_otp,
       });
-  }
+      console.log(response.data.status);
+    } catch (error) {
+      console.error("Error authenticating:", error);
+    } finally {
+      setIsVerifying(false);
+    }
+  }, [tempt_otp]);
 
   useEffect(() => {
     axios.get("/api/checking-status-otp").then((response) => {
@@ -102,7 +101,7 @@ function LoginOtp() {
         generateOtp();
       }
     });
-  }, []);
+  }, [generateOtp, router]);
 
   if (isVerifying) {
     return <Loading />;

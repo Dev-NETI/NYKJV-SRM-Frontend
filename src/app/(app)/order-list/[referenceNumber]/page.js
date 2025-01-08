@@ -4,7 +4,7 @@ import Header from "../../Header";
 import OrderListComponent from "@/components/order-list/OrderListComponent";
 import Button from "@mui/material/Button";
 
-function page({ params }) {
+function Page({ params }) {
   const [orderListState, setOrderListState] = useState({
     edit: false,
   });
@@ -45,4 +45,4 @@ function page({ params }) {
   );
 }
 
-export default page;
+export default Page;

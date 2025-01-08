@@ -80,7 +80,7 @@ const ProductComponent = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [showBrand, showCategory, showProduct]);
 
   useEffect(() => {
     if (search) {

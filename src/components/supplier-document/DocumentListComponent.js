@@ -67,7 +67,14 @@ function DocumentListComponent() {
     if (user) {
       supplierDocumentState.reload === true && fetchData();
     }
-  }, [user, supplierDocumentState.reload]);
+  }, [
+    user,
+    supplierDocumentState.reload,
+    getDepartmentSupplier,
+    getDocumentType,
+    getOrderDocument,
+    setSupplierDocumentState,
+  ]);
 
   const handleSearch = (value) => {
     setDocumentListState((prevState) => ({

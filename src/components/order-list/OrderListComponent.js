@@ -55,7 +55,7 @@ function OrderListComponent({ referenceNumber, editMode }) {
       }));
     };
     fetchData();
-  }, []);
+  }, [getOrderItems, referenceNumber]);
 
   const initialValues = {
     fileQuotation: null,

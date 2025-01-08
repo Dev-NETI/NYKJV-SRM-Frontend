@@ -1,3 +1,4 @@
+"use client";
 import { createContext, useContext, useState } from "react";
 import MemoComponent from "@/components/orders/MemoComponent";
 import QuotationComponentForm from "@/components/orders/QuotationComponentForm";
@@ -30,7 +31,7 @@ export const OrderProvider = ({ children }) => {
 export const useOrder = () => {
   const context = useContext(OrderContext);
   if (context === undefined) {
-    throw new Error("useChat must be used within a ChatProvider");
+    throw new Error("useOrder must be used within a OrderProvider");
   }
   return context;
 };

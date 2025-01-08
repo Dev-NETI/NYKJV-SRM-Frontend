@@ -68,7 +68,7 @@ function EditUserModal({ slug }) {
     };
 
     fetchData();
-  }, []);
+  }, [getCompanyData, getDepartmentData, getSupplierData]);
 
   return (
     <React.Fragment>

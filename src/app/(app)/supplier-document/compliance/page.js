@@ -9,7 +9,7 @@ import { Snackbar } from "@mui/material";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import Alert from "@mui/material/Alert";
 
-function page() {
+function Page() {
   const [supplierDocumentState, setSupplierDocumentState] = useState({
     modal: false,
     snackbar: false,
@@ -18,7 +18,7 @@ function page() {
     snackbarHorizontal: "right",
     snackBarSeverity: "success",
     reload: true,
-    activePage: 1, //1 - documents, 0 - trash  
+    activePage: 1, //1 - documents, 0 - trash
     supplierId: 0,
   });
 
@@ -98,4 +98,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

@@ -59,7 +59,7 @@ function UserManagementSlugPage() {
     };
 
     fetchData();
-  }, [params.slug]);
+  }, [params.slug, getUser]);
 
   if (!user) {
     return (

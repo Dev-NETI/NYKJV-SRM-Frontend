@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import DocumentListItemComponent from "../DocumentListItemComponent";
 import DocumentListMissingItemComponent from "../DocumentListMissingItemComponent";
@@ -21,14 +21,16 @@ import { useContext } from "react";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import { useDocumentType } from "@/hooks/api/document-type";
 
-export default function ComplianceDocumentListComponent({ handleOpenFileUploadModal }) {
+export default function ComplianceDocumentListComponent({
+  handleOpenFileUploadModal,
+}) {
   const { user } = useAuth({ middleware: "auth" });
 
   const { showWith3Parameter: getSupplierComplianceDocuments } =
     useSupplierDocument("show-documents-by-category");
 
-  const { showWith2Parameter: getMissingComplianceDocuments } = 
-    useSupplierDocument("missing-documents")
+  const { showWith2Parameter: getMissingComplianceDocuments } =
+    useSupplierDocument("missing-documents");
 
   const { supplierDocumentState, setSupplierDocumentState } = useContext(
     SupplierDocumentContext
@@ -44,12 +46,12 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
     documentData: [],
     filteredData: [],
   });
-  
+
   const [notification, setNotification] = useState({
     expired: { count: 0 },
-    warning: { count: 0},
-    duplicated: { count: 0},
-    missing: { count: 0},
+    warning: { count: 0 },
+    duplicated: { count: 0 },
+    missing: { count: 0 },
     completed: false,
   });
 
@@ -58,45 +60,70 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
   const [duplicated, setDuplicated] = useState([]);
   const [warning, setWarning] = useState([]);
 
-  const getUploadedDocuments = async (supplierId, categoryId, isActive = 1) => {
-    return await getSupplierComplianceDocuments(supplierId, categoryId, isActive)
-    .then(response => response.data);
-  }
+  const getUploadedDocuments = useCallback(
+    async (supplierId, categoryId, isActive = 1) => {
+      const response = await getSupplierComplianceDocuments(
+        supplierId,
+        categoryId,
+        isActive
+      );
+      return response.data;
+    },
+    [getSupplierComplianceDocuments]
+  );
 
-  const getMissingDocuments = async (supplierId, categoryId) => {
-    return await getMissingComplianceDocuments(supplierId, categoryId)
-    .then(response => response.data);
-  }
+  const getMissingDocuments = useCallback(
+    async (supplierId, categoryId) => {
+      const response = await getMissingComplianceDocuments(
+        supplierId,
+        categoryId
+      );
+      return response.data;
+    },
+    [getMissingComplianceDocuments]
+  );
 
   const getExpiredDocuments = (documents = []) => {
-    return documents.filter(doc => 
-      doc.expired_at && new Date(doc.expired_at) < new Date()
+    return documents.filter(
+      (doc) => doc.expired_at && new Date(doc.expired_at) < new Date()
     );
-  }
+  };
 
   const getWarningDocuments = (documents = []) => {
-    return documents.filter(doc => {
+    return documents.filter((doc) => {
       if (!doc.expired_at) return false;
       const expirationDate = new Date(doc.expired_at);
       const oneWeekFromNow = new Date();
       oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
       return expirationDate > new Date() && expirationDate <= oneWeekFromNow;
     });
-  }
+  };
 
   const getDuplicatedDocuments = (documents = []) => {
-    return documents.filter((doc, index, self) =>
-      index !== self.findIndex((t) => t.document_type_id === doc.document_type_id)
+    return documents.filter(
+      (doc, index, self) =>
+        index !==
+        self.findIndex((t) => t.document_type_id === doc.document_type_id)
     );
-  }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       const COMPLIANCE_DOCUMENT_CATEGORY_ID = 1;
-      const uploadedDocs = await getUploadedDocuments(user?.supplier_id || supplierDocumentState.supplierId, COMPLIANCE_DOCUMENT_CATEGORY_ID, supplierDocumentState.activePage);
-      setDocumentListState((prevState) => ({...prevState, documentData: uploadedDocs}));
+      const uploadedDocs = await getUploadedDocuments(
+        user?.supplier_id || supplierDocumentState.supplierId,
+        COMPLIANCE_DOCUMENT_CATEGORY_ID,
+        supplierDocumentState.activePage
+      );
+      setDocumentListState((prevState) => ({
+        ...prevState,
+        documentData: uploadedDocs,
+      }));
 
-      const missingDocs = await getMissingDocuments(user?.supplier?.id || supplierDocumentState.supplierId, COMPLIANCE_DOCUMENT_CATEGORY_ID);
+      const missingDocs = await getMissingDocuments(
+        user?.supplier?.id || supplierDocumentState.supplierId,
+        COMPLIANCE_DOCUMENT_CATEGORY_ID
+      );
       setMissing(missingDocs);
 
       const expiredDocs = getExpiredDocuments(uploadedDocs);
@@ -108,13 +135,13 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
       const duplicatedDocs = getDuplicatedDocuments(uploadedDocs);
       setDuplicated(duplicatedDocs);
 
-      setNotification(prevState => ({
+      setNotification((prevState) => ({
         ...prevState,
-        expired: { count: expiredDocs.length},
-        warning: { count: warningDocs.length},
-        duplicated: { count: duplicatedDocs.length},
+        expired: { count: expiredDocs.length },
+        warning: { count: warningDocs.length },
+        duplicated: { count: duplicatedDocs.length },
         missing: { count: missingDocs.length },
-        completed: missingDocs.length === 0
+        completed: missingDocs.length === 0,
       }));
 
       setSupplierDocumentState((prevState) => ({
@@ -126,21 +153,27 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
     if (user) {
       supplierDocumentState.reload === true && fetchData();
     }
-    
-  }, [user, supplierDocumentState.reload]);
+  }, [
+    user,
+    supplierDocumentState.reload,
+    getMissingDocuments,
+    getUploadedDocuments,
+    setSupplierDocumentState,
+    supplierDocumentState.activePage,
+    supplierDocumentState.supplierId,
+  ]);
 
-  const handleSearch = (value, _e, info) => {      
-      setSearchText(value);
+  const handleSearch = (value, _e, info) => {
+    setSearchText(value);
 
-      const filteredData = documentListState.documentData.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
-      );
+    const filteredData = documentListState.documentData.filter((item) =>
+      item.name.toLowerCase().includes(value.toLowerCase())
+    );
 
     setDocumentListState((prevState) => ({
       ...prevState,
-      filteredData: filteredData 
+      filteredData: filteredData,
     }));
-
   };
 
   return (
@@ -158,62 +191,84 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
           />
         </Space>
       </div>
-      
-      {user?.supplier_id ?  (
-      <></>  
-      ) : 
+
+      {user?.supplier_id ? (
+        <></>
+      ) : (
         <div className="">
-          { supplierDocumentState.activePage == 1? <ComplianceDocumentListSupplierSelection/>: <></> } 
+          {supplierDocumentState.activePage == 1 ? (
+            <ComplianceDocumentListSupplierSelection />
+          ) : (
+            <></>
+          )}
         </div>
-      }
+      )}
 
-      { supplierDocumentState.supplierId == 0 ? 
-      (<div>Please select a supplier.</div>)
-      :
-      (<div className="flex flex-col bg-white border-gray-500 rounded-xl p-4">
-        { supplierDocumentState.activePage == 1
-          ?
+      {supplierDocumentState.supplierId == 0 ? (
+        <div>Please select a supplier.</div>
+      ) : (
+        <div className="flex flex-col bg-white border-gray-500 rounded-xl p-4">
+          {supplierDocumentState.activePage == 1 ? (
             <div className="flex flex-col gap-2 bg-white p-4">
-              {notification.expired.count > 0 && <ExpiredNotificationComponent count={notification.expired.count} documents={expired} />}
+              {notification.expired.count > 0 && (
+                <ExpiredNotificationComponent
+                  count={notification.expired.count}
+                  documents={expired}
+                />
+              )}
 
-              { notification.warning.count > 0 && <WarningNotificationComponent count={notification.warning.count} documents={warning} /> } 
+              {notification.warning.count > 0 && (
+                <WarningNotificationComponent
+                  count={notification.warning.count}
+                  documents={warning}
+                />
+              )}
 
               {/* { notification.duplicated.count > 0 && <DuplicatedNotificationComponent count={notification.duplicated.count} documents={duplicated} /> } */}
 
-              { notification.missing.count > 0 && <MissingNotificationComponent count={notification.missing.count} documents={missing} /> }
+              {notification.missing.count > 0 && (
+                <MissingNotificationComponent
+                  count={notification.missing.count}
+                  documents={missing}
+                />
+              )}
 
-              {notification.expired.count <= 0 && notification.completed && <CompletedNotificationComponent /> }
-            </div> 
-          :
+              {notification.expired.count <= 0 && notification.completed && (
+                <CompletedNotificationComponent />
+              )}
+            </div>
+          ) : (
             ""
-        }
-        <div
-          className="bg-white 
+          )}
+          <div
+            className="bg-white 
       grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 
       gap-4 p-4"
-        >
-          {searchText.length > 0
-            ? documentListState.filteredData.map((item) => (
-                <DocumentListItemComponent
-                  id={item.id}
-                  key={item.id}
-                  fileName={item.name}
-                  modifiedBy={item.modified_by}
-                  updatedAt={item.updated_at}
-                  filePath={item.file_path}
-                />
-              ))
-            : documentListState.documentData.map((item) => (
-                <DocumentListItemComponent
-                  id={item.id}
-                  key={item.id}
-                  fileName={item.name}
-                  modifiedBy={item.modified_by}
-                  updatedAt={item.updated_at}
-                  filePath={item.file_path}
-                />
-         ))}
-              {supplierDocumentState.activePage == 1 && missing.length > 0 && missing.map((item) => (
+          >
+            {searchText.length > 0
+              ? documentListState.filteredData.map((item) => (
+                  <DocumentListItemComponent
+                    id={item.id}
+                    key={item.id}
+                    fileName={item.name}
+                    modifiedBy={item.modified_by}
+                    updatedAt={item.updated_at}
+                    filePath={item.file_path}
+                  />
+                ))
+              : documentListState.documentData.map((item) => (
+                  <DocumentListItemComponent
+                    id={item.id}
+                    key={item.id}
+                    fileName={item.name}
+                    modifiedBy={item.modified_by}
+                    updatedAt={item.updated_at}
+                    filePath={item.file_path}
+                  />
+                ))}
+            {supplierDocumentState.activePage == 1 &&
+              missing.length > 0 &&
+              missing.map((item) => (
                 <DocumentListMissingItemComponent
                   id={item.id}
                   key={item.id}
@@ -221,8 +276,9 @@ export default function ComplianceDocumentListComponent({ handleOpenFileUploadMo
                   handleOpenFileUploadModal={handleOpenFileUploadModal}
                 />
               ))}
+          </div>
         </div>
-        </div>
-  )}
-  </div>
-)}
+      )}
+    </div>
+  );
+}

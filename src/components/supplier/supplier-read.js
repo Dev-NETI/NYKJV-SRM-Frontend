@@ -21,7 +21,7 @@ import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import Alert from "@mui/material/Alert";
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Skeleton from "@mui/material/Skeleton";
 
 import { TimerOutlined } from "@mui/icons-material";
@@ -193,7 +193,7 @@ export default function SupplierRead({ supplierId, onClose, isOpen }) {
       // Ensure fetch only runs when modal is open
       fetchData(); // Fetch supplier data
     }
-  }, [supplierId, isOpen, reset, islandsGroups]);
+  }, [supplierId, isOpen, reset, islandsGroups, clearErrors]);
 
   const handleEditAlert = () => {
     setEditAlert(true);
