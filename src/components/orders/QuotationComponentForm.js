@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   TextField,
   Chip,
@@ -9,22 +9,15 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { Formik, Form, ErrorMessage, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import StarterKit from "@tiptap/starter-kit";
-import {
-  MenuButtonBold,
-  MenuButtonItalic,
-  MenuControlsContainer,
-  MenuDivider,
-  MenuSelectHeading,
-  RichTextEditor,
-} from "mui-tiptap";
+import { useOrder } from "@/hooks/api/order";
 import axios from "@/lib/axios";
 import { useAuth } from "@/hooks/auth";
 import SnackBarComponent from "../material-ui/SnackBarComponent";
 
 export default function EmailFileUploadForm() {
+  const { store: sendQuotation } = useOrder("send-quotation");
   const [file, setFile] = useState(null);
   const { user } = useAuth({ middleware: "auth" });
   const [snackbarState, setSnackbarState] = useState({
@@ -33,25 +26,10 @@ export default function EmailFileUploadForm() {
     severity: "success",
   });
 
-  const rteRef = useRef(null);
-
   const validationSchema = Yup.object().shape({
     emails: Yup.array()
       .of(Yup.string().email("Invalid email"))
       .min(1, "At least one email is required"),
-    emailBody: Yup.string()
-      .required("Message is required!")
-      .test(
-        "minLength",
-        "Message must be at least 10 characters long",
-        (value) => {
-          const editorContent = rteRef.current?.editor?.getHTML();
-          return (
-            editorContent &&
-            editorContent.replace(/<\/?[^>]+(>|$)/g, "").trim().length >= 10
-          );
-        }
-      ),
     fileQuotation: Yup.mixed()
       .required("File is required")
       .test(
@@ -64,10 +42,6 @@ export default function EmailFileUploadForm() {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       values.company = user?.company?.name;
-      values.supplierId = user?.supplier_id;
-      values.orderDocumentTypeId = 1;
-      values.fileName = values.fileQuotation.name;
-      values.emailBody = rteRef.current?.editor?.getHTML();
 
       const { data: response } = await axios.post(
         "/api/order/send-quotation",
@@ -79,13 +53,18 @@ export default function EmailFileUploadForm() {
         }
       );
 
-      setSnackbarState({
-        open: true,
-        message: response.message,
-        severity: response.severity,
-      });
+      response.response
+        ? setSnackbarState({
+            open: true,
+            message: "Quotation sent successfully!",
+            severity: "success",
+          })
+        : setSnackbarState({
+            open: true,
+            message: "Whoops! Something went wrong!",
+            severity: "error",
+          });
 
-      rteRef.current.value = "";
       resetForm();
       setFile(null);
     } catch (error) {
@@ -102,16 +81,11 @@ export default function EmailFileUploadForm() {
   return (
     <>
       <Formik
-        initialValues={{
-          emails: [],
-          emailBody: "",
-          emailInput: "",
-          fileQuotation: null,
-        }}
+        initialValues={{ emails: [], emailInput: "", fileQuotation: null }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, setFieldValue, isSubmitting, errors }) => (
+        {({ values, setFieldValue, isSubmitting }) => (
           <Form>
             <Box sx={{ maxWidth: 500, margin: "auto", mt: 5 }}>
               <Typography variant="h5" gutterBottom>
@@ -162,31 +136,6 @@ export default function EmailFileUploadForm() {
                     color="primary"
                   />
                 ))}
-              </Box>
-
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Message
-                </Typography>
-                <RichTextEditor
-                  ref={rteRef}
-                  extensions={[StarterKit]}
-                  content="<p>Dear Sir/Ma'am,</p><p>Your message here.</p>"
-                  onUpdate={({ editor }) =>
-                    setFieldValue("emailBody", editor.getHTML())
-                  }
-                  renderControls={() => (
-                    <MenuControlsContainer>
-                      <MenuSelectHeading />
-                      <MenuDivider />
-                      <MenuButtonBold />
-                      <MenuButtonItalic />
-                    </MenuControlsContainer>
-                  )}
-                />
-                {errors.emailBody && (
-                  <Typography color="error">{errors.emailBody}</Typography>
-                )}
               </Box>
 
               <Box sx={{ mt: 3 }}>
