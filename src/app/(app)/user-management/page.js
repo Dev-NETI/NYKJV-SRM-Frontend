@@ -23,7 +23,7 @@ import { EyeIcon } from "lucide-react";
 import DeleteConfirmationModal from "@/components/user-management/DeleteUserModal";
 import axios from "axios";
 
-function page() {
+function Page() {
   const { index: getUsers, store: storeUser, update: updateUser } = useUser();
 
   const { patch: patchUser } = useUser("soft-delete");
@@ -122,7 +122,13 @@ function page() {
     if (userState.responseStore) {
       fetchUserData();
     }
-  }, [userState.responseStore, pagination.page]);
+  }, [
+    userState.responseStore,
+    pagination.page,
+    getUsers,
+    searchParams.f_name,
+    searchParams.l_name,
+  ]);
 
   const columns = [
     {
@@ -485,4 +491,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

@@ -22,7 +22,7 @@ import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 
 import Alert from "@mui/material/Alert";
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Skeleton from "@mui/material/Skeleton";
 import { TimerOutlined } from "@mui/icons-material";
 const FormSchema = z
@@ -193,7 +193,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       // Ensure fetch only runs when modal is open
       fetchData(); // Fetch supplier data
     }
-  }, [supplierId, isOpen, reset, islandsGroups]);
+  }, [supplierId, isOpen, reset, islandsGroups, clearErrors]);
 
   const handleEditAlert = () => {
     setEditAlert(true);
@@ -799,7 +799,10 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       </Drawer>
       {editAlert ? (
         <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
-          <Alert icon={<NotificationsIcon fontSize="inherit" />} severity="info">
+          <Alert
+            icon={<NotificationsIcon fontSize="inherit" />}
+            severity="info"
+          >
             Successfully Changed
           </Alert>
         </div>

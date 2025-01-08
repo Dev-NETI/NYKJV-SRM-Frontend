@@ -14,6 +14,7 @@ const Navigation = ({ user }) => {
   const { logout } = useAuth();
 
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav className="bg-white border-b border-gray-100">
@@ -30,38 +31,25 @@ const Navigation = ({ user }) => {
 
             {/* Navigation Links */}
             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-              <NavLink
-                href="/dashboard"
-                active={usePathname() === "/dashboard"}
-              >
+              <NavLink href="/dashboard" active={pathname === "/dashboard"}>
                 Dashboard
               </NavLink>
-
-              <NavLink
-                href="/category"
-                active={usePathname() === "/category"}
-              >
+              <NavLink href="/orders" active={pathname === "/orders"}>
+                Orders
+              </NavLink>
+              <NavLink href="/category" active={pathname === "/category"}>
                 Category
               </NavLink>
 
-              <NavLink
-                href="/brand"
-                active={usePathname() === "/brand"}
-              >
+              <NavLink href="/brand" active={pathname === "/brand"}>
                 Brand
               </NavLink>
 
-              <NavLink
-                href="/product"
-                active={usePathname() === "/product"}
-              >
+              <NavLink href="/product" active={pathname === "/product"}>
                 Product
               </NavLink>
 
-              <NavLink
-                href="/supplier"
-                active={usePathname() === "/supplier"}
-              >
+              <NavLink href="/supplier" active={pathname === "/supplier"}>
                 Supplier
               </NavLink>
             </div>
@@ -138,30 +126,27 @@ const Navigation = ({ user }) => {
           <div className="pt-2 pb-3 space-y-1">
             <ResponsiveNavLink
               href="/dashboard"
-              active={usePathname() === "/dashboard"}
+              active={pathname === "/dashboard"}
             >
               Dashboard
             </ResponsiveNavLink>
-              <ResponsiveNavLink
-                href="/category"
-                active={usePathname() === "/category"}
-              >
-                Category
-              </ResponsiveNavLink>
+            <ResponsiveNavLink href="/orders" active={pathname === "/orders"}>
+              Orders
+            </ResponsiveNavLink>
+            <ResponsiveNavLink
+              href="/category"
+              active={pathname === "/category"}
+            >
+              Category
+            </ResponsiveNavLink>
 
-              <ResponsiveNavLink
-                href="/brand"
-                active={usePathname() === "/brand"}
-              >
-                Brand
-              </ResponsiveNavLink>
+            <ResponsiveNavLink href="/brand" active={pathname === "/brand"}>
+              Brand
+            </ResponsiveNavLink>
 
-              <ResponsiveNavLink
-                href="/product"
-                active={usePathname() === "/product"}
-              >
-                Product
-              </ResponsiveNavLink>
+            <ResponsiveNavLink href="/product" active={pathname === "/product"}>
+              Product
+            </ResponsiveNavLink>
           </div>
 
           {/* Responsive Settings Options */}

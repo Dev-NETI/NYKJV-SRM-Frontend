@@ -5,7 +5,7 @@ import { Snackbar } from "@mui/material";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import Alert from "@mui/material/Alert";
 
-function page() {
+function Page() {
   const [supplierDocumentState, setSupplierDocumentState] = useState({
     snackbar: false,
     snackbarMessage: "",
@@ -59,4 +59,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

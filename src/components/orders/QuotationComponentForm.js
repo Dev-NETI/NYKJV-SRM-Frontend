@@ -18,11 +18,20 @@ import {
   MenuControlsContainer,
   MenuDivider,
   MenuSelectHeading,
-  RichTextEditor,
 } from "mui-tiptap";
 import axios from "@/lib/axios";
 import { useAuth } from "@/hooks/auth";
 import SnackBarComponent from "../material-ui/SnackBarComponent";
+import dynamic from "next/dynamic";
+
+// Dynamically import the RichTextEditor
+const RichTextEditor = dynamic(
+  () => import("mui-tiptap").then((mod) => mod.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => <p>Loading editor...</p>,
+  }
+);
 
 export default function EmailFileUploadForm() {
   const [file, setFile] = useState(null);

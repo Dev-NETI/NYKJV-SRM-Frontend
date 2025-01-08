@@ -25,7 +25,7 @@ function OrderList({ orderStatusId }) {
     };
 
     fetchData();
-  }, [orderStatusId, user]);
+  }, [orderStatusId, user, getOrders]);
 
   if (orderListState.loading) {
     return <OrderListSkeleton />;

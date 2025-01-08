@@ -31,8 +31,8 @@ function Unauthorized() {
           Unauthorized Access
         </h1>
         <p className="text-gray-600 mb-8">
-          Sorry, you don't have permission to access this page. Please log in or
-          contact an administrator.
+          Sorry, you don&apos;t have permission to access this page. Please log
+          in or contact an administrator.
         </p>
         <div className="flex justify-between">
           <Link

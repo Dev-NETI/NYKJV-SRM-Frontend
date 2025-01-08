@@ -21,7 +21,7 @@ const AppLayout = ({ children }) => {
     if (user) {
       checkVerified({ user, pathname, router });
     }
-  }, [pathname, user]); // Ensure dependencies are correct
+  }, [pathname, user, checkVerified, router]); // Ensure dependencies are correct
 
   if (isVerifying) {
     return <Loading />;

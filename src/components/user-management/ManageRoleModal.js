@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/joy";
 import { Fade } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import { useRoles } from "@/hooks/api/roles";
 import { useRolesUser } from "@/hooks/api/roles-user";
@@ -34,26 +34,26 @@ function ManageRoleModal({ user, showSnackbar }) {
     destroy: deleteRoleUser,
   } = useRolesUser();
 
-  const fetchRolesData = async () => {
+  const fetchRolesData = useCallback(async () => {
     const response = await getRolesData(`available-roles/${user.id}`);
     setDataState((prevState) => ({
       ...prevState,
       roles_data: response.data,
     }));
-  };
+  }, [user.id, getRolesData]);
 
-  const fetchRolesUserData = async () => {
+  const fetchRolesUserData = useCallback(async () => {
     const response = await getRolesUserData(`current-user-roles/${user.id}`);
     setDataState((prevState) => ({
       ...prevState,
       roles_user_data: response.data,
     }));
-  };
+  }, [user.id, getRolesUserData]);
 
   useEffect(() => {
     fetchRolesData();
     fetchRolesUserData();
-  }, []);
+  }, [fetchRolesData, fetchRolesUserData]);
 
   const handleAddRole = async (roleId) => {
     const response = await addRoleUser({
