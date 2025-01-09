@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import external_axios from "axios";
@@ -215,7 +215,7 @@ const handleEdit = (id) => {
             className="flex items-center bg-green-600 p-2 rounded-md text-white"
             onClick={() => handleEdit(params.row.id)}
           >
-            <Edit className="w-4 h-4"/>
+            <Edit className="w-4 h-4" />
           </button>
           <button
             className="flex items-center bg-red-600 p-2 rounded-md text-white"

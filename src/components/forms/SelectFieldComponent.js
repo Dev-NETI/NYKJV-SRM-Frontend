@@ -26,7 +26,7 @@ function SelectFieldComponent({ form, name, DataState, ...props }) {
               >
                 Please select a {props.label}
               </MenuItem>
-              {DataState.map((item) => (
+              {DataState?.map((item) => (
                 <MenuItem key={item.id} value={item.id}>
                   {item.name}
                 </MenuItem>
