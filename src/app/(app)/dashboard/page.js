@@ -17,7 +17,7 @@ import Skeleton from '@mui/material/Skeleton';
 function Dashboard() {
   return (
     <>
-      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-4 lg:flex">  
+      <div className="max-w-[110rem] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-4 lg:flex">
         <div className="w-full lg:w-2/3 h-auto p-4">
           <div className="flex justify-between">
             <div className="">

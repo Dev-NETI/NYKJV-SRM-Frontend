@@ -7,6 +7,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 const TotalSupplier = () => {
   const [totalSupplier, setTotalSupplier] = React.useState(0);
+
   const [loading, setLoading] = React.useState(true);
 
   const fetchTotalSupplier = async () => {
@@ -15,6 +16,7 @@ const TotalSupplier = () => {
       const response = await axios.get("/api/supplier/total_count");
       console.log("Response:", response);
       setTotalSupplier(response.data.total || 0);
+
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch total suppliers:", error);
@@ -30,8 +32,8 @@ const TotalSupplier = () => {
         <Box sx={{ width: "100%", p: 4 }}>
           <Skeleton />
           <Skeleton animation="wave" />
-          <Skeleton animation={false} sx={{marginTop: 2}} />
-          <Skeleton animation={false} sx={{marginTop: 2}} />
+          <Skeleton animation={false} sx={{ marginTop: 2 }} />
+          <Skeleton animation={false} sx={{ marginTop: 2 }} />
         </Box>
       ) : (
         <div className="p-4 text-center">
