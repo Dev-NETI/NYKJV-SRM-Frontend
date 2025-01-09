@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import axios from "@/lib/axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 import Cookies from "js-cookie";
@@ -158,14 +158,14 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
       .then((response) => setStatus(response.data.status));
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     if (!error) {
       Cookies.remove("isVerified");
       await axios.post("/logout").then(() => mutate());
     }
 
     window.location.pathname = "/login";
-  };
+  }, [error, mutate]);
 
   const checkVerified = async ({ user, pathname, router }) => {
     setIsVerifying(true);
@@ -219,7 +219,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
       router.push(redirectIfAuthenticated);
 
     if (middleware === "auth" && error) logout();
-  }, [user, error]);
+  }, [user, error, logout, middleware, redirectIfAuthenticated, router]);
 
   return {
     user,

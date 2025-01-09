@@ -56,7 +56,7 @@ const PasswordReset = () => {
 
   useEffect(() => {
     form.setValue("email", searchParams.get("email") || "");
-  }, [searchParams.get("email")]);
+  }, [searchParams, form]);
 
   return (
     <>

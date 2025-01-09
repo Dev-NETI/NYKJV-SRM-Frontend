@@ -1,5 +1,11 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import axios from "@/lib/axios";
 import useEcho from "@/hooks/useEcho";
 import { useAuth } from "@/hooks/auth";
@@ -27,7 +33,7 @@ export const ChatProvider = ({ children }) => {
     if (echo && user) {
       fetchInitialData();
     }
-  }, [echo, user]);
+  }, [echo, user, fetchInitialData]);
 
   useEffect(() => {
     if (selectedChat) {
@@ -36,7 +42,7 @@ export const ChatProvider = ({ children }) => {
     }
   }, [selectedChat]);
 
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
     try {
       const [fetchedUsers, fetchedChats] = await Promise.all([
         chatService.fetchUsers(),
@@ -120,18 +126,33 @@ export const ChatProvider = ({ children }) => {
     } catch (error) {
       toast.error("Error fetching initial data");
     }
-  };
+  }, [echo, selectedChat?.id, user.id]);
 
-  // Cleanup function for echo channels
+  // // Cleanup function for echo channels
+  // useEffect(() => {
+  //   return () => {
+  //     if (echo) {
+  //       // Leave all channels on unmount
+  //       Object.keys(echo.connector.channels).forEach((channelName) => {
+  //         echo.leaveChannel(channelName);
+  //       });
+  //       // Clear joined channels set
+  //       joinedChannels.current.clear();
+  //     }
+  //   };
+  // }, [echo]);
   useEffect(() => {
+    // Store the current value of joinedChannels in a local variable
+    const joinedChannelsSnapshot = joinedChannels.current;
+
     return () => {
       if (echo) {
         // Leave all channels on unmount
         Object.keys(echo.connector.channels).forEach((channelName) => {
           echo.leaveChannel(channelName);
         });
-        // Clear joined channels set
-        joinedChannels.current.clear();
+        // Clear the snapshot of joined channels
+        joinedChannelsSnapshot.clear();
       }
     };
   }, [echo]);

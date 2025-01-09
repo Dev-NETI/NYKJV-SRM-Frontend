@@ -4,7 +4,7 @@ import Header from "../Header";
 import TabMenu from "@/components/order/TabMenu";
 import OrderList from "@/components/order/OrderList";
 
-function page() {
+function Page() {
   const [orderStatusId, setOrderStatusId] = useState(1);
 
   const handleChange = (newValue) => {
@@ -27,4 +27,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

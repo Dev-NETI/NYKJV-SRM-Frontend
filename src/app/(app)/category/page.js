@@ -59,7 +59,7 @@ const CategoryComponent = () => {
       }
     };
     fetchCategorys();
-  }, []);
+  }, [showCategory]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },

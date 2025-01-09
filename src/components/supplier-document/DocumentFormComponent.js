@@ -25,7 +25,7 @@ const validationSchema = Yup.object({
     .test(
       "fileFormat",
       "Only PDF files are allowed",
-      (value) => value && value.type === "application/pdf",
+      (value) => value && value.type === "application/pdf"
     ),
 });
 
@@ -36,14 +36,16 @@ function DocumentFormComponent({ setSnackbarMethod }) {
     uploadProgress: 0,
     isExpirable: false,
   });
-  
+
   const { index: getDocumentType } = useDocumentType();
-  
+
   const { user } = useAuth({ middleware: "auth" });
-  const { supplierDocumentState, setSupplierDocumentState, initialDocumentTypeInForm } = useContext(
-    SupplierDocumentContext
-  );
-  
+  const {
+    supplierDocumentState,
+    setSupplierDocumentState,
+    initialDocumentTypeInForm,
+  } = useContext(SupplierDocumentContext);
+
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getDocumentType();
@@ -58,7 +60,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
     };
 
     fetchData();
-  }, []);
+  }, [getDocumentType]);
 
   const initialValues = {
     documentType: initialDocumentTypeInForm || 0,
@@ -94,9 +96,9 @@ function DocumentFormComponent({ setSnackbarMethod }) {
       filePath: uploadResponse.url,
       expiration: values.expirationField || null,
     };
-    
+
     const { data: requestResponse } = await store(documentObject);
-     
+
     setSnackbarMethod((prevState) => ({
       ...prevState,
       modal: false,
@@ -142,7 +144,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
                     onChange={(event) => {
                       setFieldValue(
                         "fileDocument",
-                        event.currentTarget.files[0],
+                        event.currentTarget.files[0]
                       );
                     }}
                   />

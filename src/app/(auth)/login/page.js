@@ -54,7 +54,7 @@ const Login = () => {
     } else {
       setStatus(null);
     }
-  });
+  }, [router.reset, errors.length]);
 
   const submitForm = async (data) => {
     login({
