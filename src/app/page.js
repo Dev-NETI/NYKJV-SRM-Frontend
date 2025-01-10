@@ -4,7 +4,7 @@ import Footer from "@/components/home-page/Footer";
 import SrmLogo from "@/components/home-page/SrmLogo";
 
 export const metadata = {
-  title: "Laravel",
+  title: "NYK-JV Supplier Relationship Management",
 };
 
 const Home = () => {

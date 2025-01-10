@@ -19,9 +19,11 @@ const AppLayout = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      checkVerified({ user, pathname, router });
+      if (isVerifying) {
+        checkVerified({ user, pathname, router });
+      }
     }
-  }, [pathname, user, checkVerified, router]); // Ensure dependencies are correct
+  }, [pathname, user, checkVerified, router, isVerifying]);
 
   if (isVerifying) {
     return <Loading />;
