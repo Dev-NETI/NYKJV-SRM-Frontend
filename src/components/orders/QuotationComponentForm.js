@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   TextField,
   Chip,
@@ -34,6 +34,11 @@ export default function EmailFileUploadForm() {
   });
 
   const rteRef = useRef(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const validationSchema = Yup.object().shape({
     emails: Yup.array()
@@ -62,7 +67,7 @@ export default function EmailFileUploadForm() {
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-    values.company = user?.company?.name;
+    values.company = user?.supplier?.name;
     values.supplierId = user?.supplier_id;
     values.orderDocumentTypeId = 1;
     values.fileName = values.fileQuotation.name;
@@ -160,22 +165,25 @@ export default function EmailFileUploadForm() {
                 <Typography variant="subtitle1" gutterBottom>
                   Message
                 </Typography>
-                <RichTextEditor
-                  ref={rteRef}
-                  extensions={[StarterKit]}
-                  content="<p>Dear Sir/Ma'am,</p><p>Your message here.</p>"
-                  onUpdate={({ editor }) =>
-                    setFieldValue("emailBody", editor.getHTML())
-                  }
-                  renderControls={() => (
-                    <MenuControlsContainer>
-                      <MenuSelectHeading />
-                      <MenuDivider />
-                      <MenuButtonBold />
-                      <MenuButtonItalic />
-                    </MenuControlsContainer>
-                  )}
-                />
+                {isClient && (
+                  <RichTextEditor
+                    ref={rteRef}
+                    extensions={[StarterKit]}
+                    content="<p>Dear Sir/Ma'am,</p><p>Your message here.</p>"
+                    immediatelyRender={false}
+                    onUpdate={({ editor }) =>
+                      setFieldValue("emailBody", editor.getHTML())
+                    }
+                    renderControls={() => (
+                      <MenuControlsContainer>
+                        <MenuSelectHeading />
+                        <MenuDivider />
+                        <MenuButtonBold />
+                        <MenuButtonItalic />
+                      </MenuControlsContainer>
+                    )}
+                  />
+                )}
                 {errors.emailBody && (
                   <Typography color="error">{errors.emailBody}</Typography>
                 )}
