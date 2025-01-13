@@ -27,6 +27,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Search as SearchIcon } from "@mui/icons-material"; // Change to MUI's Search Icon
+import { useAuth } from "@/hooks/auth";
 
 const ProductComponent = () => {
   const {
@@ -51,12 +52,11 @@ const ProductComponent = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [search, setSearch] = useState("");
   const [deactivatingId, setDeactivatingId] = useState(null);
-
   const { index: showBrand } = useBrand();
   const [brandItems, setBrand] = useState([]);
-
   const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
+  const { user } = useAuth({ middleware: "auth" });
 
   // Loading state
   const [loading, setLoading] = useState({
@@ -80,7 +80,7 @@ const ProductComponent = () => {
       }
     };
     fetchData();
-  }, [showBrand, showCategory, showProduct]);
+  }, []);
 
   useEffect(() => {
     if (search) {
@@ -110,14 +110,16 @@ const ProductComponent = () => {
       width: 150,
       renderCell: (params) => (
         <>
-          <IconButton
-            aria-label="edit"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row)}
-          >
-            <EditIcon />
-          </IconButton>
+          {user?.supplier_id && (
+            <IconButton
+              aria-label="edit"
+              color="primary"
+              size="small"
+              onClick={() => handleEdit(params.row)}
+            >
+              <EditIcon />
+            </IconButton>
+          )}
           <IconButton
             aria-label="view"
             color="info"
@@ -127,20 +129,22 @@ const ProductComponent = () => {
           >
             <VisibilityIcon />
           </IconButton>
-          <IconButton
-            aria-label="deactivate"
-            color="error"
-            size="small"
-            onClick={() => handleDeactivate(params.row.id)}
-            sx={{ ml: 1 }}
-            disabled={deactivatingId === params.row.id}
-          >
-            {deactivatingId === params.row.id ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <DeleteIcon />
-            )}
-          </IconButton>
+          {user?.supplier_id && (
+            <IconButton
+              aria-label="deactivate"
+              color="error"
+              size="small"
+              onClick={() => handleDeactivate(params.row.id)}
+              sx={{ ml: 1 }}
+              disabled={deactivatingId === params.row.id}
+            >
+              {deactivatingId === params.row.id ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                <DeleteIcon />
+              )}
+            </IconButton>
+          )}
         </>
       ),
     },
@@ -308,18 +312,21 @@ const ProductComponent = () => {
                 />
               </Box>
               <Box display="flex" alignItems="center">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpen}
-                  disabled={loading.adding || loading.updating} // Disable during loading
-                >
-                  {loading.adding || loading.updating ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Add"
-                  )}
-                </Button>
+                {/* add product button */}
+                {user?.supplier_id && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpen}
+                    disabled={loading.adding || loading.updating} // Disable during loading
+                  >
+                    {loading.adding || loading.updating ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "Add"
+                    )}
+                  </Button>
+                )}
                 <Button
                   variant="contained"
                   color="error"
