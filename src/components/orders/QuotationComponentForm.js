@@ -18,20 +18,11 @@ import {
   MenuControlsContainer,
   MenuDivider,
   MenuSelectHeading,
+  RichTextEditor,
 } from "mui-tiptap";
 import axios from "@/lib/axios";
 import { useAuth } from "@/hooks/auth";
 import SnackBarComponent from "../material-ui/SnackBarComponent";
-import dynamic from "next/dynamic";
-
-// Dynamically import the RichTextEditor
-const RichTextEditor = dynamic(
-  () => import("mui-tiptap").then((mod) => mod.RichTextEditor),
-  {
-    ssr: false,
-    loading: () => <p>Loading editor...</p>,
-  }
-);
 
 export default function EmailFileUploadForm() {
   const [file, setFile] = useState(null);
@@ -71,41 +62,32 @@ export default function EmailFileUploadForm() {
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-    try {
-      values.company = user?.company?.name;
-      values.supplierId = user?.supplier_id;
-      values.orderDocumentTypeId = 1;
-      values.fileName = values.fileQuotation.name;
-      values.emailBody = rteRef.current?.editor?.getHTML();
+    values.company = user?.company?.name;
+    values.supplierId = user?.supplier_id;
+    values.orderDocumentTypeId = 1;
+    values.fileName = values.fileQuotation.name;
+    values.emailBody = rteRef.current?.editor?.getHTML();
 
-      const { data: response } = await axios.post(
-        "/api/order/send-quotation",
-        values,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    const { data: response } = await axios.post(
+      "/api/order/send-quotation",
+      values,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    setSubmitting(true);
+    setSnackbarState({
+      open: true,
+      message: response.message,
+      severity: response.severity,
+    });
 
-      setSnackbarState({
-        open: true,
-        message: response.message,
-        severity: response.severity,
-      });
-
-      rteRef.current.value = "";
-      resetForm();
-      setFile(null);
-    } catch (error) {
-      setSnackbarState({
-        open: true,
-        message: "An error occurred while sending the quotation.",
-        severity: "error",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    rteRef.current.value = "";
+    resetForm();
+    setFile(null);
+    setSubmitting(false);
   };
 
   return (
@@ -135,6 +117,7 @@ export default function EmailFileUploadForm() {
                 fullWidth
                 margin="normal"
                 helperText="Press Enter or , to add email"
+                disabled={!user?.supplier_id}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === ",") {
                     e.preventDefault();
@@ -203,6 +186,7 @@ export default function EmailFileUploadForm() {
                   variant="contained"
                   component="label"
                   startIcon={<CloudUploadIcon />}
+                  disabled={!user?.supplier_id}
                   fullWidth
                 >
                   Upload File
@@ -247,7 +231,7 @@ export default function EmailFileUploadForm() {
                   type="submit"
                   variant="contained"
                   color="primary"
-                  disabled={isSubmitting}
+                  disabled={!user?.supplier_id}
                 >
                   {isSubmitting ? "Sending..." : "Send"}
                 </Button>
