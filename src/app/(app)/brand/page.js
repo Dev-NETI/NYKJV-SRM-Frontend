@@ -25,6 +25,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
+import { useAuth } from "@/hooks/auth";
 
 const BrandComponent = () => {
   const {
@@ -43,6 +44,7 @@ const BrandComponent = () => {
   const [loading, setLoading] = useState(false);
   const [deactivatingId, setDeactivatingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
+  const { user } = useAuth({ middleware: "auth" });
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -59,7 +61,7 @@ const BrandComponent = () => {
       }
     };
     fetchBrands();
-  }, [showBrand]);
+  }, []);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
@@ -73,14 +75,17 @@ const BrandComponent = () => {
       width: 150,
       renderCell: (params) => (
         <>
-          <IconButton
-            aria-label="edit"
-            color="primary"
-            size="small"
-            onClick={() => handleEdit(params.row)}
-          >
-            <EditIcon />
-          </IconButton>
+          {user?.supplier_id && (
+            <IconButton
+              aria-label="edit"
+              color="primary"
+              size="small"
+              onClick={() => handleEdit(params.row)}
+            >
+              <EditIcon />
+            </IconButton>
+          )}
+
           <IconButton
             aria-label="view"
             color="info"
@@ -90,20 +95,22 @@ const BrandComponent = () => {
           >
             <VisibilityIcon />
           </IconButton>
-          <IconButton
-            aria-label="deactivate"
-            color="error"
-            size="small"
-            onClick={() => handleDeactivate(params.row.id)}
-            sx={{ ml: 1 }}
-            disabled={deactivatingId === params.row.id}
-          >
-            {deactivatingId === params.row.id ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              <DeleteIcon />
-            )}
-          </IconButton>
+          {user?.supplier_id && (
+            <IconButton
+              aria-label="deactivate"
+              color="error"
+              size="small"
+              onClick={() => handleDeactivate(params.row.id)}
+              sx={{ ml: 1 }}
+              disabled={deactivatingId === params.row.id}
+            >
+              {deactivatingId === params.row.id ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                <DeleteIcon />
+              )}
+            </IconButton>
+          )}
         </>
       ),
     },
@@ -268,14 +275,17 @@ const BrandComponent = () => {
                 }}
               />
               <Box display="flex">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpen}
-                  sx={{ mr: 2 }}
-                >
-                  Add
-                </Button>
+                {user?.supplier_id && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpen}
+                    sx={{ mr: 2 }}
+                  >
+                    Add
+                  </Button>
+                )}
+
                 <Button
                   variant="contained"
                   color="error"
