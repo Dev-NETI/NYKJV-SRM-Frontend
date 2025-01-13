@@ -59,7 +59,7 @@ function AddUserModal() {
     fetchCompanyData();
     fetchDepartmentData();
     fetchSupplierData();
-  }, [getCompanyData, getDepartmentData, getSupplierData]);
+  }, []);
 
   return (
     <React.Fragment>

@@ -107,7 +107,7 @@ function Page() {
         setUserState((prevState) => ({
           ...prevState,
           userData: data.data,
-          responseStore: false,
+          responseStore: false, // Mark the fetch as completed
         }));
         setPagination((prev) => ({
           ...prev,
@@ -116,19 +116,34 @@ function Page() {
         }));
       } catch (error) {
         console.error("Error fetching user data:", error);
+        setUserState((prevState) => ({
+          ...prevState,
+          responseStore: false, // Prevent loop even on error
+        }));
       }
     };
 
+    // Fetch data only when responseStore is true
     if (userState.responseStore) {
       fetchUserData();
     }
   }, [
     userState.responseStore,
     pagination.page,
-    getUsers,
     searchParams.f_name,
     searchParams.l_name,
   ]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchParams.f_name || searchParams.l_name) {
+        setPagination((prev) => ({ ...prev, page: 1 }));
+        setUserState((prev) => ({ ...prev, responseStore: true }));
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchParams.f_name, searchParams.l_name]);
 
   const columns = [
     {

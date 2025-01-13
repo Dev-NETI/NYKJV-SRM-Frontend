@@ -172,32 +172,33 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     try {
       const response = await axios.get("/api/checking-status-otp");
       const currentPath = pathname;
-
-      console.log("Current Path:", currentPath);
-
       const roles = user?.roles || [];
 
-      if (response.data.status === true) {
-        if (!roles.length) {
-          router.push("/unauthorized");
-          return;
-        }
-
-        const hasRoleForPath = roles.some((role) => {
-          const rolePath = `/${role.url}`;
-          return (
-            currentPath === rolePath || currentPath.startsWith(`${rolePath}/`)
-          );
-        });
-
-        if (!hasRoleForPath) {
-          router.push("/unauthorized");
-          return;
-        }
-      } else {
+      // First check: OTP verification
+      if (response.data.status !== true) {
         if (currentPath !== "/login-otp") {
           router.push("/login-otp");
+          return;
         }
+      }
+
+      // Second check: Role verification
+      if (!roles.length) {
+        router.push("/unauthorized");
+        return;
+      }
+
+      // Check if user has permission for current path
+      const hasRoleForPath = roles.some((role) => {
+        const rolePath = `/${role.url}`;
+        return (
+          currentPath === rolePath || currentPath.startsWith(`${rolePath}/`)
+        );
+      });
+
+      if (!hasRoleForPath && currentPath !== "/unauthorized") {
+        router.push("/unauthorized");
+        return;
       }
     } catch (error) {
       console.error("Error checking verification status:", error);
@@ -206,6 +207,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         title: "Error",
         description: "Failed to verify access permissions",
       });
+      // On error, redirect to login
+      router.push("/login");
     } finally {
       setIsVerifying(false);
     }
