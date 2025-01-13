@@ -19,14 +19,16 @@ const AppLayout = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      if (isVerifying) {
-        checkVerified({ user, pathname, router });
-      }
+      checkVerified({ user, pathname, router });
     }
-  }, [pathname, user, checkVerified, router, isVerifying]);
+  }, [user, pathname]);
 
   if (isVerifying) {
     return <Loading />;
+  }
+
+  if (!user) {
+    return null;
   }
 
   const toggleSidebar = () => {

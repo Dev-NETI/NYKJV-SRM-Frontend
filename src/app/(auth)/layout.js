@@ -4,7 +4,7 @@ import ApplicationLogo from "@/components/ApplicationLogo";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
-  title: "Laravel",
+  title: "NYK-JV Supplier Relationship Management",
 };
 
 const Layout = ({ children }) => {
