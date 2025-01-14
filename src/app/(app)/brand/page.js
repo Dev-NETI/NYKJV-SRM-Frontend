@@ -60,8 +60,10 @@ const BrandComponent = () => {
         toast.error("Failed to load brands. Please try again later.");
       }
     };
-    fetchBrands();
-  });
+    if (brands.length === 0) {
+      fetchBrands();
+    }
+  }, [brands, showBrand]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },

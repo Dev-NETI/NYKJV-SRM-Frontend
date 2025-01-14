@@ -79,8 +79,21 @@ const ProductComponent = () => {
         toast.error("Failed to load data. Please try again later.");
       }
     };
-    fetchData();
-  }, []);
+    if (
+      brandItems.length === 0 &&
+      categoryItems.length === 0 &&
+      products.length === 0
+    ) {
+      fetchData();
+    }
+  }, [
+    brandItems,
+    categoryItems,
+    products,
+    showBrand,
+    showCategory,
+    showProduct,
+  ]);
 
   useEffect(() => {
     if (search) {

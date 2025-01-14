@@ -58,8 +58,10 @@ const CategoryComponent = () => {
         toast.error("Failed to load categorys. Please try again later.");
       }
     };
-    fetchCategorys();
-  }, [showCategory]);
+    if (categorys.length === 0) {
+      fetchCategorys();
+    }
+  }, [categorys, showCategory]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
