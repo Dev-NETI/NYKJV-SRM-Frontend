@@ -30,7 +30,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Search as SearchIcon } from "@mui/icons-material";
 
 const ProductComponent = () => {
-  const { index: showProduct, store, update: updateProduct, destroy: deactivateProduct } = useProduct();
+  const { index: showProduct, store, update , destroy: deactivateProduct } = useProduct();
 const { index: showBrand } = useBrand();
 const { index: showCategory } = useCategory();
 
@@ -142,6 +142,7 @@ const handleSubmit = async (event) => {
 
   // Append form data
   const formData = new FormData();
+  
   formData.append('productName', productName);
   formData.append('productCategory', productCategory);
   formData.append('productBrand', productBrand);
@@ -154,17 +155,16 @@ const handleSubmit = async (event) => {
   } else {
     console.log("No image selected.");
   }
-  
 
   // Validate form
   const validationErrors = validateForm({
+    productImage,
     productName,
     productCategory,
     productBrand,
     productCurrency,
     productPrice,
     productSpecification,
-    productImage,
   });
 
   if (Object.keys(validationErrors).length > 0) {
@@ -182,16 +182,15 @@ const handleSubmit = async (event) => {
   try {
     let response;
     const object = Object.fromEntries(formData.entries());
-    
-    console.log(object);
-    // // Log form data for debugging
-    // for (const [key, value] of formData.entries()) {
-    //   console.log(`${key}:`, value);
-    // }
 
+    // // Log form data for debugging
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+    // console.log(object);
     if (editingProductId) {
       // Update an existing product
-      response = await updateProduct(editingProductId, object, {
+      response = await update(editingProductId, object, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Product updated successfully!");
@@ -379,19 +378,20 @@ const paginationModel = { page: 0, pageSize: 10 };
                       <strong>Product Image:</strong>
                     </Typography>
                     
-                      {/* <input
+                      <input
+                        type="file"
+                        id="productImage"
+                        name="productImage"
+                        accept="image/*"
+                        onChange={(e) => setProductImage(e.target.files[0])}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                      />
+
+                    {/* <input
                       type="file"
-                      id="productImage"
-                      name="productImage"
                       accept="image/*"
                       onChange={(e) => setProductImage(e.target.files[0])}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
                     /> */}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setProductImage(e.target.files[0])}
-                    />
 
                     {errors.productImage && (
                       <p className="text-red-500 text-sm">
@@ -550,46 +550,50 @@ const paginationModel = { page: 0, pageSize: 10 };
                   component="img"
                   image={`${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/product-image/${viewProduct.product_image || "N/A"}`}
                   alt="Not Found"
-                  sx={{ height: 300, width: '100%', mb: 2 }}
+                  sx={{ 
+                    height: '100%', 
+                    width: '100%', 
+                    objectFit: 'contain', 
+                    mb: 2 
+                  }}
                 />
-
-                <Grid2 item xs={8}>
+                <Grid2 item size={{ xs: 8 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Product Name:</strong>
                   </Typography>
                   <Typography>{viewProduct.name || "N/A"}</Typography>
                 </Grid2>
-                <Grid2 item xs={4}>
+                <Grid2 item size={{ xs: 4 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Price:</strong>
                   </Typography>
                   <Typography>{viewProduct.price || "N/A"}</Typography>
                 </Grid2>
-                <Grid2 item xs={6}>
+                <Grid2 item size={{ xs: 6 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Category:</strong>
                   </Typography>
                   <Typography>{viewProduct.category_name || "N/A"}</Typography>
                 </Grid2>
-                <Grid2 item xs={6}>
+                <Grid2 item size={{ xs: 6 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Brand:</strong>
                   </Typography>
                   <Typography>{viewProduct.brand_name || "N/A"}</Typography>
                 </Grid2>
-                <Grid2 item xs={12}>
+                <Grid2 item size={{ xs: 12 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Specification:</strong>
                   </Typography>
                   <Typography>{viewProduct.specification || "N/A"}</Typography>
                 </Grid2>
-                <Grid2 item xs={4}>
+                {/* <Grid2 item size={{ xs: 4 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Modified By:</strong>
                   </Typography>
                   <Typography>{viewProduct.modified_by || "N/A"}</Typography>
                 </Grid2>
-                <Grid2 item xs={4}>
+                <Grid2 item size={{ xs: 4 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Updated At:</strong>
                   </Typography>
@@ -597,14 +601,14 @@ const paginationModel = { page: 0, pageSize: 10 };
                     {viewProduct.updated_at ? new Date(viewProduct.updated_at).toLocaleString() : "N/A"}
                   </Typography>
                 </Grid2>
-                <Grid2 item xs={4}>
+                <Grid2 item size={{ xs: 4 }}>
                   <Typography variant="body1" color="textSecondary">
                     <strong>Created At:</strong>
                   </Typography>
                   <Typography>
                     {viewProduct.created_at ? new Date(viewProduct.created_at).toLocaleString() : "N/A"}
                   </Typography>
-                </Grid2>
+                </Grid2> */}
               </Grid2>
             </Box>
           </DialogContent>
