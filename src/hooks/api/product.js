@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useResource } from '../resource';
+import { useResource } from "../resource";
 
 const useProduct = (customUrl = null) => {
   const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
