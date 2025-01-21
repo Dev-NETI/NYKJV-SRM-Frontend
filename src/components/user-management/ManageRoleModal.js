@@ -40,7 +40,7 @@ function ManageRoleModal({ user, showSnackbar }) {
       ...prevState,
       roles_data: response.data,
     }));
-  }, [user.id, getRolesData]);
+  }, [user.id]);
 
   const fetchRolesUserData = useCallback(async () => {
     const response = await getRolesUserData(`current-user-roles/${user.id}`);
@@ -48,12 +48,12 @@ function ManageRoleModal({ user, showSnackbar }) {
       ...prevState,
       roles_user_data: response.data,
     }));
-  }, [user.id, getRolesUserData]);
+  }, [user.id]);
 
   useEffect(() => {
     fetchRolesData();
     fetchRolesUserData();
-  }, [fetchRolesData, fetchRolesUserData]);
+  }, []);
 
   const handleAddRole = async (roleId) => {
     const response = await addRoleUser({

@@ -9,14 +9,18 @@ const useEcho = () => {
 
     useEffect(() => { 
         const echo = new Echo({
-            broadcaster: 'reverb',
-            key: process.env.NEXT_PUBLIC_REVERB_APP_KEY,
-            wsHost: process.env.NEXT_PUBLIC_REVERB_HOST,
-            wsPort: process.env.NEXT_PUBLIC_REVERB_PORT,
-            wssPort: process.env.NEXT_PUBLIC_REVERB_PORT,
-            forceTLS:
-                (process.env.NEXT_PUBLIC_REVERB_SCHEME ?? 'https') === 'https',
-            enabledTransports: ['ws', 'wss'],
+            broadcaster: 'pusher',
+            key:  process.env.NEXT_PUBLIC_PUSHER_APP_KEY,
+            cluster: process.env.NEXT_PUBLIC_PUSHER_APP_CLUSTER,
+            namespace: 'App.Events',
+            encrypted: true,
+            forceTLS: true,  // (process.env.NEXT_PUBLIC_REVERB_SCHEME ?? 'https') === 'https',
+
+            // wsHost: process.env.NEXT_PUBLIC_REVERB_HOST,
+            // wsPort: process.env.NEXT_PUBLIC_REVERB_PORT,
+            // wssPort: process.env.NEXT_PUBLIC_REVERB_PORT,
+           // enabledTransports: ['ws', 'wss'],
+           
             Pusher: Pusher,
             authorizer: (channel, options) => {
                 return {

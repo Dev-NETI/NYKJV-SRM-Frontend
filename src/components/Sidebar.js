@@ -20,7 +20,6 @@ import Avatar from "@mui/joy/Avatar";
 import Box from "@mui/joy/Box";
 import Divider from "@mui/joy/Divider";
 import IconButton from "@mui/joy/IconButton";
-import Input from "@mui/joy/Input";
 import List from "@mui/joy/List";
 import ListItem from "@mui/joy/ListItem";
 import ListItemButton from "@mui/joy/ListItemButton";
@@ -43,9 +42,7 @@ const routes = [
         label: "Dashboard",
         icon: <DashboardRoundedIcon />,
 
-
         allowedRoles: ["Dashboard"],
-
       },
       {
         href: "/product",

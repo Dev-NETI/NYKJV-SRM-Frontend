@@ -44,7 +44,7 @@ const Page = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       f_name: "",
-      m_name: null,
+      m_name: "",
       l_name: "",
       contact_number: "",
       email: "",
