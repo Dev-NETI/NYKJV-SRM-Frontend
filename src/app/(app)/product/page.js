@@ -43,8 +43,6 @@ const ProductComponent = () => {
   const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
   const { user } = useAuth({ middleware: "auth" });
-
-  // Loading state
   const [loading, setLoading] = useState({
     adding: false,
     updating: false,
@@ -173,41 +171,41 @@ const ProductComponent = () => {
   };
 
   const handleDeactivate = async (id) => {
-    // setLoading((prev) => ({ ...prev, deactivating: true }));
-    // try {
-    //   await deactivateProduct(id);
-    //   setProducts(products.filter((product) => product.id !== id));
-    //   setFilteredProducts(
-    //     filteredProducts.filter((product) => product.id !== id)
-    //   );
-    //   setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-    //   toast.success("Product deactivated successfully!");
-    // } catch (error) {
-    //   console.error("Error deleting product:", error);
-    //   toast.error("Failed to deactivate product. Please try again.");
-    // } finally {
-    //   setLoading((prev) => ({ ...prev, deactivating: false }));
-    // }
+    setLoading((prev) => ({ ...prev, deactivating: true }));
+    try {
+      await deactivateProduct(id);
+      setProducts(products.filter((product) => product.id !== id));
+      setFilteredProducts(
+        filteredProducts.filter((product) => product.id !== id)
+      );
+      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
+      toast.success("Product deactivated successfully!");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error("Failed to deactivate product. Please try again.");
+    } finally {
+      setLoading((prev) => ({ ...prev, deactivating: false }));
+    }
   };
 
   const handleMultipleDeactivate = async () => {
-    // setLoading((prev) => ({ ...prev, deactivating: true }));
-    // try {
-    //   await Promise.all(selectedIds.map((id) => deactivateProduct(id)));
-    //   setProducts(
-    //     products.filter((product) => !selectedIds.includes(product.id))
-    //   );
-    //   setFilteredProducts(
-    //     filteredProducts.filter((product) => !selectedIds.includes(product.id))
-    //   );
-    //   setSelectedIds([]);
-    //   toast.success("Selected products deactivated successfully!");
-    // } catch (error) {
-    //   console.error("Error deactivating products:", error);
-    //   toast.error("Failed to deactivate products. Please try again.");
-    // } finally {
-    //   setLoading((prev) => ({ ...prev, deactivating: false }));
-    // }
+    setLoading((prev) => ({ ...prev, deactivating: true }));
+    try {
+      await Promise.all(selectedIds.map((id) => deactivateProduct(id)));
+      setProducts(
+        products.filter((product) => !selectedIds.includes(product.id))
+      );
+      setFilteredProducts(
+        filteredProducts.filter((product) => !selectedIds.includes(product.id))
+      );
+      setSelectedIds([]);
+      toast.success("Selected products deactivated successfully!");
+    } catch (error) {
+      console.error("Error deactivating products:", error);
+      toast.error("Failed to deactivate products. Please try again.");
+    } finally {
+      setLoading((prev) => ({ ...prev, deactivating: false }));
+    }
   };
 
   const handleView = (product) => {
