@@ -11,12 +11,6 @@ import {
   Container,
   Paper,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid2,
-  Typography,
   IconButton,
   TextField,
   CircularProgress,
@@ -28,30 +22,22 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Search as SearchIcon } from "@mui/icons-material"; // Change to MUI's Search Icon
 import { useAuth } from "@/hooks/auth";
+import ProductForm from "@/components/product/ProductForm";
+import ViewProductDialog from "@/components/product/ViewProductDialog";
 
 const ProductComponent = () => {
-  const {
-    index: showProduct,
-    store,
-    update: updateProduct,
-    destroy: deactivateProduct,
-  } = useProduct();
+  const { destroy: deactivateProduct } = useProduct();
+  const { show: showProduct } = useProduct("get-products");
 
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [open, setOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewProduct, setViewProduct] = useState({});
-  const [productName, setProductName] = useState("");
-  const [productCategory, setProductCategory] = useState("");
-  const [productBrand, setProductBrand] = useState("");
-  const [productPrice, setProductPrice] = useState("");
-  const [productSpecification, setProductSpecification] = useState("");
-  const [errors, setErrors] = useState({});
-  const [editingProductId, setEditingProductId] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const [search, setSearch] = useState("");
   const [deactivatingId, setDeactivatingId] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const { index: showBrand } = useBrand();
   const [brandItems, setBrand] = useState([]);
   const { index: showCategory } = useCategory();
@@ -70,7 +56,9 @@ const ProductComponent = () => {
       try {
         const { data: brandData } = await showBrand();
         const { data: categoryData } = await showCategory();
-        const { data: productData } = await showProduct();
+        const { data: productData } = await showProduct(
+          user?.supplier_id || "null"
+        );
         setBrand(brandData);
         setCategory(categoryData);
         setProducts(productData);
@@ -174,130 +162,57 @@ const ProductComponent = () => {
     name: product.name,
     price: product.price,
     specification: product.specification,
+    image: product.image_path,
   }));
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setProductName("");
-    setProductCategory("");
-    setProductBrand("");
-    setProductPrice("");
-    setProductSpecification("");
-    setErrors({});
-    setEditingProductId(null);
-  };
 
   const handleEdit = (product) => {
-    setEditingProductId(product.id);
-    setProductName(product.name);
-    setProductCategory(product.category_id);
-    setProductBrand(product.brand_id);
-    setProductPrice(product.price);
-    setProductSpecification(product.specification);
     setOpen(true);
+    setSelectedProduct(product.id);
   };
 
   const handleDeactivate = async (id) => {
-    setLoading((prev) => ({ ...prev, deactivating: true }));
-    try {
-      await deactivateProduct(id);
-      setProducts(products.filter((product) => product.id !== id));
-      setFilteredProducts(
-        filteredProducts.filter((product) => product.id !== id)
-      );
-      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
-      toast.success("Product deactivated successfully!");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      toast.error("Failed to deactivate product. Please try again.");
-    } finally {
-      setLoading((prev) => ({ ...prev, deactivating: false }));
-    }
+    // setLoading((prev) => ({ ...prev, deactivating: true }));
+    // try {
+    //   await deactivateProduct(id);
+    //   setProducts(products.filter((product) => product.id !== id));
+    //   setFilteredProducts(
+    //     filteredProducts.filter((product) => product.id !== id)
+    //   );
+    //   setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
+    //   toast.success("Product deactivated successfully!");
+    // } catch (error) {
+    //   console.error("Error deleting product:", error);
+    //   toast.error("Failed to deactivate product. Please try again.");
+    // } finally {
+    //   setLoading((prev) => ({ ...prev, deactivating: false }));
+    // }
   };
 
   const handleMultipleDeactivate = async () => {
-    setLoading((prev) => ({ ...prev, deactivating: true }));
-    try {
-      await Promise.all(selectedIds.map((id) => deactivateProduct(id)));
-      setProducts(
-        products.filter((product) => !selectedIds.includes(product.id))
-      );
-      setFilteredProducts(
-        filteredProducts.filter((product) => !selectedIds.includes(product.id))
-      );
-      setSelectedIds([]);
-      toast.success("Selected products deactivated successfully!");
-    } catch (error) {
-      console.error("Error deactivating products:", error);
-      toast.error("Failed to deactivate products. Please try again.");
-    } finally {
-      setLoading((prev) => ({ ...prev, deactivating: false }));
-    }
+    // setLoading((prev) => ({ ...prev, deactivating: true }));
+    // try {
+    //   await Promise.all(selectedIds.map((id) => deactivateProduct(id)));
+    //   setProducts(
+    //     products.filter((product) => !selectedIds.includes(product.id))
+    //   );
+    //   setFilteredProducts(
+    //     filteredProducts.filter((product) => !selectedIds.includes(product.id))
+    //   );
+    //   setSelectedIds([]);
+    //   toast.success("Selected products deactivated successfully!");
+    // } catch (error) {
+    //   console.error("Error deactivating products:", error);
+    //   toast.error("Failed to deactivate products. Please try again.");
+    // } finally {
+    //   setLoading((prev) => ({ ...prev, deactivating: false }));
+    // }
   };
 
   const handleView = (product) => {
     setViewProduct(product);
     setViewOpen(true);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const object = Object.fromEntries(formData.entries());
-
-    const validationErrors = validateForm(object);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setLoading((prev) => ({
-      ...prev,
-      adding: !editingProductId,
-      updating: editingProductId,
-    }));
-
-    try {
-      if (editingProductId) {
-        await updateProduct(editingProductId, object);
-        toast.success("Product updated successfully!");
-      } else {
-        await store(object);
-        toast.success("Product added successfully!");
-      }
-      handleClose();
-    } catch (error) {
-      console.error("Error submitting product:", error);
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
-      } else {
-        setErrors({ form: "An error occurred. Please try again." });
-      }
-    } finally {
-      setLoading((prev) => ({ ...prev, adding: false, updating: false }));
-    }
-  };
-
-  const validateForm = (object) => {
-    const errors = {};
-    if (!object.productName) errors.productName = "Product Name is required.";
-    if (!object.productPrice) {
-      errors.productPrice = "Product Price is required.";
-    } else if (isNaN(object.productPrice)) {
-      errors.productPrice = "Product Price must be a number.";
-    }
-    if (!object.productSpecification)
-      errors.productSpecification = "Product Specification is required.";
-    if (!object.productCategory)
-      errors.productCategory = "Please select a category.";
-    if (!object.productBrand) errors.productBrand = "Please select a brand.";
-
-    return errors;
   };
 
   return (
@@ -375,303 +290,19 @@ const ProductComponent = () => {
           </Paper>
         </Box>
 
-        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-          <DialogTitle>
-            {editingProductId ? "Edit Product" : "Add Product"}
-          </DialogTitle>
-          <DialogContent>
-            <Box>
-              <form onSubmit={handleSubmit}>
-                <Grid2 container spacing={2}>
-                  <Grid2 item size={{ xs: 8 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Product Name:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <input
-                        type="text"
-                        id="productName"
-                        name="productName"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </item>
-                    {errors.productName && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productName}
-                      </p>
-                    )}
-                  </Grid2>
-
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Brand:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <select
-                        id="productBrand"
-                        name="productBrand"
-                        value={productBrand} // Update this state variable accordingly
-                        onChange={(e) => setProductBrand(e.target.value)} // Update the state function accordingly
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Select a brand</option>
-                        {brandItems.map(({ id, name }) => (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </item>
-                    {errors.productBrand && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productBrand}
-                      </p>
-                    )}
-                  </Grid2>
-
-                  <Grid2 item size={{ xs: 6 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Category:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <select
-                        id="productCategory"
-                        name="productCategory"
-                        value={productCategory}
-                        onChange={(e) => setProductCategory(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Select a category</option>
-                        {categoryItems.map(({ id, name }) => (
-                          <option key={id} value={id}>
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </item>
-                    {errors.productCategory && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productCategory}
-                      </p>
-                    )}
-                  </Grid2>
-
-                  <Grid2 item size={{ xs: 12 }}>
-                    <Typography variant="body1" color="textSecondary">
-                      <strong>Specification:</strong>
-                    </Typography>
-                    <item sx={{ fontSize: "1.1rem" }}>
-                      <textarea
-                        id="productSpecification"
-                        name="productSpecification"
-                        value={productSpecification}
-                        onChange={(e) =>
-                          setProductSpecification(e.target.value)
-                        }
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </item>
-                    {errors.productSpecification && (
-                      <p className="text-red-500 text-sm">
-                        {errors.productSpecification}
-                      </p>
-                    )}
-                  </Grid2>
-                </Grid2>
-
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Category:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    <select
-                      id="productCategory"
-                      name="productCategory"
-                      value={productCategory}
-                      onChange={(e) => setProductCategory(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Select a category</option>
-                      {categoryItems.map(({ id, name }) => (
-                        <option key={id} value={id}>
-                          {name}
-                        </option>
-                      ))}
-                    </select>
-                  </item>
-                  {errors.productCategory && (
-                    <p className="text-red-500 text-sm">
-                      {errors.productCategory}
-                    </p>
-                  )}
-                </Grid2>
-
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Brand:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    <select
-                      id="productBrand"
-                      name="productBrand"
-                      value={productBrand} // Update this state variable accordingly
-                      onChange={(e) => setProductBrand(e.target.value)} // Update the state function accordingly
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Select a brand</option>
-                      {brandItems.map(({ id, name }) => (
-                        <option key={id} value={id}>
-                          {name}
-                        </option>
-                      ))}
-                    </select>
-                  </item>
-                  {errors.productBrand && (
-                    <p className="text-red-500 text-sm">
-                      {errors.productBrand}
-                    </p>
-                  )}
-                </Grid2>
-
-                <Grid2 item size={{ xs: 12 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Specification:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    <textarea
-                      id="productSpecification"
-                      name="productSpecification"
-                      value={productSpecification}
-                      onChange={(e) => setProductSpecification(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </item>
-                  {errors.productSpecification && (
-                    <p className="text-red-500 text-sm">
-                      {errors.productSpecification}
-                    </p>
-                  )}
-                </Grid2>
-                {errors.form && (
-                  <p className="text-red-500 text-sm">{errors.form}</p>
-                )}
-                <div className="pt-2 flex justify-end">
-                  <DialogActions>
-                    <Button
-                      onClick={handleClose}
-                      variant="contained"
-                      color="error"
-                      className="mr-2"
-                    >
-                      Cancel
-                    </Button>
-                    <Button variant="contained" color="primary" type="submit">
-                      {" "}
-                      {editingProductId ? "Update Product" : "Add Product"}
-                    </Button>
-                  </DialogActions>
-                </div>
-              </form>
-            </Box>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          open={viewOpen}
-          onClose={() => setViewOpen(false)}
-          fullWidth
-          maxWidth="sm"
-        >
-          <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-            Product Details
-          </DialogTitle>
-          <DialogContent dividers>
-            <Box p={2}>
-              <Grid2 container spacing={2}>
-                <Grid2 item size={{ xs: 8 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Product Name:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.name || "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 4 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Price:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.price || "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Category:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.category_name || "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Brand:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.brand_name || "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Specification:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.specification || "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Modified By:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.modified_by || "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Updated At:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.updated_at
-                      ? new Date(viewProduct.updated_at).toLocaleString()
-                      : "N/A"}
-                  </item>
-                </Grid2>
-                <Grid2 item size={{ xs: 6 }}>
-                  <Typography variant="body1" color="textSecondary">
-                    <strong>Created At:</strong>
-                  </Typography>
-                  <item sx={{ fontSize: "1.1rem" }}>
-                    {viewProduct.created_at
-                      ? new Date(viewProduct.created_at).toLocaleString()
-                      : "N/A"}
-                  </item>
-                </Grid2>
-              </Grid2>
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => setViewOpen(false)}
-              color="error"
-              variant="contained"
-            >
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-
+        <ProductForm
+          isOpen={open}
+          closeForm={setOpen}
+          brandItems={brandItems}
+          categoryItems={categoryItems}
+          selectedProduct={selectedProduct}
+          setSelectedProduct={setSelectedProduct}
+        />
+        <ViewProductDialog
+          viewDialog={viewOpen}
+          viewProduct={viewProduct}
+          closeDialog={setViewOpen}
+        />
         <ToastContainer />
       </Container>
     </>

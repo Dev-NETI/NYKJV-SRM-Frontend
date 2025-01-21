@@ -23,6 +23,7 @@ import {
 import axios from "@/lib/axios";
 import { useAuth } from "@/hooks/auth";
 import SnackBarComponent from "../material-ui/SnackBarComponent";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function EmailFileUploadForm() {
   const [file, setFile] = useState(null);
@@ -256,6 +257,8 @@ export default function EmailFileUploadForm() {
         severity={snackbarState.severity}
         message={snackbarState.message}
       />
+
+      <ToastContainer />
     </>
   );
 }
