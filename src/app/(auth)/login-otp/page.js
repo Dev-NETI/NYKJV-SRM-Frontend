@@ -64,7 +64,7 @@ function LoginOtp() {
             "You have successfully verified your account. You can now log in.",
         });
         console.log(response.data.status);
-        router.push("/dashboard");
+        router.push("/product");
       })
       .catch((error) => {
         console.error("Error authenticating:", error.response.data.status);
