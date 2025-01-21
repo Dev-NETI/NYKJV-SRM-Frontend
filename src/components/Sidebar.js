@@ -37,13 +37,13 @@ const routes = [
   {
     group: "Main",
     items: [
-      {
-        href: "/dashboard",
-        label: "Dashboard",
-        icon: <DashboardRoundedIcon />,
+      // {
+      //   href: "/dashboard",
+      //   label: "Dashboard",
+      //   icon: <DashboardRoundedIcon />,
 
-        allowedRoles: ["Dashboard"],
-      },
+      //   allowedRoles: ["Dashboard"],
+      // },
       {
         href: "/product",
         label: "Products",
