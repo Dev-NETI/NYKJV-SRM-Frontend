@@ -85,14 +85,14 @@ const ProductComponent = () => {
   ]);
 
   useEffect(() => {
-    if (search) {
-      const result = products.filter((product) =>
-        product.name.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredProducts(result);
-    } else {
-      setFilteredProducts(products);
-    }
+    const lowerCaseSearch = search.toLowerCase();
+    const result = products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(lowerCaseSearch) ||
+        product.category.name.toLowerCase().includes(lowerCaseSearch) ||
+        product.brand.name.toLowerCase().includes(lowerCaseSearch)
+    );
+    setFilteredProducts(result);
   }, [search, products]);
 
   const columns = [
@@ -155,6 +155,10 @@ const ProductComponent = () => {
 
   const paginationModel = { page: 0, pageSize: 10 };
 
+  const currency = (currency_id) => {
+    return currency_id === 0 ? "₱" : "$";
+  };
+
   const rows = filteredProducts.map((product) => ({
     id: product.id,
     category_name: product.category.name,
@@ -162,8 +166,10 @@ const ProductComponent = () => {
     category_id: product.category_id,
     brand_id: product.brand_id,
     name: product.name,
-    price: product.price,
-    price_vat_ex: product.price_vat_ex,
+    price: product.price && `${currency(product.currency_id)} ${product.price}`,
+    price_vat_ex:
+      product.price_vat_ex &&
+      `${currency(product.currency_id)} ${product.price_vat_ex}`,
     specification: product.specification,
     image: product.image_path,
   }));
