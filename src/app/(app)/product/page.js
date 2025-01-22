@@ -24,6 +24,7 @@ import { Search as SearchIcon } from "@mui/icons-material"; // Change to MUI's S
 import { useAuth } from "@/hooks/auth";
 import ProductForm from "@/components/product/ProductForm";
 import ViewProductDialog from "@/components/product/ViewProductDialog";
+import ProductListSkeleton from "@/components/product/ProductListSkeleton";
 
 const ProductComponent = () => {
   const { destroy: deactivateProduct } = useProduct();
@@ -47,6 +48,7 @@ const ProductComponent = () => {
     adding: false,
     updating: false,
     deactivating: false,
+    getProduct: true,
   });
 
   useEffect(() => {
@@ -61,6 +63,7 @@ const ProductComponent = () => {
         setCategory(categoryData);
         setProducts(productData);
         setFilteredProducts(productData);
+        setLoading((prevState) => ({ ...prevState, getProduct: false }));
       } catch (error) {
         toast.error("Failed to load data. Please try again later.");
       }
@@ -218,93 +221,98 @@ const ProductComponent = () => {
   return (
     <>
       <Header title="Product" />
-      <Container maxWidth="xl" sx={{ mt: 3 }}>
-        <Box display="flex" justifyContent="center">
-          <Paper sx={{ width: "100%", p: 2 }}>
-            <Box display="flex" justifyContent="space-between" mt={2}>
-              <Box display="flex" alignItems="center">
-                <TextField
-                  variant="outlined"
-                  placeholder="Search Products"
-                  size="small"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  sx={{ mr: 2 }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              <Box display="flex" alignItems="center">
-                {/* add product button */}
-                {user?.supplier_id && (
+
+      {loading.getProduct ? (
+        <ProductListSkeleton />
+      ) : (
+        <Container maxWidth="xl" sx={{ mt: 3 }}>
+          <Box display="flex" justifyContent="center">
+            <Paper sx={{ width: "100%", p: 2 }}>
+              <Box display="flex" justifyContent="space-between" mt={2}>
+                <Box display="flex" alignItems="center">
+                  <TextField
+                    variant="outlined"
+                    placeholder="Search Products"
+                    size="small"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    sx={{ mr: 2 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+                <Box display="flex" alignItems="center">
+                  {/* add product button */}
+                  {user?.supplier_id && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleOpen}
+                      disabled={loading.adding || loading.updating} // Disable during loading
+                    >
+                      {loading.adding || loading.updating ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "Add"
+                      )}
+                    </Button>
+                  )}
                   <Button
                     variant="contained"
-                    color="primary"
-                    onClick={handleOpen}
-                    disabled={loading.adding || loading.updating} // Disable during loading
+                    color="error"
+                    onClick={handleMultipleDeactivate}
+                    disabled={selectedIds.length === 0 || loading.deactivating} // Disable if no products selected or during loading
+                    sx={{ ml: 2 }}
                   >
-                    {loading.adding || loading.updating ? (
+                    {loading.deactivating ? (
                       <CircularProgress size={24} />
                     ) : (
-                      "Add"
+                      "Deactivate"
                     )}
                   </Button>
-                )}
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleMultipleDeactivate}
-                  disabled={selectedIds.length === 0 || loading.deactivating} // Disable if no products selected or during loading
-                  sx={{ ml: 2 }}
-                >
-                  {loading.deactivating ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "Deactivate"
-                  )}
-                </Button>
+                </Box>
               </Box>
-            </Box>
-            <Box sx={{ p: 2 }}>
-              <DataGrid
-                rows={rows}
-                columns={columns}
-                pagination
-                initialState={{
-                  pagination: { paginationModel },
-                }}
-                pageSizeOptions={[5, 10, 20, 30, 40, 50]}
-                checkboxSelection
-                disableRowSelectionOnClick // This disables row selection when clicking anywhere else
-                onRowSelectionModelChange={(ids) => {
-                  setSelectedIds(ids);
-                }} // Track selected rows
-                sx={{ border: 0 }}
-              />
-            </Box>
-          </Paper>
-        </Box>
+              <Box sx={{ p: 2 }}>
+                <DataGrid
+                  rows={rows}
+                  columns={columns}
+                  pagination
+                  initialState={{
+                    pagination: { paginationModel },
+                  }}
+                  pageSizeOptions={[5, 10, 20, 30, 40, 50]}
+                  checkboxSelection
+                  disableRowSelectionOnClick // This disables row selection when clicking anywhere else
+                  onRowSelectionModelChange={(ids) => {
+                    setSelectedIds(ids);
+                  }} // Track selected rows
+                  sx={{ border: 0 }}
+                />
+              </Box>
+            </Paper>
+          </Box>
+        </Container>
+      )}
 
-        <ProductForm
-          isOpen={open}
-          closeForm={setOpen}
-          brandItems={brandItems}
-          categoryItems={categoryItems}
-          selectedProduct={selectedProduct}
-          setSelectedProduct={setSelectedProduct}
-        />
-        <ViewProductDialog
-          viewDialog={viewOpen}
-          viewProduct={viewProduct}
-          closeDialog={setViewOpen}
-        />
-        <ToastContainer />
-      </Container>
+      <ProductForm
+        isOpen={open}
+        closeForm={setOpen}
+        brandItems={brandItems}
+        categoryItems={categoryItems}
+        selectedProduct={selectedProduct}
+        setSelectedProduct={setSelectedProduct}
+      />
+      <ViewProductDialog
+        viewDialog={viewOpen}
+        viewProduct={viewProduct}
+        closeDialog={setViewOpen}
+      />
+      <ToastContainer />
     </>
   );
 };
