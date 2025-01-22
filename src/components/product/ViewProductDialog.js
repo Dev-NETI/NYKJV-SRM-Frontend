@@ -36,43 +36,49 @@ function ViewProductDialog({ viewDialog, viewProduct, closeDialog }) {
               </Grid2>
             )}
 
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Product Name:</strong>
               </Typography>
               {viewProduct.name || "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
-                <strong>Price:</strong>
+                <strong>Price w/ Vat:</strong>
               </Typography>
               {viewProduct.price || "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
+              <Typography variant="body1" color="textSecondary">
+                <strong>Price w/o Vat:</strong>
+              </Typography>
+              {viewProduct.price_vat_ex || "N/A"}
+            </Grid2>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Category:</strong>
               </Typography>
               {viewProduct.category_name || "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Brand:</strong>
               </Typography>
               {viewProduct.brand_name || "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Specification:</strong>
               </Typography>
               {viewProduct.specification || "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Modified By:</strong>
               </Typography>
               {viewProduct.modified_by || "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Updated At:</strong>
               </Typography>
@@ -81,7 +87,7 @@ function ViewProductDialog({ viewDialog, viewProduct, closeDialog }) {
                 ? new Date(viewProduct.updated_at).toLocaleString()
                 : "N/A"}
             </Grid2>
-            <Grid2 size={{ xs: 6 }}>
+            <Grid2 size={4}>
               <Typography variant="body1" color="textSecondary">
                 <strong>Created At:</strong>
               </Typography>
