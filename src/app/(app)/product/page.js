@@ -97,7 +97,8 @@ const ProductComponent = () => {
     { field: "name", headerName: "Product Name", flex: 1, minWidth: 180 },
     { field: "category_name", headerName: "Category", width: 200 },
     { field: "brand_name", headerName: "Brand", width: 200 },
-    { field: "price", headerName: "Price", width: 100 },
+    { field: "price", headerName: "Price w/ vat", width: 100 },
+    { field: "price_vat_ex", headerName: "Price w/0 vat", width: 100 },
     {
       field: "specification",
       headerName: "Specification",
@@ -159,6 +160,7 @@ const ProductComponent = () => {
     brand_id: product.brand_id,
     name: product.name,
     price: product.price,
+    price_vat_ex: product.price_vat_ex,
     specification: product.specification,
     image: product.image_path,
   }));

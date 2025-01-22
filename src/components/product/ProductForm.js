@@ -30,6 +30,7 @@ function ProductForm({
 }) {
   const [errors, setErrors] = useState({});
   const [file, setFile] = useState(null);
+  const [priceVatEx, setPriceVatEx] = useState(0);
   const { user } = useAuth({ middleware: "auth" });
   const { show } = useProduct();
   const [retrievedProduct, setRetrievedProduct] = useState(null);
@@ -38,6 +39,7 @@ function ProductForm({
     const fetchData = async () => {
       const { data: selectedProductData } = await show(selectedProduct);
       setRetrievedProduct(selectedProductData);
+      setPriceVatEx(selectedProductData.price_vat_ex || 0);
     };
     if (selectedProduct) {
       fetchData();
@@ -50,6 +52,7 @@ function ProductForm({
     closeForm(false);
     setSelectedProduct(null);
     setRetrievedProduct(null);
+    setPriceVatEx(0);
     resetForm();
   };
 
@@ -113,6 +116,14 @@ function ProductForm({
       errors.productPrice = "Product Price must be greater than zero.";
     }
 
+    if (!object.productPriceVatEx) {
+      errors.productPriceVatEx = "Product Price is required.";
+    } else if (isNaN(object.productPriceVatEx)) {
+      errors.productPriceVatEx = "Product Price must be a valid number.";
+    } else if (Number(object.productPriceVatEx) <= 0) {
+      errors.productPriceVatEx = "Product Price must be greater than zero.";
+    }
+
     if (!object.productSpecification?.trim()) {
       errors.productSpecification = "Product Specification is required.";
     }
@@ -136,6 +147,11 @@ function ProductForm({
     }
 
     return errors;
+  };
+
+  const handlePriceChange = (event) => {
+    const priceWithoutVat = (event.target.value / 1.12).toFixed(2);
+    setPriceVatEx(priceWithoutVat);
   };
 
   const form = (
@@ -199,7 +215,7 @@ function ProductForm({
                   <p className="text-red-500 text-sm">{errors.fileImage}</p>
                 )}
               </Grid2>
-              <Grid2 size={{ xs: 6 }}>
+              <Grid2 size={{ xs: 4 }}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>Currency:</strong>
                 </Typography>
@@ -221,9 +237,9 @@ function ProductForm({
                   <p className="text-red-500 text-sm">{errors.currency}</p>
                 )}
               </Grid2>
-              <Grid2 size={6}>
+              <Grid2 size={4}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Product Price:</strong>
+                  <strong>Product Price w/ Vat:</strong>
                 </Typography>
                 <Item>
                   <input
@@ -231,11 +247,31 @@ function ProductForm({
                     type="text"
                     id="productPrice"
                     name="productPrice"
+                    onChange={(event) => handlePriceChange(event)}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </Item>
                 {errors.productPrice && (
                   <p className="text-red-500 text-sm">{errors.productPrice}</p>
+                )}
+              </Grid2>
+              <Grid2 size={4}>
+                <Typography variant="body1" color="textSecondary">
+                  <strong>Product Price w/o Vat:</strong>
+                </Typography>
+                <Item>
+                  <input
+                    value={priceVatEx}
+                    readOnly
+                    id="productPriceVatEx"
+                    name="productPriceVatEx"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </Item>
+                {errors.productPriceVatEx && (
+                  <p className="text-red-500 text-sm">
+                    {errors.productPriceVatEx}
+                  </p>
                 )}
               </Grid2>
               <Grid2 size={{ xs: 6 }}>
