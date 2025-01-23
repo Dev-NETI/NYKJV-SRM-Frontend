@@ -8,6 +8,7 @@ import { useUser } from "@/hooks/api/user";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 function Page() {
   const { user } = useAuth({ middleware: "auth" });
@@ -218,10 +219,15 @@ function Page() {
                     style={{ color: "red" }}
                   />
                 </div>
-                <div className="flex justify-end">
-                  <Button variant="contained" type="submit" sx={{ width: 200 }}>
+                <div className="flex justify-center">
+                  <Button variant="contained" type="submit" sx={{ width: 500 }}>
                     {isSubmitting ? "Updating" : "Update"}
                   </Button>
+                </div>
+                <div className="flex justify-center">
+                  <Link href="/product">
+                    <p className="text-blue-700">Back</p>
+                  </Link>
                 </div>
               </div>
             </Form>
