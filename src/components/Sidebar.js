@@ -26,12 +26,12 @@ import ListItemButton from "@mui/joy/ListItemButton";
 import ListItemContent from "@mui/joy/ListItemContent";
 import Sheet from "@mui/joy/Sheet";
 import Typography from "@mui/joy/Typography";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 import { useAuth } from "@/hooks/auth";
 import Image from "next/image";
 import { Grow, Tooltip } from "@mui/material";
+import Link from "next/link";
 
 const routes = [
   {
@@ -285,16 +285,21 @@ export default function Sidebar({ open, user, toggleSidebar }) {
             boxShadow: "lg",
           }}
         >
-          <Avatar
-            src={"/user.png"}
-            alt={user?.f_name}
-            size="lg"
-            sx={{
-              "--Avatar-size": "40px",
-              border: "2px solid",
-              borderColor: "primary.500",
-            }}
-          />
+          <Tooltip title="Update Profile">
+            <Link href="/profile">
+              <Avatar
+                src={"/user.png"}
+                alt={user?.f_name}
+                size="lg"
+                sx={{
+                  "--Avatar-size": "40px",
+                  border: "2px solid",
+                  borderColor: "primary.500",
+                }}
+              />
+            </Link>
+          </Tooltip>
+
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography level="body-sm" fontWeight="bold">
               Hi, {user?.f_name} {user?.l_name}
