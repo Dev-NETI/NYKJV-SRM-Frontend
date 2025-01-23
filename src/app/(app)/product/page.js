@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/auth";
 import ProductForm from "@/components/product/ProductForm";
 import ViewProductDialog from "@/components/product/ViewProductDialog";
 import ProductListSkeleton from "@/components/product/ProductListSkeleton";
+import Image from "next/image";
 
 const ProductComponent = () => {
   const { destroy: deactivateProduct } = useProduct();
@@ -97,7 +98,30 @@ const ProductComponent = () => {
 
   const columns = [
     { field: "id", headerName: "#", width: 50 },
-    { field: "name", headerName: "Product Name", flex: 1, minWidth: 180 },
+    {
+      field: "image_path",
+      headerName: "Image",
+      flex: 1,
+      minWidth: 180,
+      renderCell: (params) => {
+        const imagePath = params.row.image_path;
+        if (!imagePath) {
+          // Return nothing if image_path is null or empty
+          return null;
+        }
+
+        return (
+          <Image
+            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/storage/products/${imagePath}`}
+            width={75}
+            height={75}
+            alt={params.row.name || "Product Image"}
+            style={{ objectFit: "contain" }}
+          />
+        );
+      },
+    },
+    { field: "name", headerName: "Product", flex: 1, minWidth: 180 },
     { field: "category_name", headerName: "Category", width: 200 },
     { field: "brand_name", headerName: "Brand", width: 200 },
     { field: "price", headerName: "Price w/ vat", width: 100 },
@@ -165,6 +189,7 @@ const ProductComponent = () => {
     brand_name: product.brand.name,
     category_id: product.category_id,
     brand_id: product.brand_id,
+    image_path: product.image_path,
     name: product.name,
     price: product.price && `${currency(product.currency_id)} ${product.price}`,
     price_vat_ex:
