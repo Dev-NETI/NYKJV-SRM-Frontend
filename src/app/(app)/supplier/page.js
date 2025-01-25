@@ -63,25 +63,23 @@ export default function DataTable() {
     lastPage: 1,
   });
   const [searchParams, setSearchParams] = useState({
-    name: "", 
+    name: "", // Set initial value for name as an empty string
   });
   const handleSearch = () => {
-    const trimmedName = searchParams.name.trim();
-    if (trimmedName === "") {
-      console.log("Empty search input. Aborting.");
-      return; 
+    if (searchParams.name.trim() === "") {
+      return;
     }
-  
-    console.log("Searching for:", trimmedName);
-    setPagination({ ...pagination, page: 1 }); 
-    fetchSuppliers(); 
+    // console.log("Search Query:", searchParams.name); // Debugging
+    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page when search is triggered
+    fetchSuppliers();
   };
+
   const fetchSuppliers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get("/api/supplier", {
         params: {
-          name: searchParams.name,
+          name: searchParams.name, // Send the search term to backend
           page: pagination.page,
           per_page: 10,
         },
@@ -98,10 +96,11 @@ export default function DataTable() {
         setSuppliers([]);
       }
     } catch (error) {
+      // console.error("Error fetching suppliers:", error);
     } finally {
       setLoading(false);
     }
-  }, [searchParams.name, pagination.page]); 
+  }, [searchParams.name, pagination.page]); // Add dependencies here
 
   const handleAlert = () => {
     setDeleteAlert(true);
@@ -112,13 +111,13 @@ export default function DataTable() {
 
   const handleRead = (id) => {
     setReadSupplierId(id);
-    setEditSupplierId(null); 
+    setEditSupplierId(null); // Reset edit state
     setReadDrawerOpen(true);
   };
 
   const handleEdit = (id) => {
     setEditSupplierId(id);
-    setReadSupplierId(null); 
+    setReadSupplierId(null); // Reset read state
     setIsDrawerOpen(true);
   };
 
@@ -393,7 +392,7 @@ export default function DataTable() {
     convertedCity();
     convertedMunicipality();
     convertedBrgy();
-  }, [pagination.page]);
+  }, [pagination.page, fetchSuppliers]);
 
   if (loading) {
     return <Loading />;
@@ -432,15 +431,15 @@ export default function DataTable() {
             <FormControl sx={{ minWidth: 200 }}>
               <FormLabel>Name</FormLabel>
               <Input
-                placeholder="Search name"
+                placeholder="Search by name..."
                 startDecorator={<Search />}
                 value={searchParams.name}
                 onChange={(e) =>
-                  setSearchParams((prev) => ({
-                    ...prev,
-                    name: e.target.value,
-                  }))
-                }
+                  setSearchParams({ name: e.target.value.trim() })
+                } // No need to call .trim() here
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSearch();
+                }}
               />
             </FormControl>
             <Button
