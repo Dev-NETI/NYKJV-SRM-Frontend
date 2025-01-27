@@ -27,6 +27,7 @@ function ProductForm({
   categoryItems,
   selectedProduct = null,
   setSelectedProduct,
+  setReloadListState,
 }) {
   const [errors, setErrors] = useState({});
   const [file, setFile] = useState(null);
@@ -80,7 +81,8 @@ function ProductForm({
         },
       });
       apiResponse.response
-        ? toast.success(apiResponse.message)
+        ? (toast.success(apiResponse.message),
+          setReloadListState(Math.random()))
         : toast.error(apiResponse.message);
     } else {
       object.productId = selectedProduct;
@@ -94,7 +96,8 @@ function ProductForm({
         }
       );
       apiResponse.response
-        ? toast.success(apiResponse.message)
+        ? (toast.success(apiResponse.message),
+          setReloadListState(Math.random()))
         : toast.error(apiResponse.message);
     }
 
