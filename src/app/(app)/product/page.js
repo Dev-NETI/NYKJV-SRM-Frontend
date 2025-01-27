@@ -45,6 +45,7 @@ const ProductComponent = () => {
   const { index: showCategory } = useCategory();
   const [categoryItems, setCategory] = useState([]);
   const { user } = useAuth({ middleware: "auth" });
+  const [reloadListState, setReloadListState] = useState(0);
   const [loading, setLoading] = useState({
     adding: false,
     updating: false,
@@ -76,6 +77,11 @@ const ProductComponent = () => {
     ) {
       fetchData();
     }
+
+    // Fetch data when reloadListState changes
+    if (reloadListState) {
+      fetchData();
+    }
   }, [
     brandItems,
     categoryItems,
@@ -83,6 +89,7 @@ const ProductComponent = () => {
     showBrand,
     showCategory,
     showProduct,
+    reloadListState,
   ]);
 
   useEffect(() => {
@@ -219,6 +226,7 @@ const ProductComponent = () => {
         filteredProducts.filter((product) => product.id !== id)
       );
       setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
+      setReloadListState(Math.random());
       toast.success("Product deactivated successfully!");
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -239,6 +247,7 @@ const ProductComponent = () => {
         filteredProducts.filter((product) => !selectedIds.includes(product.id))
       );
       setSelectedIds([]);
+      setReloadListState(Math.random());
       toast.success("Selected products deactivated successfully!");
     } catch (error) {
       console.error("Error deactivating products:", error);
@@ -341,6 +350,7 @@ const ProductComponent = () => {
         categoryItems={categoryItems}
         selectedProduct={selectedProduct}
         setSelectedProduct={setSelectedProduct}
+        setReloadListState={setReloadListState}
       />
       <ViewProductDialog
         viewDialog={viewOpen}
