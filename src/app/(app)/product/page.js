@@ -191,10 +191,14 @@ const ProductComponent = () => {
     brand_id: product.brand_id,
     image_path: product.image_path,
     name: product.name,
-    price: product.price && `${currency(product.currency_id)} ${product.price}`,
+    price:
+      product.price != null && product.price > 0
+        ? `${currency(product.currency_id)} ${product.price}`
+        : "",
     price_vat_ex:
-      product.price_vat_ex &&
-      `${currency(product.currency_id)} ${product.price_vat_ex}`,
+      product.price_vat_ex != null && product.price_vat_ex > 0
+        ? `${currency(product.currency_id)} ${product.price_vat_ex}`
+        : "",
     specification: product.specification,
     image: product.image_path,
   }));

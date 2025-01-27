@@ -78,7 +78,7 @@ function Page() {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ setFieldValue, isSubmitting, errors }) => (
+          {({ setFieldValue, isSubmitting }) => (
             <Form>
               <div className="flex flex-col gap-2">
                 <div>

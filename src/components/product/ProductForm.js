@@ -108,20 +108,24 @@ function ProductForm({
       errors.productName = "Product Name is required.";
     }
 
-    if (!object.productPrice) {
-      errors.productPrice = "Product Price is required.";
-    } else if (isNaN(object.productPrice)) {
-      errors.productPrice = "Product Price must be a valid number.";
-    } else if (Number(object.productPrice) <= 0) {
-      errors.productPrice = "Product Price must be greater than zero.";
+    // Validate productPrice
+    if (object.productPrice != null && object.productPrice !== 0) {
+      if (isNaN(object.productPrice)) {
+        errors.productPrice = "Product Price must be a valid number.";
+      } else if (Number(object.productPrice) < 0) {
+        errors.productPrice = "Product Price cannot be negative.";
+      }
     }
 
-    if (!object.productPriceVatEx) {
-      errors.productPriceVatEx = "Product Price is required.";
-    } else if (isNaN(object.productPriceVatEx)) {
-      errors.productPriceVatEx = "Product Price must be a valid number.";
-    } else if (Number(object.productPriceVatEx) <= 0) {
-      errors.productPriceVatEx = "Product Price must be greater than zero.";
+    // Validate productPriceVatEx
+    if (object.productPriceVatEx != null && object.productPriceVatEx !== 0) {
+      if (isNaN(object.productPriceVatEx)) {
+        errors.productPriceVatEx =
+          "Product Price (VAT Excluded) must be a valid number.";
+      } else if (Number(object.productPriceVatEx) < 0) {
+        errors.productPriceVatEx =
+          "Product Price (VAT Excluded) cannot be negative.";
+      }
     }
 
     if (!object.productSpecification?.trim()) {
@@ -134,12 +138,6 @@ function ProductForm({
 
     if (!object.productBrand) {
       errors.productBrand = "Please select a brand.";
-    }
-
-    if (!selectedProduct) {
-      if (!object.fileImage) {
-        errors.fileImage = "Please select a product image.";
-      }
     }
 
     if (!object.currencyId) {
@@ -176,7 +174,9 @@ function ProductForm({
 
               <Grid2 size={12}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Product Name:</strong>
+                  <strong>
+                    Product Name:<text className="text-red-600">*</text>
+                  </strong>
                 </Typography>
                 <Item>
                   <input
@@ -194,6 +194,7 @@ function ProductForm({
               <Grid2 size={12}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>Select Product Image:</strong>
+                  <small className="text-red-600 text-xs">(optional)</small>
                 </Typography>
                 <Button
                   variant="contained"
@@ -239,11 +240,12 @@ function ProductForm({
               </Grid2>
               <Grid2 size={4}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Product Price w/ Vat:</strong>
+                  <strong>Price w/ Vat:</strong>
+                  <small className="text-red-600 text-xs">(optional)</small>
                 </Typography>
                 <Item>
                   <input
-                    defaultValue={retrievedProduct?.price || ""}
+                    defaultValue={retrievedProduct?.price || 0}
                     type="text"
                     id="productPrice"
                     name="productPrice"
@@ -257,7 +259,8 @@ function ProductForm({
               </Grid2>
               <Grid2 size={4}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Product Price w/o Vat:</strong>
+                  <strong>Price w/o Vat:</strong>
+                  <small className="text-red-600 text-xs">(optional)</small>
                 </Typography>
                 <Item>
                   <input
@@ -276,7 +279,9 @@ function ProductForm({
               </Grid2>
               <Grid2 size={{ xs: 6 }}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Brand:</strong>
+                  <strong>
+                    Brand:<text className="text-red-600">*</text>
+                  </strong>
                 </Typography>
                 <Item>
                   <select
@@ -304,7 +309,9 @@ function ProductForm({
 
               <Grid2 size={{ xs: 6 }}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Category:</strong>
+                  <strong>
+                    Category:<text className="text-red-600">*</text>
+                  </strong>
                 </Typography>
                 <Item>
                   <select
@@ -334,7 +341,9 @@ function ProductForm({
 
               <Grid2 size={{ xs: 12 }}>
                 <Typography variant="body1" color="textSecondary">
-                  <strong>Specification:</strong>
+                  <strong>
+                    Specification:<text className="text-red-600">*</text>
+                  </strong>
                 </Typography>
                 <Item>
                   <textarea
