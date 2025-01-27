@@ -150,6 +150,11 @@ export default function DataTable() {
       width: { xs: "15%", sm: "15%", md: "15%" },
     },
     {
+      field: "departments",
+      headerName: "Department",
+      width: { xs: "15%", sm: "15%", md: "15%" },
+    },
+    {
       field: "island",
       headerName: "Island",
       width: { xs: "15%", sm: "15%", md: "15%" },
@@ -373,6 +378,7 @@ export default function DataTable() {
     return {
       id: supplier.id,
       name: supplier.name,
+      departments: supplier.departments,
       island: supplier.island,
       region_id: region ? region.name : "None",
       province_id: province ? province.name : "None",
