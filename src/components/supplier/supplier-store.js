@@ -21,7 +21,6 @@ import local_axios from "@/lib/axios";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import PersonIcon from "@mui/icons-material/Person";
 import TerrainIcon from "@mui/icons-material/Terrain";
-import WorkIcon from '@mui/icons-material/Work';
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
@@ -31,10 +30,10 @@ import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
 import Skeleton from "@mui/material/Skeleton";
 
+
 const FormSchema = z
   .object({
     name: z.string().nonempty({ message: "Required" }),
-    departments: z.string().nonempty({ message: "Required" }),
     island: z.string().nonempty("Required"),
     region_id: z
       .string()
@@ -96,11 +95,10 @@ const FormSchema = z
 
 const StoreSupplierDrawer = () => {
   const [state, setState] = React.useState({ right: false });
-  const { control, clearErrors, handleSubmit, reset, formState: { errors } } = useForm({
+  const { control, clearErrors, handleSubmit, reset } = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
-      departments: "",
       island: "",
       province_id: null,
       district_id: null,
@@ -111,12 +109,7 @@ const StoreSupplierDrawer = () => {
       is_active: false,
     },
   });
-  
-  // Log errors for debugging
-  console.log("Form Errors:", errors);
-  
 
-  const [departmentGroups, setDepartment] = React.useState([]);
   const [islandGroups, setIslandGroups] = React.useState([]);
   const [regionGroups, setRegionGroups] = React.useState([]);
   const [provinceGroups, setProvinceGroups] = React.useState([]);
@@ -137,31 +130,6 @@ const StoreSupplierDrawer = () => {
   const [selectedBrgy, setSelectedBrgy] = React.useState(null);
   const [selectedStreetAddress, setSelectedStreetAddress] =
     React.useState(null);
-
-    const fetchDepartments = async () => {
-      try {
-        const response = await local_axios.get("/api/supplier/departments");
-        console.log("Raw API Response:", response.data);
-    
-        const departments = response.data.departments || [];
-        console.log("Extracted Departments:", departments);
-    
-        // Map departments to the required format
-        const formattedDepartments = departments.map((dept) => ({
-          code: dept.name, // Use `id` as the code
-          name: dept.name,       // Display the name
-        }));
-    
-        console.log("Formatted Departments:", formattedDepartments);
-    
-        setDepartment(formattedDepartments);
-      } catch (error) {
-        console.error("Error fetching department groups:", error);
-        setDepartment([]); // Reset state on error
-      }
-    };
-    
-    
 
   const fetchIslandGroups = async () => {
     try {
@@ -269,7 +237,6 @@ const StoreSupplierDrawer = () => {
 
   React.useEffect(() => {
     fetchIslandGroups();
-    fetchDepartments();
   }, []);
 
   const handleIslandChange = (islandId) => {
@@ -342,20 +309,21 @@ const StoreSupplierDrawer = () => {
   const submitForm = async (data) => {
     try {
       const response = await local_axios.post("/api/supplier", data);
-      console.log("Supplier Created Successfully", response.data);
-      console.log("Departments:", response.data.departments); // Check if departments are present
+      // console.log("Supplier Created Successfully", response.data);
       handleAlert();
-      reset(); // Clear the form
+      reset(); // This clears your form; ensure this function is defined in your code
       setState({ ...state, right: false });
+      // toggleDrawer("right", false);
     } catch (error) {
       if (error.response) {
-        console.error("Error response:", error.response.data);
+        // Backend errors (like validation errors)
+        // console.error("Error response:", error.response.data);
       } else {
-        console.error("Error submitting the form:", error.message);
+        // Other errors (like network issues)
+        // console.error("Error submitting the form:", error.message);
       }
     }
   };
-  
 
   const toggleDrawer = (anchor, open) => (event) => {
     setState({ ...state, [anchor]: open });
@@ -387,13 +355,6 @@ const StoreSupplierDrawer = () => {
                     icon: <PersonIcon fontSize="lg" />,
                     type: "text",
                     component: "input",
-                  },
-                  {
-                    name: "departments",
-                    label: "Department",
-                    icon: <WorkIcon fontSize="lg" />,
-                    component: "select",
-                    options: departmentGroups,
                   },
                   {
                     name: "island",
@@ -477,7 +438,7 @@ const StoreSupplierDrawer = () => {
                               {component === "input" ? (
                                 <input
                                   type={type}
-                                  className="w-full h-8 cursor-pointer hover:bg-[#f8f4f4] px-3 text-sm"
+                                  className="w-full h-8 cursor-pointer hover:bg-[#f8f4f4] px-3"
                                   placeholder="Empty"
                                   {...field}
                                 />
@@ -512,9 +473,9 @@ const StoreSupplierDrawer = () => {
                                       </span>
                                     </MenuItem>
                                     {options &&
-                                      options.map((group, idx) => (
+                                      options.map((group) => (
                                         <MenuItem
-                                          key={group.code || idx}
+                                          key={group.code}
                                           value={group.code}
                                         >
                                           {group.name}
@@ -591,14 +552,14 @@ const StoreSupplierDrawer = () => {
         anchor="right"
         open={state["right"]}
         onClose={toggleDrawer("right", false)}
-      >
+      > 
         {formList("right")}
       </Drawer>
       {alert ? (
         <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
-          <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-            Successfully Added
-          </Alert>
+            <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+              Successfully Added
+            </Alert>
         </div>
       ) : null}
     </div>

@@ -23,13 +23,11 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import Alert from "@mui/material/Alert";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Skeleton from "@mui/material/Skeleton";
-import WorkIcon from '@mui/icons-material/Work';
 
 import { TimerOutlined } from "@mui/icons-material";
 const FormSchema = z
   .object({
     name: z.string().nonempty({ message: "Required" }),
-    departments: z.string().nonempty({ message: "Required" }),
     island: z.string().nonempty({ message: "Required" }),
     region_id: z
       .string()
@@ -75,9 +73,7 @@ const FormSchema = z
   .strict();
 
 export default function SupplierRead({ supplierId, onClose, isOpen }) {
-  const [departmentGroups, setDepartment] = React.useState([]);
   const [islandsGroups, setIslandGroups] = React.useState([]);
-  const [departmentsGroups, setDepartmentsGroups] = React.useState([]);
   const [regionsGroups, setRegionGroups] = React.useState([]);
   const [provinceGroups, setProvinceGroups] = React.useState([]);
   const [districtGroups, setDistrictGroups] = React.useState([]);
@@ -163,7 +159,6 @@ export default function SupplierRead({ supplierId, onClose, isOpen }) {
             // Reset the form with fetched data
             reset({
               name: data?.name ?? "",
-              departments: data?.departments ?? "",
               island: data?.island ?? "",
               region_id: data?.region_id
                 ? String(data.region_id).padStart(9, "0")
@@ -206,30 +201,6 @@ export default function SupplierRead({ supplierId, onClose, isOpen }) {
       setEditAlert(false);
     }, 3000);
   };
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await local_axios.get("/api/supplier/departments");
-      console.log("Raw API Response:", response.data);
-  
-      const departments = response.data.departments || [];
-      console.log("Extracted Departments:", departments);
-  
-      // Map departments to the required format
-      const formattedDepartments = departments.map((dept) => ({
-        code: dept.name, // Use `id` as the code
-        name: dept.name,       // Display the name
-      }));
-  
-      console.log("Formatted Departments:", formattedDepartments);
-  
-      setDepartment(formattedDepartments);
-    } catch (error) {
-      console.error("Error fetching department groups:", error);
-      setDepartment([]); // Reset state on error
-    }
-  };
-
   // Fetch regions based on island code
   const fetchRegions = async (islandCode) => {
     setLoading(true);
@@ -628,13 +599,6 @@ export default function SupplierRead({ supplierId, onClose, isOpen }) {
                       name: "name",
                       label: "Name",
                       icon: <PersonIcon fontSize="lg" />,
-                      type: "text",
-                      component: "input",
-                    },
-                    {
-                      name: "departments",
-                      label: "Department",
-                      icon: <WorkIcon fontSize="lg" />,
                       type: "text",
                       component: "input",
                     },
