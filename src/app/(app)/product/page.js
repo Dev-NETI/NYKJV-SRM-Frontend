@@ -138,7 +138,7 @@ const ProductComponent = () => {
       headerName: "Specification",
       width: 250,
     },
-    { field: "supplier_name", headerName: "Supplier", flex: 1, minWidth: 180 },
+    // { field: "supplier_name", headerName: "Supplier", flex: 1, minWidth: 180 },
     {
       field: "actions",
       headerName: "Actions",
@@ -194,7 +194,7 @@ const ProductComponent = () => {
   const rows = filteredProducts.map((product) => ({
     id: product.id,
     category_name: product.category.name,
-    supplier_name: product.supplier?.name,
+    // supplier_name: product.supplier?.name,
     brand_name: product.brand.name,
     category_id: product.category_id,
     brand_id: product.brand_id,
