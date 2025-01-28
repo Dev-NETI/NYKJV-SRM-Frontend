@@ -3,12 +3,12 @@ const nextConfig = {
   reactStrictMode: false,
   images: {
     remotePatterns: [
-      // {
-      //   protocol: "https",
-      //   hostname: "nykjv-srm-backend.neti.com.ph",
-      //   port: "",
-      //   pathname: "/storage/**",
-      // },
+       {
+         protocol: "https",
+         hostname: "nykjv-srm-backend.neti.com.ph",
+         port: "",
+         pathname: "/storage/**",
+       },
       {
         protocol: "http",
         hostname: "localhost",
