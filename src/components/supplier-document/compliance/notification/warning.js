@@ -5,7 +5,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import Tooltip, { TooltipProps, tooltipClasses } from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 
-export default function WarningNotificationComponent({count, documents}) {
+export default function WarningNotificationComponent({count, documents, isSupplier}) {
     const HtmlTooltip = styled(({ className, ...props }) => (
         <Tooltip {...props} classes={{ popper: className }} />
         ))(({ theme }) => ({
@@ -38,7 +38,7 @@ export default function WarningNotificationComponent({count, documents}) {
                         <span className="cursor-pointer font-bold text-xl border-dashed border-white border-b-2 px-1">{count}</span> 
                     </HtmlTooltip>
                     soon to be expired document{count !== 1 ? 's' : ''}. 
-                   Please check the documents and update them if necessary.
+                   { isSupplier? (<span>Please check the documents and update them if necessary.</span>) : <span>Please contact the supplier to update the documents</span> }
                 </p>
                 </div>
             </div>

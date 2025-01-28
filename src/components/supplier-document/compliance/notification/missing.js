@@ -5,7 +5,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 
-export default function MissingNotificationComponent({ count, documents }) {
+export default function MissingNotificationComponent({ count, documents, isSupplier }) {
   const HtmlTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
@@ -46,8 +46,8 @@ export default function MissingNotificationComponent({ count, documents }) {
                 {count}
               </span>
             </HtmlTooltip>
-            missing document{count !== 1 ? "s" : ""}. Please upload all missing
-            documents.
+            missing document{count !== 1 ? "s" : ""}.  
+            { isSupplier? (<span> Please upload all missing documents.</span>) : <span> Please contact the supplier to upload these missing documents.</span> }
           </p>
         </div>
       </div>

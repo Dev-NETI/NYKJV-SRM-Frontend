@@ -60,7 +60,7 @@ function DocumentFormComponent({ setSnackbarMethod }) {
     };
 
     fetchData();
-  }, [getDocumentType]);
+  }, []);
 
   const initialValues = {
     documentType: initialDocumentTypeInForm || 0,

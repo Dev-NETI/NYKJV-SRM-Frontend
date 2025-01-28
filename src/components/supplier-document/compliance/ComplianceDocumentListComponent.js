@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import DocumentListItemComponent from "../DocumentListItemComponent";
-import DocumentListMissingItemComponent from "../DocumentListMissingItemComponent";
+import ComplianceDocumentListItemComponent from "./ComplianceDocumentListItemComponent";
+import ComplianceDocumentListMissingItemComponent from "./ComplianceDocumentListMissingItemComponent";
 import ComplianceDocumentListSupplierSelection from "./ComplianceDocumentListSupplierSelection";
 
 import ExpiredNotificationComponent from "./notification/expired";
@@ -41,6 +41,7 @@ export default function ComplianceDocumentListComponent({
   );
 
   const [searchText, setSearchText] = useState("");
+  const [isSupplier, setIsSupplier] = useState(false);
 
   const [documentListState, setDocumentListState] = useState({
     documentData: [],
@@ -150,6 +151,9 @@ export default function ComplianceDocumentListComponent({
       }));
     };
 
+    if(user?.is_supplier) setIsSupplier(true)
+    else setIsSupplier(false)
+
     if (user) {
       supplierDocumentState.reload === true && fetchData();
     }
@@ -174,11 +178,12 @@ export default function ComplianceDocumentListComponent({
       ...prevState,
       filteredData: filteredData,
     }));
+
   };
 
   return (
     <div
-      className="basis-full md:basis-10/12 lg:basis-10/12
+      className="basis-full lg:basis-full
                  flex flex-col gap-4"
     >
       <div className="flex justify-center items-center">
@@ -204,12 +209,12 @@ export default function ComplianceDocumentListComponent({
         </div>
       )}
 
-      {supplierDocumentState.supplierId == 0 ? (
+      {!user?.supplier_id && supplierDocumentState.supplierId == 0 ? (
         <div>Please select a supplier.</div>
       ) : (
-        <div className="flex flex-col bg-white border-gray-500 rounded-xl p-4">
+        <div className="flex flex-col bg-white border-gray-500 rounded-xl p-4 ">
           {supplierDocumentState.activePage == 1 ? (
-            <div className="flex flex-col gap-2 bg-white p-4">
+            <div className="flex flex-col gap-2 bg-white p-4 mb-4">
               {notification.expired.count > 0 && (
                 <ExpiredNotificationComponent
                   count={notification.expired.count}
@@ -221,6 +226,7 @@ export default function ComplianceDocumentListComponent({
                 <WarningNotificationComponent
                   count={notification.warning.count}
                   documents={warning}
+                  isSupplier = {user?.supplier_id}
                 />
               )}
 
@@ -230,26 +236,26 @@ export default function ComplianceDocumentListComponent({
                 <MissingNotificationComponent
                   count={notification.missing.count}
                   documents={missing}
+                  isSupplier = {user?.supplier_id}
                 />
               )}
 
               {notification.expired.count <= 0 && notification.completed && (
-                <CompletedNotificationComponent />
+                <CompletedNotificationComponent isSupplier = {user?.supplier_id}/>
               )}
             </div>
           ) : (
             ""
           )}
           <div
-            className="bg-white 
-      grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 
-      gap-4 p-4"
+            className="bg-white grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4"
           >
             {searchText.length > 0
               ? documentListState.filteredData.map((item) => (
-                  <DocumentListItemComponent
+                  <ComplianceDocumentListItemComponent
                     id={item.id}
                     key={item.id}
+                    type={item?.document_type?.name}
                     fileName={item.name}
                     modifiedBy={item.modified_by}
                     updatedAt={item.updated_at}
@@ -257,9 +263,10 @@ export default function ComplianceDocumentListComponent({
                   />
                 ))
               : documentListState.documentData.map((item) => (
-                  <DocumentListItemComponent
+                  <ComplianceDocumentListItemComponent
                     id={item.id}
                     key={item.id}
+                    type={item?.document_type?.name}
                     fileName={item.name}
                     modifiedBy={item.modified_by}
                     updatedAt={item.updated_at}
@@ -269,7 +276,7 @@ export default function ComplianceDocumentListComponent({
             {supplierDocumentState.activePage == 1 &&
               missing.length > 0 &&
               missing.map((item) => (
-                <DocumentListMissingItemComponent
+                <ComplianceDocumentListMissingItemComponent
                   id={item.id}
                   key={item.id}
                   type={item.name}
