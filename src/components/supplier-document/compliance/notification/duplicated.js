@@ -5,7 +5,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import Tooltip, { TooltipProps, tooltipClasses } from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 
-export default function DuplicatedNotificationComponent({ count, documents }) {
+export default function DuplicatedNotificationComponent({ count, documents, isSupplier }) {
   const HtmlTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))(({ theme }) => ({
