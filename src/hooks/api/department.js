@@ -2,9 +2,9 @@
 
 import { useResource } from "../resource";
 
-const useDepartment = () => {
+const useDepartment = (customUrl = null) => {
   const baseURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-  const route = "/api/department";
+  const route = customUrl ? `/api/department/${customUrl}` : "/api/department";
   return {
     ...useResource({ baseURL, route }),
   };
