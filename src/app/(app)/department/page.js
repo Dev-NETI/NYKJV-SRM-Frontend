@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 import DepartmentForm from "@/components/department/DepartmentForm";
 import { ToastContainer } from "react-toastify";
 
-function page() {
+function Page() {
   const [parentState, setParentState] = useState({
     formDialog: false,
   });
@@ -43,4 +43,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
