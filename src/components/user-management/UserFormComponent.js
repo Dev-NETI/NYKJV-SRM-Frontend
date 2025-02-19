@@ -204,15 +204,26 @@ function UserFormComponent({
             </Box>
           </>
         ) : form.getValues("creation_type") === 2 ? (
-          <Box sx={{ mb: 2 }}>
-            <SelectFieldComponent
-              form={form}
-              name="supplier_id"
-              label="Supplier"
-              DataState={DataState.supplier_data.suppliers}
-              defaultValue="0"
-            />
-          </Box>
+          <React.Fragment>
+            <Box sx={{ mb: 2 }}>
+              <SelectFieldComponent
+                form={form}
+                name="supplier_id"
+                label="Supplier"
+                DataState={DataState.supplier_data.suppliers}
+                defaultValue="0"
+              />
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <SelectFieldComponent
+                form={form}
+                name="department_id"
+                label="Department"
+                DataState={DataState.department_data}
+                defaultValue="0"
+              />
+            </Box>
+          </React.Fragment>
         ) : null}
         <Box sx={{ mb: 2 }}>
           <Typography
