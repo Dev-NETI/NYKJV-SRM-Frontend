@@ -11,6 +11,7 @@ import {
   PersonRounded as PersonIcon,
   Menu as MenuIcon,
 } from "@mui/icons-material";
+import Groups2Icon from "@mui/icons-material/Groups2";
 import ProductionQuantityLimitsIcon from "@mui/icons-material/ProductionQuantityLimits";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -112,6 +113,12 @@ const routes = [
         label: "User Management",
         icon: <ManageAccountsIcon />,
         allowedRoles: ["User Management"],
+      },
+      {
+        href: "/department",
+        label: "Department",
+        icon: <Groups2Icon />,
+        allowedRoles: ["Department"],
       },
     ],
   },

@@ -33,11 +33,7 @@ export default function ComplianceDocumentListSupplierSelection() {
 
   useEffect(() => {
     getSuppliers();
-  }, [getSuppliers]);
-
-  useEffect(() => {
-    getSuppliers();
-  }, [getSuppliers]);
+  }, []);
 
   const handleChange = (event) => {
     setSelectedSupplier(event.target.value || 0);

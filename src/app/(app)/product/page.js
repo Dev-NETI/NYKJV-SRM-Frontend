@@ -138,6 +138,7 @@ const ProductComponent = () => {
       headerName: "Specification",
       width: 250,
     },
+    { field: "supplier_name", headerName: "Supplier", flex: 1, minWidth: 180 },
     {
       field: "actions",
       headerName: "Actions",
@@ -192,12 +193,13 @@ const ProductComponent = () => {
 
   const rows = filteredProducts.map((product) => ({
     id: product.id,
-    category_name: product.category.name,
-    brand_name: product.brand.name,
+    category_name: product.category.name || "",
+    supplier_name: product.supplier.name || "",
+    brand_name: product.brand.name || "",
     category_id: product.category_id,
     brand_id: product.brand_id,
     image_path: product.image_path,
-    name: product.name,
+    name: product.name || "",
     price:
       product.price != null && product.price > 0
         ? `${currency(product.currency_id)} ${product.price}`
@@ -269,78 +271,76 @@ const ProductComponent = () => {
       {loading.getProduct ? (
         <ProductListSkeleton />
       ) : (
-        <Container maxWidth="xl" sx={{ mt: 3 }}>
-          <Box display="flex" justifyContent="center">
-            <Paper sx={{ width: "100%", p: 2 }}>
-              <Box display="flex" justifyContent="space-between" mt={2}>
-                <Box display="flex" alignItems="center">
-                  <TextField
-                    variant="outlined"
-                    placeholder="Search Products"
-                    size="small"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ mr: 2 }}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SearchIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Box>
-                <Box display="flex" alignItems="center">
-                  {/* add product button */}
-                  {user?.supplier_id && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleOpen}
-                      disabled={loading.adding || loading.updating} // Disable during loading
-                    >
-                      {loading.adding || loading.updating ? (
-                        <CircularProgress size={24} />
-                      ) : (
-                        "Add"
-                      )}
-                    </Button>
-                  )}
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={handleMultipleDeactivate}
-                    disabled={selectedIds.length === 0 || loading.deactivating} // Disable if no products selected or during loading
-                    sx={{ ml: 2 }}
-                  >
-                    {loading.deactivating ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      "Deactivate"
-                    )}
-                  </Button>
-                </Box>
-              </Box>
-              <Box sx={{ p: 2 }}>
-                <DataGrid
-                  rows={rows}
-                  columns={columns}
-                  pagination
-                  initialState={{
-                    pagination: { paginationModel },
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Paper sx={{ width: "100%", p: 2 }}>
+            <Box display="flex" justifyContent="space-between" mt={2}>
+              <Box display="flex" alignItems="center">
+                <TextField
+                  variant="outlined"
+                  placeholder="Search Products"
+                  size="small"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  sx={{ mr: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
                   }}
-                  pageSizeOptions={[5, 10, 20, 30, 40, 50]}
-                  checkboxSelection
-                  disableRowSelectionOnClick // This disables row selection when clicking anywhere else
-                  onRowSelectionModelChange={(ids) => {
-                    setSelectedIds(ids);
-                  }} // Track selected rows
-                  sx={{ border: 0 }}
                 />
               </Box>
-            </Paper>
-          </Box>
-        </Container>
+              <Box display="flex" alignItems="center">
+                {/* add product button */}
+                {user?.supplier_id && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpen}
+                    disabled={loading.adding || loading.updating} // Disable during loading
+                  >
+                    {loading.adding || loading.updating ? (
+                      <CircularProgress size={24} />
+                    ) : (
+                      "Add"
+                    )}
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleMultipleDeactivate}
+                  disabled={selectedIds.length === 0 || loading.deactivating} // Disable if no products selected or during loading
+                  sx={{ ml: 2 }}
+                >
+                  {loading.deactivating ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    "Deactivate"
+                  )}
+                </Button>
+              </Box>
+            </Box>
+            <Box>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                pagination
+                initialState={{
+                  pagination: { paginationModel },
+                }}
+                pageSizeOptions={[5, 10, 20, 30, 40, 50]}
+                checkboxSelection
+                disableRowSelectionOnClick // This disables row selection when clicking anywhere else
+                onRowSelectionModelChange={(ids) => {
+                  setSelectedIds(ids);
+                }} // Track selected rows
+                sx={{ border: 0 }}
+              />
+            </Box>
+          </Paper>
+        </Box>
       )}
 
       <ProductForm
