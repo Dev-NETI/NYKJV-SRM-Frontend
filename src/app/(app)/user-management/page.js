@@ -12,16 +12,15 @@ import {
   Input,
 } from "@mui/joy";
 import { Table, Sheet, IconButton } from "@mui/joy";
-import { Search, Add as AddIcon, DeleteForever } from "@mui/icons-material";
+import { Search, DeleteForever } from "@mui/icons-material";
 import { UserContext } from "@/stores/UserContext";
 import { useUser } from "@/hooks/api/user";
-import Loading from "../Loading";
 import AddUserModal from "../../../components/user-management/AddUserModal";
 import SBComponent from "@/components/snackbar/SBComponent";
 import EditUserModal from "@/components/user-management/EditUserModal";
 import { EyeIcon } from "lucide-react";
 import DeleteConfirmationModal from "@/components/user-management/DeleteUserModal";
-import axios from "axios";
+import GenerateCodeModal from "@/components/user-management/GenerateCodeModal";
 
 function Page() {
   const { index: getUsers, store: storeUser, update: updateUser } = useUser();
@@ -244,7 +243,16 @@ function Page() {
       >
         <Card
           variant="soft"
-          sx={{ p: 2, mb: 2 }}
+          sx={{
+            p: 3, // Increased padding
+            mb: 3, // Increased margin bottom
+            boxShadow: "sm",
+            transition: "transform 0.2s, box-shadow 0.2s",
+            "&:hover": {
+              boxShadow: "md",
+              transform: "translateY(-2px)",
+            },
+          }}
           className="animate-in fade-in duration-700"
         >
           <Box
@@ -270,8 +278,19 @@ function Page() {
           <Box
             sx={{
               display: "flex",
-              gap: 2,
+              gap: 3, // Increased gap
               flexWrap: "wrap",
+              alignItems: "flex-end",
+              "& > *": {
+                // Apply styles to all direct children
+                flex: "1 1 250px", // Allow items to grow and shrink with min width
+                maxWidth: "400px", // Prevent inputs from getting too wide
+              },
+              "& button": {
+                // Style for the search button
+                flex: "0 0 auto", // Don't let button grow/shrink
+                minWidth: "120px",
+              },
             }}
           >
             <FormControl sx={{ minWidth: 200 }}>
@@ -316,7 +335,13 @@ function Page() {
 
         <Card
           variant="soft"
-          sx={{ p: 2 }}
+          sx={{
+            p: 3,
+            boxShadow: "sm",
+            height: "calc(100vh - 250px)", // Dynamic height based on viewport
+            display: "flex",
+            flexDirection: "column",
+          }}
           className="animate-in fade-in duration-700"
         >
           <Box
@@ -324,32 +349,41 @@ function Page() {
               borderBottom: "2px solid",
               borderColor: "primary.500",
               pb: 2,
-              mb: 2,
+              mb: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 2,
             }}
           >
+            <Typography level="h4" color="primary">
+              List of Users
+            </Typography>
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
               }}
             >
-              <Typography level="h4" color="primary">
-                List of Users
-              </Typography>
+              <GenerateCodeModal />
               <AddUserModal />
             </Box>
           </Box>
-          <Divider inset="none" />
+
           <Sheet
             sx={{
               width: "100%",
               overflow: "auto",
-              borderRadius: "sm",
+              borderRadius: "md",
               mt: 2,
+              flex: 1, // Take remaining space
               display: "flex",
               flexDirection: "column",
-              height: "70vh",
+              bgcolor: "background.surface",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
             <Table

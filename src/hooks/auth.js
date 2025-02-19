@@ -41,6 +41,15 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
           title: "Registration Successful",
           description: "You have successfully registered.",
         });
+
+        const registrationCode = sessionStorage.getItem("registrationCode");
+        // Mark code as used
+        axios.post("/api/register-code/use", {
+          code: registrationCode,
+          email: props.email,
+        });
+        sessionStorage.removeItem("registrationCode");
+        router.push("/login");
       })
       .then(() => mutate())
       .catch((error) => {

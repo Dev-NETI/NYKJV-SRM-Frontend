@@ -79,98 +79,125 @@ const Login = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8 ">
       <AuthSessionStatus className="mb-4" status={status} />
-      <div className="flex min-h-full flex-1 flex-col justify-center items-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <div className="flex justify-center items-center">
-            <Image
-              src="/SRM.png"
-              alt="NYKJV-SRM-Logo"
-              width={250}
-              height={250}
-              priority
-            />
+
+      <div className="w-full max-w-[500px] space-y-8 bg-white p-10 rounded-2xl shadow-lg mx-4">
+        <div>
+          <h2 className="mt-2 text-center text-4xl font-extrabold tracking-tight text-gray-900">
+            Welcome Back
+          </h2>
+          <p className="mt-4 text-center text-base text-gray-600">
+            Please sign in to your account
+          </p>
+        </div>
+
+        <div className="mt-10">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(submitForm)}
+              className="space-y-8"
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700 text-base font-medium">
+                      Email address
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        className="px-4 py-3 border focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-lg"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700 text-base font-medium">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Enter your password"
+                        className="px-4 py-3 border focus:ring-indigo-500 focus:border-indigo-500 block w-full rounded-lg"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex items-center justify-between">
+                <a
+                  href="forgot-password"
+                  className="text-base font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  Forgot your password?
+                </a>
+              </div>
+
+              <Button className="w-full" type="submit">
+                Sign in
+              </Button>
+            </form>
+          </Form>
+        </div>
+
+        {/* <div className="mt-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-base">
+              <span className="px-4 bg-white text-gray-500">
+                Or continue with
+              </span>
+            </div>
           </div>
 
-          <h2 className="mt-10 mb-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign in to your account
-          </h2>
-        </div>
-        {/* <button
-          onClick={googleLogin}
-          type="button"
-          className="text-white bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55 me-2 mb-2"
-        >
-          <svg
-            className="w-4 h-4 me-2"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 18 19"
-          >
-            <path d="M8.842 18.083a8.8 8.8 0 0 1-8.65-8.948 8.841 8.841 0 0 1 8.8-8.652h.153a8.464 8.464 0 0 1 5.7 2.257l-2.193 2.038A5.27 5.27 0 0 0 9.09 3.4a5.882 5.882 0 0 0-.2 11.76h.124a5.091 5.091 0 0 0 5.248-4.057L14.3 11H9V8h8.34c.066.543.095 1.09.088 1.636-.086 5.053-3.463 8.449-8.4 8.449l-.186-.002Z" />
-          </svg>
-          Sign in with Google
-        </button> */}
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(submitForm)}
-            className="grid w-full max-w-sm items-center gap-1.5"
-          >
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Email address"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <a
-              href="forgot-password"
-              className="text-sm text-indigo-600 text-right"
+          <div className="mt-8">
+            <button
+              onClick={googleLogin}
+              className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
             >
-              Forget password
-            </a>
+              <svg
+                className="w-6 h-6"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 18 19"
+              >
+                <path d="M8.842 18.083a8.8 8.8 0 0 1-8.65-8.948 8.841 8.841 0 0 1 8.8-8.652h.153a8.464 8.464 0 0 1 5.7 2.257l-2.193 2.038A5.27 5.27 0 0 0 9.09 3.4a5.882 5.882 0 0 0-.2 11.76h.124a5.091 5.091 0 0 0 5.248-4.057L14.3 11H9V8h8.34c.066.543.095 1.09.088 1.636-.086 5.053-3.463 8.449-8.4 8.449l-.186-.002Z" />
+              </svg>
+              Sign in with Google
+            </button>
+          </div>
+        </div> */}
 
-            <Button className="mt-1" type="submit">
-              Login
-            </Button>
-          </form>
-        </Form>
-        <p className="mt-10 text-center text-sm text-gray-500">
-          Not register?{" "}
+        <p className="mt-8 text-center text-base text-gray-600">
+          Don't have an account?{" "}
           <a
             href="register"
-            className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
           >
-            Click here to register
+            Sign up now
           </a>
         </p>
       </div>
-    </>
+    </div>
   );
 };
 
