@@ -280,6 +280,7 @@ function ProductForm({
                   </p>
                 )}
               </Grid2>
+              
               <Grid2 size={{ xs: 6 }}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>
@@ -290,19 +291,21 @@ function ProductForm({
                   <select
                     id="productBrand"
                     name="productBrand"
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={
-                      retrievedProduct?.brand_id
-                        ? retrievedProduct?.brand_id
-                        : ""
-                    }
+                    className="mt-1  block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    defaultValue={retrievedProduct?.brand_id || ""}
                   >
                     <option value="">Select a brand</option>
-                    {brandItems.map(({ id, name }) => (
-                      <option key={id} value={id}>
-                        {name}
+                    {Array.isArray(brandItems) && brandItems.length > 0 ? (
+                      brandItems.map(({ id, name }) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No Brand available
                       </option>
-                    ))}
+                    )}
                   </select>
                 </Item>
                 {errors.productBrand && (
@@ -321,26 +324,27 @@ function ProductForm({
                     id="productCategory"
                     name="productCategory"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={
-                      retrievedProduct?.category_id
-                        ? retrievedProduct?.category_id
-                        : ""
-                    }
+                    defaultValue={retrievedProduct?.category_id || ""}
                   >
                     <option value="">Select a category</option>
-                    {categoryItems.map(({ id, name }) => (
-                      <option key={id} value={id}>
-                        {name}
+                    {Array.isArray(categoryItems) && categoryItems.length > 0 ? (
+                      categoryItems.map(({ id, name }) => (
+                        <option key={id} value={id}>
+                          {name}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No categories available
                       </option>
-                    ))}
+                    )}
                   </select>
                 </Item>
                 {errors.productCategory && (
-                  <p className="text-red-500 text-sm">
-                    {errors.productCategory}
-                  </p>
+                  <p className="text-red-500 text-sm">{errors.productCategory}</p>
                 )}
               </Grid2>
+
 
               <Grid2 size={{ xs: 12 }}>
                 <Typography variant="body1" color="textSecondary">

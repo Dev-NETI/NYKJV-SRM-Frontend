@@ -8,6 +8,7 @@ import DocumentFormComponent from "@/components/supplier-document/DocumentFormCo
 import { Snackbar } from "@mui/material";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import Alert from "@mui/material/Alert";
+import { useAuth } from "@/hooks/auth"
 
 function Page() {
   const [supplierDocumentState, setSupplierDocumentState] = useState({
@@ -21,7 +22,7 @@ function Page() {
     activePage: 1, //1 - documents, 0 - trash
     supplierId: 0,
   });
-
+  const { user } = useAuth({middlware: "auth"})
   const [initialDocumentTypeInForm, setInitialDocumentTypeInForm] =
     useState(null);
 
@@ -46,9 +47,14 @@ function Page() {
       <div className="p-4">
         <Header title="Documents" />
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 mt-4">
-          <DocumentListNavigationComponent
-            handleOpenFileUploadModal={handleClickOpen}
-          />
+          {
+            user?.supplier_id?
+            <DocumentListNavigationComponent
+              handleOpenFileUploadModal={handleClickOpen}
+            />
+            :
+            <></>
+          }
           <ComplianceDocumentListComponent
             handleOpenFileUploadModal={handleClickOpen}
           />
