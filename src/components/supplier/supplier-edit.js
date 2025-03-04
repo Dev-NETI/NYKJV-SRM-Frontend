@@ -9,6 +9,7 @@ import {
   FormControl,
   MenuItem,
 } from "@mui/material";
+
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,14 +21,16 @@ import TerrainIcon from "@mui/icons-material/Terrain";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
-
 import Alert from "@mui/material/Alert";
+import WorkIcon from '@mui/icons-material/Work';
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import Skeleton from "@mui/material/Skeleton";
 import { TimerOutlined } from "@mui/icons-material";
+
 const FormSchema = z
   .object({
     name: z.string().nonempty({ message: "Required" }),
+    departments: z.string().nonempty({ message: "Required" }),
     island: z.string().nonempty({ message: "Required" }),
     region_id: z
       .string()
@@ -73,6 +76,7 @@ const FormSchema = z
   .strict();
 
 export default function SupplierEdit({ supplierId, onClose, isOpen }) {
+    const [departmentGroups, setDepartment] = React.useState([]);
   const [islandsGroups, setIslandGroups] = React.useState([]);
   const [regionsGroups, setRegionGroups] = React.useState([]);
   const [provinceGroups, setProvinceGroups] = React.useState([]);
@@ -118,6 +122,8 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
     fetchOptions();
   }, []);
 
+  console.log("Form Update Errors:", errors);
+
   React.useEffect(() => {
     const fetchData = async () => {
       if (supplierId) {
@@ -159,6 +165,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
             // Reset the form with fetched data
             reset({
               name: data?.name ?? "",
+              departments: data?.departments ?? "",
               island: data?.island ?? "",
               region_id: data?.region_id
                 ? String(data.region_id).padStart(9, "0")
@@ -192,6 +199,7 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
     if (isOpen) {
       // Ensure fetch only runs when modal is open
       fetchData(); // Fetch supplier data
+      fetchDepartments();
     }
   }, [supplierId, isOpen, reset, islandsGroups, clearErrors]);
 
@@ -201,6 +209,30 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
       setEditAlert(false);
     }, 3000);
   };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await local_axios.get("/api/supplier/departments");
+      console.log("Raw API Response:", response.data);
+  
+      const departments = response.data.departments || [];
+      console.log("Extracted Departments:", departments);
+  
+      // Map departments to the required format
+      const formattedDepartments = departments.map((dept) => ({
+        code: dept.name, // Use `id` as the code
+        name: dept.name,       // Display the name
+      }));
+  
+      console.log("Formatted Departments:", formattedDepartments);
+  
+      setDepartment(formattedDepartments);
+    } catch (error) {
+      console.error("Error fetching department groups:", error);
+      setDepartment([]); // Reset state on error
+    }
+  };
+
   // Fetch regions based on island code
   const fetchRegions = async (islandCode) => {
     setLoading(true);
@@ -536,17 +568,17 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
         `/api/supplier/${supplierId}`,
         normalizedData
       );
-      // console.log("Update successful:", response.data);
+      console.log("Update successful:", response.data);
       handleEditAlert();
       onClose();
     } catch (error) {
       if (error.response) {
-        // console.error("Error response from server:", error.response.data);
+        console.error("Error response from server:", error.response.data);
         alert(
           `Error updating supplier: ${error.response.data.message || "Please check the data and try again."}`
         );
       } else {
-        // console.error("Error updating supplier:", error);
+        console.error("Error updating supplier:", error);
         alert("An unexpected error occurred. Please try again.");
       }
     }
@@ -597,10 +629,17 @@ export default function SupplierEdit({ supplierId, onClose, isOpen }) {
                   {[
                     {
                       name: "name",
-                      label: "Name",
+                      label: "Names",
                       icon: <PersonIcon fontSize="lg" />,
                       type: "text",
                       component: "input",
+                    },
+                    {
+                      name: "departments",
+                      label: "Department",
+                      icon: <WorkIcon fontSize="lg" />,
+                      component: "select",
+                      options: departmentGroups,
                     },
                     {
                       name: "island",
