@@ -87,7 +87,13 @@ export default function DepartmentForm({
             />
 
             <>
-              <InputLabel>Company</InputLabel>
+              <InputLabel
+                error={
+                  formik.touched.companyId && Boolean(formik.errors.companyId)
+                }
+              >
+                Company
+              </InputLabel>
               <Select
                 name="companyId"
                 value={formik.values.companyId}
@@ -96,6 +102,9 @@ export default function DepartmentForm({
                   formik.setFieldValue("companyId", event.target.value)
                 }
                 onBlur={formik.handleBlur}
+                error={
+                  formik.touched.companyId && Boolean(formik.errors.companyId)
+                }
               >
                 {formState.companyData.map((item) => (
                   <MenuItem key={item.id} value={item.id}>
@@ -103,6 +112,9 @@ export default function DepartmentForm({
                   </MenuItem>
                 ))}
               </Select>
+              {formik.touched.companyId && Boolean(formik.errors.companyId) && (
+                <p className="text-xs text-red-700">Company is required!</p>
+              )}
             </>
           </div>
         </DialogContent>
