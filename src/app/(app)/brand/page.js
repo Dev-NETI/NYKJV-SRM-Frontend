@@ -46,24 +46,16 @@ const BrandComponent = () => {
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
   const { user } = useAuth({ middleware: "auth" });
 
+  const fetchBrandData = async () => {
+    const { data } = await showBrand();
+    setBrand(data);
+  };
+
   useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const response = await showBrand();
-        if (response && response.data) {
-          setBrand(response.data);
-        } else {
-          throw new Error("Invalid response structure");
-        }
-      } catch (error) {
-        console.error("Failed to fetch brands:", error);
-        toast.error("Failed to load brands. Please try again later.");
-      }
-    };
     if (brands.length === 0) {
-      fetchBrands();
+      fetchBrandData();
     }
-  }, [brands, showBrand]);
+  }, [brands, fetchBrandData]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
@@ -201,25 +193,22 @@ const BrandComponent = () => {
     }
 
     setLoading(true);
-    try {
-      if (editingBrandId) {
-        await updateBrand(editingBrandId, object);
-        toast.success("Brand updated successfully!");
-      } else {
-        await store(object);
-        toast.success("Brand added successfully!");
-      }
-      handleClose();
-    } catch (error) {
-      console.error("Error submitting brand:", error);
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
-      } else {
-        setErrors({ form: "An error occurred. Please try again." });
-      }
-    } finally {
-      setLoading(false);
+    if (editingBrandId) {
+      const { data: updateResponse } = await updateBrand(
+        editingBrandId,
+        object
+      );
+      updateResponse
+        ? (toast.success("Brand updated successfully!"), fetchBrandData())
+        : toast.error("Something went wrong!");
+    } else {
+      const { data: storeResponse } = await store(object);
+      storeResponse
+        ? (toast.success("Brand added successfully!"), fetchBrandData())
+        : toast.error("Something went wrong!");
     }
+    setLoading(false);
+    handleClose();
   }
 
   function validateForm(object) {
