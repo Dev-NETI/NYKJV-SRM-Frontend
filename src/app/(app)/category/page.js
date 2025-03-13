@@ -48,24 +48,14 @@ const CategoryComponent = () => {
   const [deactivatingId, setDeactivatingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
+  const fetchCategoryData = async () => {
+    const { data } = await showCategory();
+    setCategory(data);
+  };
+
   useEffect(() => {
-    const fetchCategorys = async () => {
-      try {
-        const response = await showCategory({department_id: user.department_id});
-        if (response && response.data) {
-          setCategory(response.data.category_data);
-        } else {
-          throw new Error("Invalid response structure");
-        }
-      } catch (error) {
-        console.error("Failed to fetch categorys:", error);
-        toast.error("Failed to load categorys. Please try again later.");
-      }
-    };
-    if (categorys.length === 0) {
-      fetchCategorys();
-    }
-  }, [categorys, showCategory]);
+    fetchCategoryData();
+  }, [showCategory, fetchCategoryData]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
@@ -116,36 +106,39 @@ const CategoryComponent = () => {
     },
   ];
 
-  const filteredRows = categorys
-    .filter((category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .map((category) => ({
-      id: category.id,
-      name: category.name,
-      department_id: category.department_id,
-      modified_by: category.modified_by || "N/A",
-      updated_at: category.updated_at
-        ? new Date(category.updated_at).toLocaleString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          })
-        : "N/A",
-      created_at: category.created_at
-        ? new Date(category.created_at).toLocaleString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          })
-        : "N/A",
-    }));
+  let filteredRows = [];
+  if (categorys && categorys.length > 0) {
+    filteredRows = categorys
+      .filter((category) =>
+        category.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .map((category) => ({
+        id: category.id,
+        name: category.name,
+        department_id: category.department_id,
+        modified_by: category.modified_by || "N/A",
+        updated_at: category.updated_at
+          ? new Date(category.updated_at).toLocaleString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "N/A",
+        created_at: category.created_at
+          ? new Date(category.created_at).toLocaleString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "N/A",
+      }));
+  }
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -193,7 +186,6 @@ const CategoryComponent = () => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const object = Object.fromEntries(formData.entries());
-    console.log(object);
 
     const validationErrors = validateForm(object);
     if (Object.keys(validationErrors).length > 0) {
@@ -202,33 +194,28 @@ const CategoryComponent = () => {
     }
 
     setLoading(true);
-    try {
-      if (editingCategoryId) {
-        await updateCategory(editingCategoryId, object);
-        toast.success("Category updated successfully!");
-      } else {
-        await store(object);
-        toast.success("Category added successfully!");
-      }
-      handleClose();
-    } catch (error) {
-      console.error("Error submitting category:", error);
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
-      } else {
-        setErrors({ form: "An error occurred. Please try again." });
-      }
-    } finally {
-      setLoading(false);
+    if (editingCategoryId) {
+      const { data } = await updateCategory(editingCategoryId, object);
+      data
+        ? (toast.success("Category updated successfully!"), fetchCategoryData())
+        : toast.error("Something went wrong!");
+    } else {
+      const { data } = await store(object);
+      data.success
+        ? (toast.success("Category added successfully!"), fetchCategoryData())
+        : toast.error("Something went wrong!");
     }
+    handleClose();
+
+    setLoading(false);
   }
 
   function validateForm(object) {
     const errors = {};
     if (!object.categoryName)
       errors.categoryName = "Category Name is required.";
-    if (!object.departmentId)
-      errors.departmentId = "Department ID is required.";
+    // if (!object.departmentId)
+    //   errors.departmentId = "Department ID is required.";
     return errors;
   }
   const paginationModel = { page: 0, pageSize: 10 };
@@ -287,7 +274,7 @@ const CategoryComponent = () => {
                   onClick={handleOpen}
                   sx={{ mr: 2 }}
                 >
-                  Add 
+                  Add
                 </Button>
                 <Button
                   variant="contained"
