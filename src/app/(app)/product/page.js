@@ -55,20 +55,16 @@ const ProductComponent = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const { data: brandData } = await showBrand();
-        const { data: categoryData } = await showCategory();
-        const { data: productData } = await showProduct(
-          user?.supplier_id || "null"
-        );
-        setBrand(brandData);
-        setCategory(categoryData);
-        setProducts(productData);
-        setFilteredProducts(productData);
-        setLoading((prevState) => ({ ...prevState, getProduct: false }));
-      } catch (error) {
-        toast.error("Failed to load data. Please try again later.");
-      }
+      const { data: brandData } = await showBrand();
+      const { data: categoryData } = await showCategory();
+      const { data: productData } = await showProduct(
+        user?.supplier_id || "null"
+      );
+      setBrand(brandData);
+      setCategory(categoryData);
+      setProducts(productData);
+      setFilteredProducts(productData);
+      setLoading((prevState) => ({ ...prevState, getProduct: false }));
     };
     if (
       brandItems.length === 0 &&
