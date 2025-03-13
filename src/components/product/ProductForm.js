@@ -178,7 +178,7 @@ function ProductForm({
               <Grid2 size={12}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>
-                    Product Name:<text className="text-red-600">*</text>
+                    Product Name:<b className="text-red-600">*</b>
                   </strong>
                 </Typography>
                 <Item>
@@ -280,11 +280,11 @@ function ProductForm({
                   </p>
                 )}
               </Grid2>
-              
+
               <Grid2 size={{ xs: 6 }}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>
-                    Brand:<text className="text-red-600">*</text>
+                    Brand:<b className="text-red-600">*</b>
                   </strong>
                 </Typography>
                 <Item>
@@ -316,7 +316,7 @@ function ProductForm({
               <Grid2 size={{ xs: 6 }}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>
-                    Category:<text className="text-red-600">*</text>
+                    Category:<b className="text-red-600">*</b>
                   </strong>
                 </Typography>
                 <Item>
@@ -327,7 +327,8 @@ function ProductForm({
                     defaultValue={retrievedProduct?.category_id || ""}
                   >
                     <option value="">Select a category</option>
-                    {Array.isArray(categoryItems) && categoryItems.length > 0 ? (
+                    {Array.isArray(categoryItems) &&
+                    categoryItems.length > 0 ? (
                       categoryItems.map(({ id, name }) => (
                         <option key={id} value={id}>
                           {name}
@@ -341,15 +342,16 @@ function ProductForm({
                   </select>
                 </Item>
                 {errors.productCategory && (
-                  <p className="text-red-500 text-sm">{errors.productCategory}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.productCategory}
+                  </p>
                 )}
               </Grid2>
-
 
               <Grid2 size={{ xs: 12 }}>
                 <Typography variant="body1" color="textSecondary">
                   <strong>
-                    Specification:<text className="text-red-600">*</text>
+                    Specification:<b className="text-red-600">*</b>
                   </strong>
                 </Typography>
                 <Item>
