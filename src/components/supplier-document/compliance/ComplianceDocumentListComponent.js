@@ -151,8 +151,8 @@ export default function ComplianceDocumentListComponent({
       }));
     };
 
-    if(user?.is_supplier) setIsSupplier(true)
-    else setIsSupplier(false)
+    if (user?.is_supplier) setIsSupplier(true);
+    else setIsSupplier(false);
 
     if (user) {
       supplierDocumentState.reload === true && fetchData();
@@ -178,7 +178,6 @@ export default function ComplianceDocumentListComponent({
       ...prevState,
       filteredData: filteredData,
     }));
-
   };
 
   return (
@@ -226,7 +225,7 @@ export default function ComplianceDocumentListComponent({
                 <WarningNotificationComponent
                   count={notification.warning.count}
                   documents={warning}
-                  isSupplier = {user?.supplier_id}
+                  isSupplier={user?.supplier_id}
                 />
               )}
 
@@ -236,20 +235,20 @@ export default function ComplianceDocumentListComponent({
                 <MissingNotificationComponent
                   count={notification.missing.count}
                   documents={missing}
-                  isSupplier = {user?.supplier_id}
+                  isSupplier={user?.supplier_id}
                 />
               )}
 
               {notification.expired.count <= 0 && notification.completed && (
-                <CompletedNotificationComponent isSupplier = {user?.supplier_id}/>
+                <CompletedNotificationComponent
+                  isSupplier={user?.supplier_id}
+                />
               )}
             </div>
           ) : (
             ""
           )}
-          <div
-            className="bg-white grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4"
-          >
+          <div className="bg-white grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
             {searchText.length > 0
               ? documentListState.filteredData.map((item) => (
                   <ComplianceDocumentListItemComponent
