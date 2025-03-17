@@ -1,6 +1,7 @@
-'use client'
+"use client";
 import React, { useState, useEffect } from "react";
 import axios from "@/lib/axios";
+import useSWR from "swr";
 import external_axios from "axios";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
@@ -66,41 +67,28 @@ export default function DataTable() {
     name: "", // Set initial value for name as an empty string
   });
   const handleSearch = () => {
-    if (searchParams.name.trim() === "") {
-      return;
-    }
-    // console.log("Search Query:", searchParams.name); // Debugging
-    setPagination((prev) => ({ ...prev, page: 1 })); // Reset to first page when search is triggered
-    fetchSuppliers();
+    // if (searchParams.name.trim() === "") {
+    //   return;
+    // }
   };
 
-  const fetchSuppliers = async () => {
-    setLoading(true);
+  const fetcher = async (url) => {
     try {
-      const response = await axios.get("/api/supplier", {
-        params: {
-          name: searchParams.name, // Send the search term to backend
-          page: pagination.page,
-          per_page: 10,
-        },
-      });
-
-      if (response?.data?.suppliers) {
-        setSuppliers(response.data.suppliers);
-        setPagination({
-          page: response.data.pagination.current_page,
-          total: response.data.pagination.total,
-          lastPage: response.data.pagination.last_page,
-        });
-      } else {
-        setSuppliers([]);
-      }
+      const res = await axios.get(url);
+      return res.data;
     } catch (error) {
-      // console.error("Error fetching suppliers:", error);
-    } finally {
+      console.error("Error fetching data from", url, error);
+      return [];
+    }
+    finally {
       setLoading(false);
     }
   };
+
+  const { data: supplierData } = useSWR("/api/supplier", fetcher);
+  // console.log("Fetched supplier data:", supplierData);
+
+
 
   const handleAlert = () => {
     setDeleteAlert(true);
@@ -109,19 +97,17 @@ export default function DataTable() {
     }, 3000);
   };
 
-const handleRead = (id) => {
-  setReadSupplierId(id);
-  setEditSupplierId(null); // Reset edit state
-  setReadDrawerOpen(true);
-};
+  const handleRead = (id) => {
+    setReadSupplierId(id);
+    setEditSupplierId(null); // Reset edit state
+    setReadDrawerOpen(true);
+  };
 
-const handleEdit = (id) => {
-  setEditSupplierId(id);
-  setReadSupplierId(null); // Reset read state
-  setIsDrawerOpen(true);
-};
-
-
+  const handleEdit = (id) => {
+    setEditSupplierId(id);
+    setReadSupplierId(null); // Reset read state
+    setIsDrawerOpen(true);
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -151,41 +137,30 @@ const handleEdit = (id) => {
       width: { xs: "15%", sm: "15%", md: "15%" },
     },
     {
-      field: "island",
-      headerName: "Island",
+      field: "department",
+      headerName: "Department",
       width: { xs: "15%", sm: "15%", md: "15%" },
     },
     {
-      field: "region_id",
+      field: "region",
       headerName: "Region",
       width: { xs: "5%", sm: "5%", md: "5%" },
     },
     {
-      field: "province_id",
+      field: "province",
       headerName: "Province",
       width: { xs: "20%", sm: "20%", md: "20%" },
     },
     {
-      field: "district_id",
-      headerName: "District",
+      field: "citymun",
+      headerName: "City Municipality",
       width: { xs: "15%", sm: "15%", md: "15%" },
     },
     {
-      field: "city_id",
-      headerName: "City",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
-    {
-      field: "municipality_id",
-      headerName: "Municipality",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
-    {
-      field: "brgy_id",
+      field: "brgy",
       headerName: "Barangay",
       width: { xs: "15%", sm: "15%", md: "15%" },
     },
-
     {
       field: "street_address",
       headerName: "Street Address",
@@ -215,7 +190,7 @@ const handleEdit = (id) => {
             className="flex items-center bg-green-600 p-2 rounded-md text-white"
             onClick={() => handleEdit(params.row.id)}
           >
-            <Edit className="w-4 h-4"/>
+            <Edit className="w-4 h-4" />
           </button>
           <button
             className="flex items-center bg-red-600 p-2 rounded-md text-white"
@@ -231,170 +206,25 @@ const handleEdit = (id) => {
     },
   ];
 
-  const convertedRegion = async () => {
-    try {
-      const response = await external_axios.get(
-        "https://psgc.gitlab.io/api/regions/"
-      );
-      // console.log("Fetched Regions:", response.data);
-
-      const regions = response.data.map((region) => ({
-        id: region.code,
-        name: region.name,
-      }));
-      setApiRegion(regions);
-    } catch (error) {
-      // console.error("Error fetching regions from the API:", error);
-    }
-  };
-
-  const convertedProvince = async () => {
-    try {
-      const response = await external_axios.get(
-        "https://psgc.gitlab.io/api/provinces/"
-      );
-      // console.log("Fetched Provinces:", response.data);
-      const provinces = response.data.map((province) => ({
-        id: province.code,
-        name: province.name,
-      }));
-      setApiProvince(provinces);
-    } catch (error) {
-      // console.log("Error fetching province", error);
-    }
-  };
-
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.lastPage) {
       setPagination((prev) => ({ ...prev, page: newPage }));
     }
   };
 
-  const convertedDistrict = async () => {
-    try {
-      const response = await external_axios.get(
-        "https://psgc.gitlab.io/api/districts/"
-      );
-      // console.log("Fetched Districts", response.data);
-
-      const districts = response.data.map((district) => ({
-        id: district.code,
-        name: district.name,
-      }));
-      setApiDistrict(districts);
-    } catch (error) {
-      // console.log("Error fetching district", error);
-    }
-  };
-
-  const convertedCity = async () => {
-    try {
-      const response = await external_axios.get(
-        "https://psgc.gitlab.io/api/cities/"
-      );
-      // console.log("Fetched City", response.data);
-
-      const cities = response.data.map((city) => ({
-        id: city.code,
-        name: city.name,
-      }));
-      setApiCity(cities);
-    } catch (error) {
-      // console.log("Fetched City", error);
-    }
-  };
-
-  const convertedMunicipality = async () => {
-    try {
-      const response = await external_axios.get(
-        "https://psgc.gitlab.io/api/municipalities/"
-      );
-      // console.log("Fetched Municipality", response.data);
-
-      const municipalities = response.data.map((municipality) => ({
-        id: municipality.code,
-        name: municipality.name,
-      }));
-      setApiMunicipality(municipalities);
-    } catch (error) {
-      // console.log("Error fetching municipality", error);
-    }
-  };
-
-  const convertedBrgy = async () => {
-    try {
-      const response = await external_axios.get(
-        "https://psgc.gitlab.io/api/barangays/"
-      );
-      // console.log("Fetched Barangay", response.data);
-
-      const barangays = response.data.map((brgy) => ({
-        id: brgy.code,
-        name: brgy.name,
-      }));
-      setApiBrgy(barangays);
-    } catch (error) {
-      // console.log("Error fetching barangay", error);
-    }
-  };
-
-  const rows = suppliers.map((supplier) => {
-    const paddedRegionId = supplier.region_id
-      ? String(supplier.region_id).padStart(9, "0")
-      : "";
-    const paddedProvinceId = supplier.province_id
-      ? String(supplier.province_id).padStart(9, "0")
-      : "";
-    const paddedDistrictId = supplier.district_id
-      ? String(supplier.district_id).padStart(9, "0")
-      : "";
-    const paddedCityId = supplier.city_id
-      ? String(supplier.city_id).padStart(9, "0")
-      : "";
-    const paddedMunicipalityId = supplier.municipality_id
-      ? String(supplier.municipality_id).padStart(9, "0")
-      : "";
-    const paddedBarangayId = supplier.brgy_id
-      ? String(supplier.brgy_id).padStart(9, "0")
-      : "None";
-
-    const region = apiRegion.find((region) => region.id === paddedRegionId);
-    const province = apiProvince.find(
-      (province) => province.id === paddedProvinceId
-    );
-    const district = apiDistrict.find(
-      (district) => district.id === paddedDistrictId
-    );
-    const city = apiCity.find((city) => city.id === paddedCityId);
-    const municipality = apiMunicipality.find(
-      (municipality) => municipality.id === paddedMunicipalityId
-    );
-    const brgy = apiBrgy.find((brgy) => brgy.id === paddedBarangayId);
-
-    return {
-      id: supplier.id,
-      name: supplier.name,
-      island: supplier.island,
-      region_id: region ? region.name : "None",
-      province_id: province ? province.name : "None",
-      district_id: district ? district.name : "None",
-      city_id: city ? city.name : "None",
-      municipality_id: municipality ? municipality.name : "None",
-      brgy_id: brgy ? brgy.name : "None",
-      street_address: supplier.street_address,
-      slug: supplier.slug,
-    };
-  });
-
-  useEffect(() => {
-    fetchSuppliers();
-    convertedRegion();
-    convertedProvince();
-    convertedDistrict();
-    convertedCity();
-    convertedMunicipality();
-    convertedBrgy();
-  }, [pagination.page]);
+  const rows = Array.isArray(supplierData?.suppliers)
+    ? supplierData.suppliers.map((supplier) => ({
+        id: supplier.id,
+        name: supplier.name,
+        department: supplier.department,
+        region: supplier.region,
+        province: supplier.province,
+        citymun: supplier.citymun,
+        brgy: supplier.brgy,
+        street_address: supplier.street_address,
+        slug: supplier.slug,
+      }))
+    : [];
 
   if (loading) {
     return <Loading />;
@@ -635,7 +465,7 @@ const handleEdit = (id) => {
           supplierId={readSupplierId}
           onClose={() => setReadDrawerOpen(false)}
           isOpen={isReadDrawerOpen}
-        />        
+        />
         <SupplierEdit
           supplierId={editSupplierId}
           onClose={() => setIsDrawerOpen(false)}
