@@ -1,5 +1,4 @@
 import * as React from "react";
-import useSWR from "swr";
 import {
   Box,
   Drawer,
@@ -26,7 +25,6 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ReportIcon from "@mui/icons-material/Report";
 
-// Define the schema
 const FormSchema = z
   .object({
     name: z.string().min(1, "Required"),
@@ -40,15 +38,6 @@ const FormSchema = z
   })
   .strict();
 
-const fetcher = async (url) => {
-  try {
-    const res = await axios.get(url);
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching data from", url, error);
-  }
-};
-
 const StoreSupplierDrawer = () => {
   const [alert, setAlert] = React.useState(false);
   const [warningAlert, setWarningAlert] = React.useState(false);
@@ -57,38 +46,49 @@ const StoreSupplierDrawer = () => {
   const [selectedProvince, setSelectedProvince] = React.useState("");
   const [selectedCityMun, setSelectedCityMun] = React.useState("");
   const [selectedBarangay, setSelectedBarangay] = React.useState("");
+  const [departmentData, setDepartmentData] = React.useState([]);
+  const [regionData, setRegionData] = React.useState([]);
+  const [provinceData, setProvinceData] = React.useState([]);
+  const [citymunData, setCitymunData] = React.useState([]);
+  const [brgyData, setBrgyData] = React.useState([]);
 
-  const { data: departmentData } = useSWR("/api/supplier/department", fetcher);
-  const { data: regionData } = useSWR("/api/supplier/fetch_region", fetcher);
-  const { data: provinceData } = useSWR(
-    "/api/supplier/fetch_province",
-    fetcher
-  );
-  const { data: citymunData } = useSWR("/api/supplier/fetch_citymun", fetcher);
-  const { data: brgyData } = useSWR("/api/supplier/fetch_brgy", fetcher);
-
-  // Compute filtered provinces based on selectedRegion using useMemo.
+  const fetchData = async () => {
+    try {
+      const [departments, regions, provinces, cities, barangays] =
+        await Promise.all([
+          axios.get("/api/supplier/department"),
+          axios.get("/api/supplier/fetch_region"),
+          axios.get("/api/supplier/fetch_province"),
+          axios.get("/api/supplier/fetch_citymun"),
+          axios.get("/api/supplier/fetch_brgy"),
+        ]);
+      setDepartmentData(departments.data || []); // Ensure it's an array
+      setRegionData(regions.data || []);
+      setProvinceData(provinces.data || []);
+      setCitymunData(cities.data || []);
+      setBrgyData(barangays.data || []);
+    } catch (error) {
+      console.error("Error fetching supplier data:", error);
+    }
+  };
   const filteredProvinces = React.useMemo(() => {
     if (!selectedRegion || !provinceData?.province) return [];
     return provinceData.province.filter(
       (prov) => String(prov.regCode) === String(selectedRegion)
     );
   }, [selectedRegion, provinceData]);
-
   const filteredCitymun = React.useMemo(() => {
     if (!selectedProvince || !citymunData?.citymun) return [];
     return citymunData.citymun.filter(
       (city) => String(city.provCode) === String(selectedProvince)
     );
   }, [selectedProvince, citymunData]);
-
   const filteredBrgy = React.useMemo(() => {
     if (!selectedCityMun || !brgyData?.brgy) return [];
     return brgyData.brgy.filter(
       (brgy) => String(brgy.citymunCode) === String(selectedCityMun)
     );
   }, [selectedCityMun, brgyData]);
-
   const { control, clearErrors, handleSubmit, reset } = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -102,7 +102,6 @@ const StoreSupplierDrawer = () => {
       is_active: false,
     },
   });
-
   const handleRegionChange = (value) => {
     console.log("Region changed to:", value);
     setSelectedRegion(value);
@@ -110,25 +109,21 @@ const StoreSupplierDrawer = () => {
     setSelectedCityMun("");
     setSelectedBarangay("");
   };
-
   const handleProvinceChange = (value) => {
     console.log("Province changed to:", value);
     setSelectedProvince(value);
     setSelectedCityMun("");
     setSelectedBarangay("");
   };
-
   const handleCityMunChange = (value) => {
     console.log("CityMun changed to:", value);
     setSelectedCityMun(value);
     setSelectedBarangay("");
   };
-
   const handleBarangayChange = (value) => {
     console.log("Barangay changed to:", value);
     setSelectedBarangay(value);
   };
-
   const handleClear = () => {
     reset();
     setSelectedRegion("");
@@ -136,23 +131,19 @@ const StoreSupplierDrawer = () => {
     setSelectedCityMun("");
     setSelectedBarangay("");
   };
-
   const handleAlert = () => {
     setAlert(true);
     setTimeout(() => {
       setAlert(false);
     }, 3000);
   };
-
   const handleWarningAlert = () => {
     setWarningAlert(true);
     setTimeout(() => {
       setWarningAlert(false);
     }, 3000);
   };
-
   const submitForm = async (data) => {
-    console.log("Form Data:", data); // Check the data being sent
     try {
       const response = await axios.post("/api/supplier", data);
       handleAlert();
@@ -160,8 +151,6 @@ const StoreSupplierDrawer = () => {
       setState({ ...state, right: false });
     } catch (error) {
       if (error.response.status == 409) {
-        // console.error("Submission error:", error.response.data);
-        // console.error("Supplier Already Exist")
         handleWarningAlert(true);
         setState({ ...state, right: false });
       } else {
@@ -169,10 +158,12 @@ const StoreSupplierDrawer = () => {
       }
     }
   };
-  
 
-  const toggleDrawer = (anchor, open) => (event) => {
+  const toggleDrawer = (anchor, open) => async (event) => {
     setState({ ...state, [anchor]: open });
+    if (open) {
+      await fetchData();
+    }
   };
 
   const formList = (anchor) => (
@@ -209,7 +200,7 @@ const StoreSupplierDrawer = () => {
                     type: "text",
                     component: "select",
                     options: (departmentData?.department || []).map((dept) => ({
-                      code: Number(dept.id), // Force it to a number
+                      code: Number(dept.id), 
                       name: dept.name,
                     })),
                   },
@@ -343,7 +334,7 @@ const StoreSupplierDrawer = () => {
                                         Empty
                                       </span>
                                     </MenuItem>
-                                    {options &&
+                                    {Array.isArray(options) ? (
                                       options.map((group) => (
                                         <MenuItem
                                           key={group.code}
@@ -351,7 +342,12 @@ const StoreSupplierDrawer = () => {
                                         >
                                           {group.name}
                                         </MenuItem>
-                                      ))}
+                                      ))
+                                    ) : (
+                                      <MenuItem disabled>
+                                        No options available
+                                      </MenuItem>
+                                    )}
                                   </Select>
                                 </FormControl>
                               )}
