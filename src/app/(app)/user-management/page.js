@@ -11,19 +11,21 @@ import {
   FormLabel,
   Input,
 } from "@mui/joy";
-import { Table, Sheet, Checkbox, IconButton, Select, Option } from "@mui/joy";
-import { Search, Add as AddIcon } from "@mui/icons-material";
+import { Table, Sheet, IconButton } from "@mui/joy";
+import { Search, DeleteForever } from "@mui/icons-material";
 import { UserContext } from "@/stores/UserContext";
 import { useUser } from "@/hooks/api/user";
-import Loading from "../Loading";
 import AddUserModal from "../../../components/user-management/AddUserModal";
 import SBComponent from "@/components/snackbar/SBComponent";
 import EditUserModal from "@/components/user-management/EditUserModal";
 import { EyeIcon } from "lucide-react";
+import DeleteConfirmationModal from "@/components/user-management/DeleteUserModal";
+import GenerateCodeModal from "@/components/user-management/GenerateCodeModal";
 
-function page() {
+function Page() {
   const { index: getUsers, store: storeUser, update: updateUser } = useUser();
-  const [loading, setLoading] = useState(false);
+
+  const { patch: patchUser } = useUser("soft-delete");
   const [snackbarState, setSnackbarState] = useState({
     open: false,
     message: "",
@@ -51,27 +53,60 @@ function page() {
     });
   };
 
+  const [openModal, setOpenModal] = useState(false);
+  const [itemIdToDelete, setItemIdToDelete] = useState(null);
+
+  const handleDelete = async (slug) => {
+    try {
+      // Await the patchUser function to complete
+      const { data } = await patchUser(slug);
+
+      // Reload the users list after the patch request is successful
+      await setUserState((prevState) => ({
+        ...prevState,
+        responseStore: true,
+      }));
+
+      console.log("Item deleted with id:", data);
+    } catch (error) {
+      // Handle any errors that occur during the request
+      console.error("Error deleting item:", error);
+    }
+  };
+
+  const handleOpenModal = (slug) => {
+    setItemIdToDelete(slug);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setItemIdToDelete(null);
+  };
+
   // Auto-close snackbar after a few seconds (optional)
   setTimeout(() => {
     setSnackbarState((prevState) => ({
       ...prevState,
       open: false,
     }));
-  }, 3000); // 3 seconds
+  }, 5000); // 3 seconds
 
   useEffect(() => {
     const fetchUserData = async () => {
-      setLoading(true);
       try {
         const { data } = await getUsers({
           page: pagination.page,
           f_name: searchParams.f_name,
           l_name: searchParams.l_name,
+          company_info: true,
+          department_info: true,
+          supplier_info: true,
         });
         setUserState((prevState) => ({
           ...prevState,
           userData: data.data,
-          responseStore: false,
+          responseStore: false, // Mark the fetch as completed
         }));
         setPagination((prev) => ({
           ...prev,
@@ -80,15 +115,34 @@ function page() {
         }));
       } catch (error) {
         console.error("Error fetching user data:", error);
-      } finally {
-        setLoading(false);
+        setUserState((prevState) => ({
+          ...prevState,
+          responseStore: false, // Prevent loop even on error
+        }));
       }
     };
 
+    // Fetch data only when responseStore is true
     if (userState.responseStore) {
       fetchUserData();
     }
-  }, [userState.responseStore, pagination.page]);
+  }, [
+    userState.responseStore,
+    pagination.page,
+    searchParams.f_name,
+    searchParams.l_name,
+  ]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchParams.f_name || searchParams.l_name) {
+        setPagination((prev) => ({ ...prev, page: 1 }));
+        setUserState((prev) => ({ ...prev, responseStore: true }));
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchParams.f_name, searchParams.l_name]);
 
   const columns = [
     {
@@ -152,6 +206,15 @@ function page() {
             </IconButton>
           </Link>
           <EditUserModal slug={params.row.slug} />
+
+          <IconButton
+            variant="solid"
+            color="danger"
+            size="sm"
+            onClick={() => handleOpenModal(params.row.slug)} // Pass the id of the item to delete
+          >
+            <DeleteForever />
+          </IconButton>
         </Box>
       ),
     },
@@ -173,16 +236,25 @@ function page() {
     setUserState((prev) => ({ ...prev, responseStore: true }));
   };
 
-  if (loading) {
-    return <Loading />;
-  }
-
   return (
     <>
       <UserContext.Provider
         value={{ setUserState, storeUser, showSnackbar, updateUser }}
       >
-        <Card variant="soft" sx={{ p: 2, mb: 2 }}>
+        <Card
+          variant="soft"
+          sx={{
+            p: 3, // Increased padding
+            mb: 3, // Increased margin bottom
+            boxShadow: "sm",
+            transition: "transform 0.2s, box-shadow 0.2s",
+            "&:hover": {
+              boxShadow: "md",
+              transform: "translateY(-2px)",
+            },
+          }}
+          className="animate-in fade-in duration-700"
+        >
           <Box
             sx={{
               borderBottom: "2px solid",
@@ -206,8 +278,19 @@ function page() {
           <Box
             sx={{
               display: "flex",
-              gap: 2,
+              gap: 3, // Increased gap
               flexWrap: "wrap",
+              alignItems: "flex-end",
+              "& > *": {
+                // Apply styles to all direct children
+                flex: "1 1 250px", // Allow items to grow and shrink with min width
+                maxWidth: "400px", // Prevent inputs from getting too wide
+              },
+              "& button": {
+                // Style for the search button
+                flex: "0 0 auto", // Don't let button grow/shrink
+                minWidth: "120px",
+              },
             }}
           >
             <FormControl sx={{ minWidth: 200 }}>
@@ -250,38 +333,57 @@ function page() {
           </Box>
         </Card>
 
-        <Card variant="soft" sx={{ p: 2 }}>
+        <Card
+          variant="soft"
+          sx={{
+            p: 3,
+            boxShadow: "sm",
+            height: "calc(100vh - 250px)", // Dynamic height based on viewport
+            display: "flex",
+            flexDirection: "column",
+          }}
+          className="animate-in fade-in duration-700"
+        >
           <Box
             sx={{
               borderBottom: "2px solid",
               borderColor: "primary.500",
               pb: 2,
-              mb: 2,
+              mb: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 2,
             }}
           >
+            <Typography level="h4" color="primary">
+              List of Users
+            </Typography>
             <Box
               sx={{
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
               }}
             >
-              <Typography level="h4" color="primary">
-                List of Users
-              </Typography>
+              <GenerateCodeModal />
               <AddUserModal />
             </Box>
           </Box>
-          <Divider inset="none" />
+
           <Sheet
             sx={{
               width: "100%",
               overflow: "auto",
-              borderRadius: "sm",
+              borderRadius: "md",
               mt: 2,
+              flex: 1, // Take remaining space
               display: "flex",
               flexDirection: "column",
-              height: "70vh",
+              bgcolor: "background.surface",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
             <Table
@@ -306,7 +408,7 @@ function page() {
                 "& thead th": {
                   fontWeight: "bold",
                   color: "text.primary",
-                  backgroundColor: "var(--TableCell-headBackground)",
+                  backgroundColor: "#fff",
                   borderBottom: "2px solid var(--joy-palette-divider)",
                   whiteSpace: "normal",
                   overflow: "hidden",
@@ -426,9 +528,16 @@ function page() {
           message={snackbarState.message}
           color={snackbarState.color}
         />
+
+        <DeleteConfirmationModal
+          open={openModal}
+          onClose={handleCloseModal}
+          handleDelete={handleDelete}
+          id={itemIdToDelete}
+        />
       </UserContext.Provider>
     </>
   );
 }
 
-export default page;
+export default Page;

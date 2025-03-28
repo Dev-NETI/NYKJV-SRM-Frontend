@@ -1,10 +1,16 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import axios from "@/lib/axios";
 import useEcho from "@/hooks/useEcho";
 import { useAuth } from "@/hooks/auth";
 import { chatService } from "@/hooks/api/chats";
-import { useRef } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -23,20 +29,9 @@ export const ChatProvider = ({ children }) => {
   const { user } = useAuth({ middleware: "auth" });
   const echo = useEcho();
 
-  useEffect(() => {
-    if (echo && user) {
-      fetchInitialData();
-    }
-  }, [echo, user]);
+  const fetchInitialData = useCallback(async () => {
+    if (!user || !echo) return;
 
-  useEffect(() => {
-    if (selectedChat) {
-      setMessages(selectedChat.messages || []);
-      markMessagesAsRead(selectedChat.id);
-    }
-  }, [selectedChat]);
-
-  const fetchInitialData = async () => {
     try {
       const [fetchedUsers, fetchedChats] = await Promise.all([
         chatService.fetchUsers(),
@@ -46,98 +41,103 @@ export const ChatProvider = ({ children }) => {
       setUsers(fetchedUsers);
       setChats(fetchedChats);
 
-      if (echo) {
-        // Join presence channel if not already joined
-        const presenceChannelName = "presence-chat";
-        if (!joinedChannels.current.has(presenceChannelName)) {
-          echo
-            .join(presenceChannelName)
-            .here((users) => {
-              setOnlineUsers(new Set(users.map((user) => user.id)));
-            })
-            .joining((user) => {
-              setOnlineUsers((prev) => new Set(prev.add(user.id)));
-            })
-            .leaving((user) => {
-              setOnlineUsers((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(user.id);
-                return newSet;
-              });
+      const presenceChannelName = "presence-chat";
+      if (!joinedChannels.current.has(presenceChannelName)) {
+        echo
+          .join(presenceChannelName)
+          .here((users) => {
+            setOnlineUsers(new Set(users.map((u) => u.id)));
+          })
+          .joining((u) => {
+            setOnlineUsers((prev) => new Set(prev.add(u.id)));
+          })
+          .leaving((u) => {
+            setOnlineUsers((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(u.id);
+              return newSet;
             });
-          joinedChannels.current.add(presenceChannelName);
-        }
-
-        // Join private channels for each chat
-        fetchedChats.forEach((chat) => {
-          const channelName = `chat.${chat.id}`;
-          if (!joinedChannels.current.has(channelName)) {
-            console.log("Joining channel:", channelName);
-            echo.private(channelName).listenForWhisper("MessageSent", (e) => {
-              if (e.sender.id === user.id) return;
-
-              const newMessage = {
-                id: e.id,
-                content: e.content,
-                created_at: e.created_at,
-                sender: e.sender,
-              };
-
-              setMessages((prev) => [...prev, newMessage]);
-
-              // Update the chat's messages in the chats list
-              setChats((prevChats) =>
-                prevChats.map((c) =>
-                  c.id === chat.id
-                    ? {
-                        ...c,
-                        messages: [...(c.messages || []), newMessage],
-                        last_message: newMessage,
-                      }
-                    : c
-                )
-              );
-
-              // Update unread counts for non-selected chats
-              if (selectedChat?.id !== chat.id) {
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  [chat.id]: (prev[chat.id] || 0) + 1,
-                }));
-              }
-            });
-            joinedChannels.current.add(channelName);
-          }
-        });
+          });
+        joinedChannels.current.add(presenceChannelName);
       }
 
-      // Initialize unread counts
+      fetchedChats.forEach((chat) => {
+        const channelName = `chat.${chat.id}`;
+        if (!joinedChannels.current.has(channelName)) {
+          console.log("Joining channel:", channelName);
+          echo.private(channelName).listenForWhisper("MessageSent", (e) => {
+            if (e.sender?.id === user?.id) return;
+
+            const newMessage = {
+              id: e.id,
+              content: e.content,
+              created_at: e.created_at,
+              sender: e.sender,
+            };
+
+            setMessages((prev) => [...prev, newMessage]);
+
+            setChats((prevChats) =>
+              prevChats.map((c) =>
+                c.id === chat.id
+                  ? {
+                      ...c,
+                      messages: [...(c.messages || []), newMessage],
+                      last_message: newMessage,
+                    }
+                  : c
+              )
+            );
+
+            if (selectedChat?.id !== chat.id) {
+              setUnreadCounts((prev) => ({
+                ...prev,
+                [chat.id]: (prev[chat.id] || 0) + 1,
+              }));
+            }
+          });
+          joinedChannels.current.add(channelName);
+        }
+      });
+
       const counts = {};
       fetchedChats.forEach((chat) => {
         counts[chat.id] = chat.unread_count || 0;
       });
       setUnreadCounts(counts);
     } catch (error) {
+      console.error('Error fetching initial data:', error);
       toast.error("Error fetching initial data");
     }
-  };
+  }, [echo, selectedChat?.id, user]);
 
-  // Cleanup function for echo channels
   useEffect(() => {
+    if (echo && user) {
+      fetchInitialData();
+    }
+  }, [echo, user, fetchInitialData]);
+
+  useEffect(() => {
+    if (selectedChat) {
+      setMessages(selectedChat.messages || []);
+      markMessagesAsRead(selectedChat.id);
+    }
+  }, [selectedChat]);
+
+  useEffect(() => {
+    const joinedChannelsSnapshot = joinedChannels.current;
     return () => {
       if (echo) {
-        // Leave all channels on unmount
         Object.keys(echo.connector.channels).forEach((channelName) => {
           echo.leaveChannel(channelName);
         });
-        // Clear joined channels set
-        joinedChannels.current.clear();
+        joinedChannelsSnapshot.clear();
       }
     };
   }, [echo]);
 
   const sendMessage = async (content, chat) => {
-    if (!echo || !chat) return;
+    if (!echo || !chat || !user) return;
 
     try {
       const newMessage = {
@@ -159,58 +159,74 @@ export const ChatProvider = ({ children }) => {
 
       await chatService.sendMessage(content, chat.id);
     } catch (error) {
+      console.error('Error sending message:', error);
       toast.error("Error sending message");
     }
   };
+
   const updateChat = (chatId, newMessage) => {
     setChats((prevChats) =>
       prevChats.map((chat) =>
         chat.id === chatId
-          ? { ...chat, messages: [...chat.messages, newMessage] }
+          ? {
+              ...chat,
+              messages: [...(chat.messages || []), newMessage],
+              last_message: newMessage,
+            }
           : chat
       )
     );
   };
 
-  const onSelectUser = (selectedUser) => {
-    // Find if there's an existing chat with the selected user
-    const existingChat = chats.find((chat) =>
-      chat.participants.some(
-        (participant) => participant.user.id === selectedUser.id
-      )
-    );
+  const onSelectUser = async (selectedUser) => {
+    if (!selectedUser) return;
 
-    if (existingChat) {
-      setSelectedChat(existingChat);
-    } else {
-      // Create new chat session if none exists
-      chatService.newSession(selectedUser.id);
+    try {
+      const existingChat = chats.find((chat) =>
+        chat.participants?.some(
+          (participant) => participant.user?.id === selectedUser.id
+        )
+      );
+
+      if (existingChat) {
+        setSelectedChat(existingChat);
+      } else {
+        const newChat = await chatService.newSession(selectedUser.id);
+        setChats((prev) => [...prev, newChat]);
+        setSelectedChat(newChat);
+      }
+    } catch (error) {
+      console.error('Error selecting user:', error);
+      toast.error("Error creating chat session");
     }
   };
 
   const markMessagesAsRead = async (chatId) => {
+    if (!chatId) return;
+
     try {
       await axios.post(`/api/messages/mark-read`, {
         chat_id: chatId,
       });
 
-      // Clear unread count for this chat
       setUnreadCounts((prev) => ({
         ...prev,
         [chatId]: 0,
       }));
     } catch (error) {
+      console.error('Error marking messages as read:', error);
       toast.error("Error marking messages as read");
     }
   };
 
   const addParticipantToChat = async (chatId, userId) => {
+    if (!chatId || !userId) return;
+
     try {
       await axios.post(`/api/chats/${chatId}/participants`, {
         user_id: userId,
       });
 
-      // Update the local chat state with the new participant
       setChats((prevChats) =>
         prevChats.map((chat) => {
           if (chat.id === chatId) {
@@ -218,7 +234,7 @@ export const ChatProvider = ({ children }) => {
             return {
               ...chat,
               participants: [
-                ...chat.participants,
+                ...(chat.participants || []),
                 {
                   user: newParticipant,
                   chat_id: chatId,
@@ -234,7 +250,7 @@ export const ChatProvider = ({ children }) => {
         setSelectedChat((prev) => ({
           ...prev,
           participants: [
-            ...prev.participants,
+            ...(prev.participants || []),
             {
               user: users.find((u) => u.id === userId),
               chat_id: chatId,
@@ -243,23 +259,25 @@ export const ChatProvider = ({ children }) => {
         }));
       }
     } catch (error) {
+      console.error('Error adding participant:', error);
       toast.error("Error adding participant");
     }
   };
 
   const removeParticipantFromChat = async (chatId, userId) => {
+    if (!chatId || !userId) return;
+
     try {
       await axios.delete(`/api/chats/${chatId}/participants/${userId}`);
 
-      // Update local state
       setChats((prevChats) =>
         prevChats.map((chat) => {
           if (chat.id === chatId) {
             return {
               ...chat,
-              participants: chat.participants.filter(
-                (p) => p.sender.id !== userId
-              ),
+              participants: chat.participants?.filter(
+                (p) => p.user?.id !== userId
+              ) || [],
             };
           }
           return chat;
@@ -269,10 +287,13 @@ export const ChatProvider = ({ children }) => {
       if (selectedChat?.id === chatId) {
         setSelectedChat((prev) => ({
           ...prev,
-          participants: prev.participants.filter((p) => p.sender.id !== userId),
+          participants: prev.participants?.filter(
+            (p) => p.user?.id !== userId
+          ) || [],
         }));
       }
     } catch (error) {
+      console.error('Error removing participant:', error);
       toast.error("Error removing participant");
     }
   };
@@ -283,9 +304,7 @@ export const ChatProvider = ({ children }) => {
         messages,
         currentSessionId,
         setCurrentSessionId,
-
         sendMessage,
-
         users,
         onlineUsers,
         chats,

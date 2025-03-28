@@ -25,6 +25,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
+import { useAuth } from "@/hooks/auth";
 
 const CategoryComponent = () => {
   const {
@@ -33,10 +34,13 @@ const CategoryComponent = () => {
     update: updateCategory,
     destroy: deactivateCategory,
   } = useCategory();
+
+  const { user } = useAuth();
   const [categorys, setCategory] = useState([]);
   const [open, setOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
+  const [departmentId, setdepartmentId] = useState("");
   const [errors, setErrors] = useState({});
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [viewCategory, setViewCategory] = useState(null);
@@ -44,26 +48,19 @@ const CategoryComponent = () => {
   const [deactivatingId, setDeactivatingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState(""); // Add search query state
 
+  const fetchCategoryData = async () => {
+    const { data } = await showCategory();
+    setCategory(data);
+  };
+
   useEffect(() => {
-    const fetchCategorys = async () => {
-      try {
-        const response = await showCategory();
-        if (response && response.data) {
-          setCategory(response.data);
-        } else {
-          throw new Error("Invalid response structure");
-        }
-      } catch (error) {
-        console.error("Failed to fetch categorys:", error);
-        toast.error("Failed to load categorys. Please try again later.");
-      }
-    };
-    fetchCategorys();
-  }, [showCategory]);
+    fetchCategoryData();
+  }, [showCategory, fetchCategoryData]);
 
   const columns = [
     { field: "id", headerName: "ID", width: 5 },
     { field: "name", headerName: "Category Name", flex: 1, minWidth: 180 },
+    // { field: "department_id", headerName: "department id", flex: 1, minWidth: 180 },
     { field: "modified_by", headerName: "Modified By", width: 180 },
     { field: "updated_at", headerName: "Updated At", width: 180 },
     { field: "created_at", headerName: "Created At", width: 180 },
@@ -109,35 +106,39 @@ const CategoryComponent = () => {
     },
   ];
 
-  const filteredRows = categorys
-    .filter((category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .map((category) => ({
-      id: category.id,
-      name: category.name,
-      modified_by: category.modified_by || "N/A",
-      updated_at: category.updated_at
-        ? new Date(category.updated_at).toLocaleString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          })
-        : "N/A",
-      created_at: category.created_at
-        ? new Date(category.created_at).toLocaleString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          })
-        : "N/A",
-    }));
+  let filteredRows = [];
+  if (categorys && categorys.length > 0) {
+    filteredRows = categorys
+      .filter((category) =>
+        category.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .map((category) => ({
+        id: category.id,
+        name: category.name,
+        department_id: category.department_id,
+        modified_by: category.modified_by || "N/A",
+        updated_at: category.updated_at
+          ? new Date(category.updated_at).toLocaleString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "N/A",
+        created_at: category.created_at
+          ? new Date(category.created_at).toLocaleString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "N/A",
+      }));
+  }
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -150,6 +151,7 @@ const CategoryComponent = () => {
 
   const resetForm = () => {
     setCategoryName("");
+    setdepartmentId("");
     setErrors({});
     setEditingCategoryId(null);
   };
@@ -157,6 +159,7 @@ const CategoryComponent = () => {
   const handleEdit = (category) => {
     setEditingCategoryId(category.id);
     setCategoryName(category.name);
+    setdepartmentId(category.department_id);
     setOpen(true);
   };
 
@@ -191,31 +194,28 @@ const CategoryComponent = () => {
     }
 
     setLoading(true);
-    try {
-      if (editingCategoryId) {
-        await updateCategory(editingCategoryId, object);
-        toast.success("Category updated successfully!");
-      } else {
-        await store(object);
-        toast.success("Category added successfully!");
-      }
-      handleClose();
-    } catch (error) {
-      console.error("Error submitting category:", error);
-      if (error.response && error.response.status === 422) {
-        setErrors(error.response.data.errors);
-      } else {
-        setErrors({ form: "An error occurred. Please try again." });
-      }
-    } finally {
-      setLoading(false);
+    if (editingCategoryId) {
+      const { data } = await updateCategory(editingCategoryId, object);
+      data
+        ? (toast.success("Category updated successfully!"), fetchCategoryData())
+        : toast.error("Something went wrong!");
+    } else {
+      const { data } = await store(object);
+      data.success
+        ? (toast.success("Category added successfully!"), fetchCategoryData())
+        : toast.error("Something went wrong!");
     }
+    handleClose();
+
+    setLoading(false);
   }
 
   function validateForm(object) {
     const errors = {};
     if (!object.categoryName)
       errors.categoryName = "Category Name is required.";
+    // if (!object.departmentId)
+    //   errors.departmentId = "Department ID is required.";
     return errors;
   }
   const paginationModel = { page: 0, pageSize: 10 };
@@ -334,6 +334,17 @@ const CategoryComponent = () => {
                 />
                 {errors.categoryName && (
                   <p className="text-red-500 text-sm">{errors.categoryName}</p>
+                )}
+                <input
+                  type="hidden"
+                  id="departmentId"
+                  name="departmentId"
+                  value={user.department_id}
+                  onChange={(e) => setdepartmentId(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+                {errors.departmentId && (
+                  <p className="text-red-500 text-sm">{errors.departmentId}</p>
                 )}
               </div>
               {errors.form && (

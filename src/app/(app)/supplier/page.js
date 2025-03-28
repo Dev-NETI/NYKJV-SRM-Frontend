@@ -1,13 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "@/lib/axios";
 import useSWR from "swr";
 import StoreSupplierDrawer from "@/components/supplier/supplier-store";
 import SupplierEdit from "@/components/supplier/supplier-edit";
 import SupplierRead from "@/components/supplier/supplier-read";
-import { Edit } from "lucide-react";
-import { Trash } from "lucide-react";
-import { Eye } from "lucide-react";
+import { Edit, Eye, Trash } from "lucide-react";
 import {
   Box,
   Button,
@@ -15,7 +13,6 @@ import {
   Divider,
   Typography,
   Skeleton,
-  Grid,
   FormControl,
   FormLabel,
   Input,
@@ -36,18 +33,60 @@ export default function DataTable() {
   const [isReadDrawerOpen, setReadDrawerOpen] = useState(false);
   const [deleteAlert, setDeleteAlert] = useState(false);
   const [suppliers, setSuppliers] = useState([]);
-  const [modalOpen, setModalOpen] = React.useState(false);
-  const [selectedSupplierId, setSelectedSupplierId] = React.useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
   const [userState, setUserState] = useState({
     userData: [],
     responseStore: true,
   });
-
   const [pagination, setPagination] = useState({
     page: 1,
     perPage: 10,
     lastPage: 1,
   });
+  const [searchParams, setSearchParams] = useState({
+    name: "",
+  });
+  const [loading, setLoading] = useState(false); // Added loading state from main
+
+  const handleSearch = () => {
+    const trimmedName = searchParams.name.trim();
+    if (trimmedName === "") {
+      console.log("Empty search input. Aborting.");
+      return;
+    }
+    console.log("Searching for:", trimmedName);
+    setPagination({ ...pagination, page: 1 });
+    fetchSuppliers();
+  };
+
+  const fetchSuppliers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("/api/supplier", {
+        params: {
+          name: searchParams.name,
+          page: pagination.page,
+          per_page: 10,
+        },
+      });
+
+      if (response?.data?.suppliers) {
+        setSuppliers(response.data.suppliers);
+        setPagination({
+          page: response.data.pagination.current_page,
+          total: response.data.pagination.total,
+          lastPage: response.data.pagination.last_page,
+        });
+      } else {
+        setSuppliers([]);
+      }
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams.name, pagination.page]);
 
   const fetcher = async (url) => {
     try {
@@ -88,7 +127,7 @@ export default function DataTable() {
     if (pagination.lastPage !== totalPages) {
       setPagination((prev) => ({ ...prev, lastPage: totalPages || 1 }));
     }
-  }, [filteredRows.length, pagination.perPage]); 
+  }, [filteredRows.length, pagination.perPage]);
 
   const paginatedRows = React.useMemo(() => {
     const startIndex = (pagination.page - 1) * pagination.perPage;
@@ -115,78 +154,46 @@ export default function DataTable() {
     setIsDrawerOpen(true);
   };
 
-const handleDelete = async () => {
-  try {
-    await axios.delete(`/api/supplier/${selectedSupplierId}`);
-    const data = await fetcher("/api/supplier"); 
-    setSuppliers(data.suppliers || []);
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`/api/supplier/${selectedSupplierId}`);
+      const data = await fetcher("/api/supplier");
+      setSuppliers(data.suppliers || []);
+      handleAlert();
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Failed to delete the supplier:", error);
+    }
+  };
 
-    handleAlert();
-    setModalOpen(false);
-  } catch (error) {
-    setError("Failed to delete the supplier. Please try again.");
-  }
-};
   const openDeleteModal = (id) => {
     setSelectedSupplierId(id);
     setModalOpen(true);
   };
+
   const handlePageChange = (newPage) => {
-    const totalPages = pagination.lastPage; // Use lastPage from state
+    const totalPages = pagination.lastPage;
     if (newPage >= 1 && newPage <= totalPages) {
       setPagination((prev) => ({ ...prev, page: newPage }));
     }
   };
+
   const columns = [
-    {
-      field: "name",
-      headerName: "Name",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
-    {
-      field: "department",
-      headerName: "Department",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
-    {
-      field: "region",
-      headerName: "Region",
-      width: { xs: "5%", sm: "5%", md: "5%" },
-    },
-    {
-      field: "province",
-      headerName: "Province",
-      width: { xs: "20%", sm: "20%", md: "20%" },
-    },
-    {
-      field: "citymun",
-      headerName: "City Municipality",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
-    {
-      field: "brgy",
-      headerName: "Barangay",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
-    {
-      field: "street_address",
-      headerName: "Street Address",
-      width: { xs: "15%", sm: "15%", md: "15%" },
-    },
+    { field: "name", headerName: "Name", width: "15%" },
+    { field: "department", headerName: "Department", width: "15%" },
+    { field: "region", headerName: "Region", width: "5%" },
+    { field: "province", headerName: "Province", width: "20%" },
+    { field: "citymun", headerName: "City Municipality", width: "15%" },
+    { field: "brgy", headerName: "Barangay", width: "15%" },
+    { field: "street_address", headerName: "Street Address", width: "15%" },
     {
       field: "Action",
-      width: { xs: "10%", sm: "10%", md: "10%" },
+      width: "10%",
       filterable: false,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            flexWrap: "nowrap",
-          }}
-        >
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "nowrap" }}>
           <button
             className="flex items-center bg-blue-600 p-2 rounded-md text-white"
             onClick={() => handleRead(params.row.id)}
@@ -203,7 +210,7 @@ const handleDelete = async () => {
             className="flex items-center bg-red-600 p-2 rounded-md text-white"
             onClick={(e) => {
               e.stopPropagation();
-              openDeleteModal(params.row.id); // Open modal instead of directly calling handleDelete
+              openDeleteModal(params.row.id);
             }}
           >
             <Trash className="w-4 h-4" />
@@ -212,6 +219,7 @@ const handleDelete = async () => {
       ),
     },
   ];
+
   return (
     <>
       {supplierData ? (
@@ -225,38 +233,29 @@ const handleDelete = async () => {
                 mb: 2,
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography level="h4" color="primary">
-                  Search Supplier
-                </Typography>
-              </Box>
+              <Typography level="h4" color="primary">
+                Search Supplier
+              </Typography>
             </Box>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                flexWrap: "wrap",
-              }}
-            >
-              <FormControl sx={{ mt: 2 }}>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+              <FormControl sx={{ minWidth: 200 }}>
+                <FormLabel>Name</FormLabel>
                 <Input
                   placeholder="Search by name..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  value={searchParams.name}
+                  onChange={(e) =>
+                    setSearchParams((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
                 />
               </FormControl>
               <Button
                 variant="solid"
                 color="primary"
                 sx={{ alignSelf: "flex-end" }}
-                // startDecorator={<Search />}
-                // onClick={handleSearch}
+                onClick={handleSearch}
               >
                 Search
               </Button>
@@ -279,7 +278,7 @@ const handleDelete = async () => {
                 }}
               >
                 <Typography level="h4" color="primary">
-                  List of Users
+                  List of Suppliers
                 </Typography>
                 <StoreSupplierDrawer />
               </Box>
@@ -312,9 +311,7 @@ const handleDelete = async () => {
                   "--TableCell-paddingX": "16px",
                   minWidth: "1000px",
                   tableLayout: "fixed",
-                  "& tbody": {
-                    bgcolor: "background.surface",
-                  },
+                  "& tbody": { bgcolor: "background.surface" },
                   "& thead th": {
                     fontWeight: "bold",
                     color: "text.primary",
@@ -324,9 +321,7 @@ const handleDelete = async () => {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   },
-                  "& tbody tr": {
-                    transition: "background-color 0.2s",
-                  },
+                  "& tbody tr": { transition: "background-color 0.2s" },
                   "& td": {
                     color: "text.secondary",
                     padding: "12px",
@@ -334,9 +329,7 @@ const handleDelete = async () => {
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     maxWidth: 0,
-                    "&[title]": {
-                      cursor: "pointer",
-                    },
+                    "&[title]": { cursor: "pointer" },
                   },
                 }}
               >
@@ -357,10 +350,7 @@ const handleDelete = async () => {
                           <td
                             key={`${row.id}-${column.field}`}
                             title={column.renderCell ? null : row[column.field]}
-                            sx={{
-                              maxHeight: "100px",
-                              lineHeight: "1.5",
-                            }}
+                            sx={{ maxHeight: "100px", lineHeight: "1.5" }}
                           >
                             {column.renderCell
                               ? column.renderCell({ row })
@@ -381,7 +371,6 @@ const handleDelete = async () => {
                   )}
                 </tbody>
               </Table>
-
               <Box
                 sx={{
                   display: "flex",
@@ -401,7 +390,7 @@ const handleDelete = async () => {
                     size="sm"
                     variant="solid"
                     disabled={pagination.page === 1}
-                    onClick={() => handlePageChange(pagination.page - 1)} // Decrease page
+                    onClick={() => handlePageChange(pagination.page - 1)}
                   >
                     Previous
                   </Button>
@@ -415,7 +404,7 @@ const handleDelete = async () => {
                       color={
                         pagination.page === index + 1 ? "primary" : "neutral"
                       }
-                      onClick={() => handlePageChange(index + 1)} // Go to specific page
+                      onClick={() => handlePageChange(index + 1)}
                     >
                       {index + 1}
                     </Button>
@@ -424,7 +413,7 @@ const handleDelete = async () => {
                     size="sm"
                     variant="solid"
                     disabled={pagination.page >= pagination.lastPage}
-                    onClick={() => handlePageChange(pagination.page + 1)} // Increase page
+                    onClick={() => handlePageChange(pagination.page + 1)}
                   >
                     Next
                   </Button>
@@ -432,13 +421,13 @@ const handleDelete = async () => {
               </Box>
             </Sheet>
           </Card>
-          {deleteAlert ? (
+          {deleteAlert && (
             <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
               <Alert icon={<DeleteIcon fontSize="inherit" />} severity="error">
                 Successfully Deleted
               </Alert>
             </div>
-          ) : null}
+          )}
           <SupplierRead
             supplierId={readSupplierId}
             onClose={() => setReadDrawerOpen(false)}
@@ -458,7 +447,6 @@ const handleDelete = async () => {
           />
         </UserContext.Provider>
       ) : (
-        // Render Skeleton loading when data is being fetched
         <div>
           <Box
             sx={{

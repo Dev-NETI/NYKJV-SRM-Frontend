@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   TextField,
   Chip,
@@ -9,15 +9,23 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, ErrorMessage, Field } from "formik";
 import * as Yup from "yup";
-import { useOrder } from "@/hooks/api/order";
+import StarterKit from "@tiptap/starter-kit";
+import {
+  MenuButtonBold,
+  MenuButtonItalic,
+  MenuControlsContainer,
+  MenuDivider,
+  MenuSelectHeading,
+  RichTextEditor,
+} from "mui-tiptap";
 import axios from "@/lib/axios";
 import { useAuth } from "@/hooks/auth";
 import SnackBarComponent from "../material-ui/SnackBarComponent";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function EmailFileUploadForm() {
-  const { store: sendQuotation } = useOrder("send-quotation");
   const [file, setFile] = useState(null);
   const { user } = useAuth({ middleware: "auth" });
   const [snackbarState, setSnackbarState] = useState({
@@ -26,10 +34,30 @@ export default function EmailFileUploadForm() {
     severity: "success",
   });
 
+  const rteRef = useRef(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const validationSchema = Yup.object().shape({
     emails: Yup.array()
       .of(Yup.string().email("Invalid email"))
       .min(1, "At least one email is required"),
+    emailBody: Yup.string()
+      .required("Message is required!")
+      .test(
+        "minLength",
+        "Message must be at least 10 characters long",
+        (value) => {
+          const editorContent = rteRef.current?.editor?.getHTML();
+          return (
+            editorContent &&
+            editorContent.replace(/<\/?[^>]+(>|$)/g, "").trim().length >= 10
+          );
+        }
+      ),
     fileQuotation: Yup.mixed()
       .required("File is required")
       .test(
@@ -40,52 +68,47 @@ export default function EmailFileUploadForm() {
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
-    try {
-      values.company = user?.company?.name;
+    values.company = user?.supplier?.name;
+    values.supplierId = user?.supplier_id;
+    values.orderDocumentTypeId = 1;
+    values.fileName = values.fileQuotation.name;
+    values.emailBody = rteRef.current?.editor?.getHTML();
 
-      const { data: response } = await axios.post(
-        "/api/order/send-quotation",
-        values,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    const { data: response } = await axios.post(
+      "/api/order/send-quotation",
+      values,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    setSubmitting(true);
+    setSnackbarState({
+      open: true,
+      message: response.message,
+      severity: response.severity,
+    });
 
-      response.response
-        ? setSnackbarState({
-            open: true,
-            message: "Quotation sent successfully!",
-            severity: "success",
-          })
-        : setSnackbarState({
-            open: true,
-            message: "Whoops! Something went wrong!",
-            severity: "error",
-          });
-
-      resetForm();
-      setFile(null);
-    } catch (error) {
-      setSnackbarState({
-        open: true,
-        message: "An error occurred while sending the quotation.",
-        severity: "error",
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    rteRef.current.value = "";
+    resetForm();
+    setFile(null);
+    setSubmitting(false);
   };
 
   return (
     <>
       <Formik
-        initialValues={{ emails: [], emailInput: "", fileQuotation: null }}
+        initialValues={{
+          emails: [],
+          emailBody: "",
+          emailInput: "",
+          fileQuotation: null,
+        }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ values, setFieldValue, isSubmitting }) => (
+        {({ values, setFieldValue, isSubmitting, errors }) => (
           <Form>
             <Box sx={{ maxWidth: 500, margin: "auto", mt: 5 }}>
               <Typography variant="h5" gutterBottom>
@@ -100,6 +123,7 @@ export default function EmailFileUploadForm() {
                 fullWidth
                 margin="normal"
                 helperText="Press Enter or , to add email"
+                disabled={!user?.supplier_id}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === ",") {
                     e.preventDefault();
@@ -139,10 +163,39 @@ export default function EmailFileUploadForm() {
               </Box>
 
               <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Message
+                </Typography>
+                {isClient && (
+                  <RichTextEditor
+                    ref={rteRef}
+                    extensions={[StarterKit]}
+                    content="<p>Dear Sir/Ma'am,</p><p>Your message here.</p>"
+                    immediatelyRender={false}
+                    onUpdate={({ editor }) =>
+                      setFieldValue("emailBody", editor.getHTML())
+                    }
+                    renderControls={() => (
+                      <MenuControlsContainer>
+                        <MenuSelectHeading />
+                        <MenuDivider />
+                        <MenuButtonBold />
+                        <MenuButtonItalic />
+                      </MenuControlsContainer>
+                    )}
+                  />
+                )}
+                {errors.emailBody && (
+                  <Typography color="error">{errors.emailBody}</Typography>
+                )}
+              </Box>
+
+              <Box sx={{ mt: 3 }}>
                 <Button
                   variant="contained"
                   component="label"
                   startIcon={<CloudUploadIcon />}
+                  disabled={!user?.supplier_id}
                   fullWidth
                 >
                   Upload File
@@ -187,7 +240,7 @@ export default function EmailFileUploadForm() {
                   type="submit"
                   variant="contained"
                   color="primary"
-                  disabled={isSubmitting}
+                  disabled={!user?.supplier_id}
                 >
                   {isSubmitting ? "Sending..." : "Send"}
                 </Button>
@@ -204,6 +257,8 @@ export default function EmailFileUploadForm() {
         severity={snackbarState.severity}
         message={snackbarState.message}
       />
+
+      <ToastContainer />
     </>
   );
 }

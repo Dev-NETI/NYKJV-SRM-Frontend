@@ -8,6 +8,7 @@ import {
   Option,
   Select,
   Typography,
+  CircularProgress,
 } from "@mui/joy";
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
@@ -25,7 +26,10 @@ function UserFormComponent({
   const { storeUser, setUserState, showSnackbar, updateUser } =
     useContext(UserContext);
 
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const onSubmit = async (data) => {
+    setIsSubmitting(true);
     try {
       let response;
       if (mode === 1) {
@@ -73,6 +77,8 @@ function UserFormComponent({
           showSnackbar(error.message, "danger");
         }
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -167,30 +173,58 @@ function UserFormComponent({
         <Box sx={{ mb: 2 }}>
           <SelectFieldComponent
             form={form}
-            name="company_id"
-            label="Company"
-            DataState={DataState.company_data}
+            name="creation_type"
+            label="Creation Type"
+            DataState={[
+              { id: 1, name: "Admin" },
+              { id: 2, name: "Supplier" },
+            ]}
             defaultValue="0"
           />
         </Box>
-        <Box sx={{ mb: 2 }}>
-          <SelectFieldComponent
-            form={form}
-            name="department_id"
-            label="Department"
-            DataState={DataState.department_data}
-            defaultValue="0"
-          />
-        </Box>
-        <Box sx={{ mb: 2 }}>
-          <SelectFieldComponent
-            form={form}
-            name="supplier_id"
-            label="Supplier"
-            DataState={DataState.supplier_data}
-            defaultValue="0"
-          />
-        </Box>
+        {form.getValues("creation_type") === 1 ? (
+          <>
+            <Box sx={{ mb: 2 }}>
+              <SelectFieldComponent
+                form={form}
+                name="company_id"
+                label="Company"
+                DataState={DataState.company_data}
+                defaultValue="0"
+              />
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <SelectFieldComponent
+                form={form}
+                name="department_id"
+                label="Department"
+                DataState={DataState.department_data}
+                defaultValue="0"
+              />
+            </Box>
+          </>
+        ) : form.getValues("creation_type") === 2 ? (
+          <React.Fragment>
+            <Box sx={{ mb: 2 }}>
+              <SelectFieldComponent
+                form={form}
+                name="supplier_id"
+                label="Supplier"
+                DataState={DataState.supplier_data.suppliers}
+                defaultValue="0"
+              />
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <SelectFieldComponent
+                form={form}
+                name="department_id"
+                label="Department"
+                DataState={DataState.department_data}
+                defaultValue="0"
+              />
+            </Box>
+          </React.Fragment>
+        ) : null}
         <Box sx={{ mb: 2 }}>
           <Typography
             component="h2"
@@ -236,11 +270,22 @@ function UserFormComponent({
           variant="plain"
           color="neutral"
           onClick={mode === 1 ? handleCloseAddModal : handleCloseEditModal}
+          disabled={isSubmitting}
         >
           Cancel
         </Button>
-        <Button variant="solid" color="primary" type="submit">
-          {mode === 1 ? "Add User" : "Update User"}
+        <Button
+          variant="solid"
+          color="primary"
+          type="submit"
+          disabled={isSubmitting}
+          startDecorator={isSubmitting ? <CircularProgress size="sm" /> : null}
+        >
+          {isSubmitting
+            ? "Submitting..."
+            : mode === 1
+              ? "Add User"
+              : "Update User"}
         </Button>
       </Box>
     </form>

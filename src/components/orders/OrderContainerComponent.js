@@ -2,7 +2,7 @@ import React from "react";
 import { useOrder } from "@/stores/OrderContext";
 
 function OrderContainerComponent() {
-  const { activeStepper, activeView } = useOrder();
+  const { activeView } = useOrder();
 
   return (
     <div

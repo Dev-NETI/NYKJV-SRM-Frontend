@@ -1,15 +1,15 @@
 "use client";
+import * as React from "react";
 import { CssVarsProvider } from "@mui/joy/styles";
 import CssBaseline from "@mui/joy/CssBaseline";
-import * as React from "react";
 import Sheet from "@mui/joy/Sheet";
-
 import MessagesPane from "./MessagesPane";
 import ChatsPane from "./ChatsPane";
 import { ChatProvider } from "@/stores/ChatContext";
 
 export default function ChatPage() {
   return (
+    
     <CssVarsProvider disableTransitionOnChange>
       <ChatProvider>
         <CssBaseline />

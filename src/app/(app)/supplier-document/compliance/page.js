@@ -1,5 +1,5 @@
 "use client";
- import Header from "../../Header";
+import Header from "../../Header";
 import React, { useState } from "react";
 import ComplianceDocumentListComponent from "@/components/supplier-document/compliance/ComplianceDocumentListComponent";
 import DocumentListNavigationComponent from "@/components/supplier-document/DocumentListNavigationComponent";
@@ -8,8 +8,9 @@ import DocumentFormComponent from "@/components/supplier-document/DocumentFormCo
 import { Snackbar } from "@mui/material";
 import { SupplierDocumentContext } from "@/stores/SupplierDocumentContext";
 import Alert from "@mui/material/Alert";
+import { useAuth } from "@/hooks/auth";
 
-function page() {
+function Page() {
   const [supplierDocumentState, setSupplierDocumentState] = useState({
     modal: false,
     snackbar: false,
@@ -18,11 +19,12 @@ function page() {
     snackbarHorizontal: "right",
     snackBarSeverity: "success",
     reload: true,
-    activePage: 1, //1 - documents, 0 - trash  
+    activePage: 1, //1 - documents, 0 - trash
     supplierId: 0,
   });
-
-  const [initialDocumentTypeInForm, setInitialDocumentTypeInForm] = useState(null);
+  const { user } = useAuth({ middlware: "auth" });
+  const [initialDocumentTypeInForm, setInitialDocumentTypeInForm] =
+    useState(null);
 
   const handleClickOpen = (id = 0) => {
     setSupplierDocumentState((prevState) => ({ ...prevState, modal: true }));
@@ -35,15 +37,26 @@ function page() {
 
   return (
     <SupplierDocumentContext.Provider
-      value={{ supplierDocumentState, setSupplierDocumentState, initialDocumentTypeInForm, setInitialDocumentTypeInForm }}
+      value={{
+        supplierDocumentState,
+        setSupplierDocumentState,
+        initialDocumentTypeInForm,
+        setInitialDocumentTypeInForm,
+      }}
     >
       <div className="p-4">
         <Header title="Documents" />
         <div className="flex flex-col md:flex-row lg:flex-row gap-4 mt-4">
-          <DocumentListNavigationComponent
+          {user?.supplier_id ? (
+            <DocumentListNavigationComponent
+              handleOpenFileUploadModal={handleClickOpen}
+            />
+          ) : (
+            <></>
+          )}
+          <ComplianceDocumentListComponent
             handleOpenFileUploadModal={handleClickOpen}
           />
-          <ComplianceDocumentListComponent handleOpenFileUploadModal={handleClickOpen} />
         </div>
 
         <DialogComponent
@@ -90,4 +103,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
