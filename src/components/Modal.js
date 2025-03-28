@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import axios from 'axios'; // Import axios for the delete request
 
 const style = {
   position: 'absolute',
@@ -22,8 +21,8 @@ export default function BasicModal({ open, onClose, onConfirm, title, descriptio
   
     const handleDelete = async () => {
       try {
-        await onConfirm();  // Calls the deletion function from the parent component
-        onClose();  // Close the modal on success
+        await onConfirm();  
+        onClose();  
       } catch (err) {
         console.error("Error deleting supplier:", err.response ? err.response.data : err.message);
         setError("Failed to delete the supplier. Please try again.");

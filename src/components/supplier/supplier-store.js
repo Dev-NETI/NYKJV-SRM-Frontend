@@ -5,22 +5,18 @@ import {
   Button,
   Grid,
   Typography,
-  TextField,
   MenuItem,
   Select,
   FormControl,
-  InputLabel,
+  Alert,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-
-import axios from "axios";
-import local_axios from "@/lib/axios";
-
+import axios from "@/lib/axios";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import PersonIcon from "@mui/icons-material/Person";
-import TerrainIcon from "@mui/icons-material/Terrain";
+import WorkspacesIcon from "@mui/icons-material/Workspaces";
 import MapsHomeWorkIcon from "@mui/icons-material/MapsHomeWork";
 import ForestIcon from "@mui/icons-material/Forest";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
@@ -28,305 +24,148 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import AddIcon from "@mui/icons-material/Add";
 import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
-import Skeleton from "@mui/material/Skeleton";
-
+import ReportIcon from "@mui/icons-material/Report";
 
 const FormSchema = z
   .object({
-    name: z.string().nonempty({ message: "Required" }),
-    island: z.string().nonempty("Required"),
-    region_id: z
-      .string()
-      .nonempty("Required")
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-
-    province_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-
-    district_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-
-    city_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-
-    municipality_id: z
-      .string()
-      .optional()
-      .nullable()
-      .refine((val) => !val || !isNaN(Number(val)), {
-        message: "Must be a number",
-      })
-      .transform((val) => (val ? Number(val) : null)),
-
-    brgy_id: z
-      .string()
-      .nonempty("Required")
-      .refine((val) => !isNaN(Number(val)), { message: "Must be a number" })
-      .transform((val) => Number(val))
-      .nullable(),
-
-    street_address: z.string().nonempty({ message: "Required" }),
+    name: z.string().min(1, "Required"),
+    department: z.number().min(1, "Required"),
+    region: z.string().min(1, "Required"),
+    province: z.string().min(1, "Required"),
+    citymun: z.string().min(1, "Required"),
+    brgy: z.string().min(1, "Required"),
+    street_address: z.string().min(1, "Required"),
     is_active: z.boolean().optional(),
   })
   .strict();
 
 const StoreSupplierDrawer = () => {
+  const [alert, setAlert] = React.useState(false);
+  const [warningAlert, setWarningAlert] = React.useState(false);
   const [state, setState] = React.useState({ right: false });
+  const [selectedRegion, setSelectedRegion] = React.useState("");
+  const [selectedProvince, setSelectedProvince] = React.useState("");
+  const [selectedCityMun, setSelectedCityMun] = React.useState("");
+  const [selectedBarangay, setSelectedBarangay] = React.useState("");
+  const [departmentData, setDepartmentData] = React.useState([]);
+  const [regionData, setRegionData] = React.useState([]);
+  const [provinceData, setProvinceData] = React.useState([]);
+  const [citymunData, setCitymunData] = React.useState([]);
+  const [brgyData, setBrgyData] = React.useState([]);
+
+  const fetchData = async () => {
+    try {
+      const [departments, regions, provinces, cities, barangays] =
+        await Promise.all([
+          axios.get("/api/supplier/department"),
+          axios.get("/api/supplier/fetch_region"),
+          axios.get("/api/supplier/fetch_province"),
+          axios.get("/api/supplier/fetch_citymun"),
+          axios.get("/api/supplier/fetch_brgy"),
+        ]);
+      setDepartmentData(departments.data || []); // Ensure it's an array
+      setRegionData(regions.data || []);
+      setProvinceData(provinces.data || []);
+      setCitymunData(cities.data || []);
+      setBrgyData(barangays.data || []);
+    } catch (error) {
+      console.error("Error fetching supplier data:", error);
+    }
+  };
+  const filteredProvinces = React.useMemo(() => {
+    if (!selectedRegion || !provinceData?.province) return [];
+    return provinceData.province.filter(
+      (prov) => String(prov.regCode) === String(selectedRegion)
+    );
+  }, [selectedRegion, provinceData]);
+  const filteredCitymun = React.useMemo(() => {
+    if (!selectedProvince || !citymunData?.citymun) return [];
+    return citymunData.citymun.filter(
+      (city) => String(city.provCode) === String(selectedProvince)
+    );
+  }, [selectedProvince, citymunData]);
+  const filteredBrgy = React.useMemo(() => {
+    if (!selectedCityMun || !brgyData?.brgy) return [];
+    return brgyData.brgy.filter(
+      (brgy) => String(brgy.citymunCode) === String(selectedCityMun)
+    );
+  }, [selectedCityMun, brgyData]);
   const { control, clearErrors, handleSubmit, reset } = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
-      island: "",
-      province_id: null,
-      district_id: null,
-      city_id: null,
-      municipality_id: null,
-      brgy_id: null,
+      department: "",
+      region: "",
+      province: "",
       street_address: "",
+      citymun: "",
+      brgy: "",
       is_active: false,
     },
   });
-
-  const [islandGroups, setIslandGroups] = React.useState([]);
-  const [regionGroups, setRegionGroups] = React.useState([]);
-  const [provinceGroups, setProvinceGroups] = React.useState([]);
-  const [districtGroups, setDistrictGroups] = React.useState([]);
-  const [cityGroups, setCityGroups] = React.useState([]);
-  const [municipalityGroups, setMunicipalityGroups] = React.useState([]);
-  const [barangayGroups, setBarangayGroups] = React.useState([]);
-
-  const [alert, setAlert] = React.useState(false);
-  const [streetAddressGroups, setStreetAddressGroups] = React.useState([]);
-
-  const [selectedIsland, setSelectedIsland] = React.useState(null);
-  const [selectedRegion, setSelectedRegion] = React.useState(null);
-  const [selectedProvince, setSelectedProvince] = React.useState(null);
-  const [selectedDistrict, setSelectedDistrict] = React.useState(null);
-  const [selectedCity, setSelectedCity] = React.useState(null);
-  const [selectedMunicipality, setSelectedMunicipality] = React.useState(null);
-  const [selectedBrgy, setSelectedBrgy] = React.useState(null);
-  const [selectedStreetAddress, setSelectedStreetAddress] =
-    React.useState(null);
-
-  const fetchIslandGroups = async () => {
-    try {
-      const response = await axios.get(
-        "https://psgc.gitlab.io/api/island-groups/"
-      );
-      setIslandGroups(response.data || []);
-    } catch (error) {
-      // console.error("Error fetching island groups:", error);
-      setIslandGroups([]);
-    }
+  const handleRegionChange = (value) => {
+    console.log("Region changed to:", value);
+    setSelectedRegion(value);
+    setSelectedProvince("");
+    setSelectedCityMun("");
+    setSelectedBarangay("");
   };
-
-  const fetchRegionGroups = async (islandId) => {
-    try {
-      const response = await axios.get(
-        `https://psgc.gitlab.io/api/island-groups/${islandId}/regions/`
-      );
-      setRegionGroups(response.data || []);
-    } catch (error) {
-      // console.error("Error fetching region groups:", error);
-    }
+  const handleProvinceChange = (value) => {
+    console.log("Province changed to:", value);
+    setSelectedProvince(value);
+    setSelectedCityMun("");
+    setSelectedBarangay("");
   };
-
-  const fetchProvincesGroups = async (regionId) => {
-    try {
-      const response = await axios.get(
-        `https://psgc.gitlab.io/api/regions/${regionId}/provinces/`
-      );
-      setProvinceGroups(response.data || []);
-      // console.log("Fetch Provinces: ", response.data);
-    } catch (error) {
-      // console.error("Error Fetching Provinces:", error);
-      setProvinceGroups([]);
-    }
+  const handleCityMunChange = (value) => {
+    console.log("CityMun changed to:", value);
+    setSelectedCityMun(value);
+    setSelectedBarangay("");
   };
-
-  const fetchDistrictGroups = async (regionId) => {
-    try {
-      const response = await axios.get(
-        `https://psgc.gitlab.io/api/regions/${regionId}/districts/`
-      );
-      setDistrictGroups(response.data || []);
-      // console.log("Fetch Districts: ", response.data);
-    } catch (error) {
-      // console.error("Error Fetching Districts:", error);
-      setDistrictGroups([]);
-    }
+  const handleBarangayChange = (value) => {
+    console.log("Barangay changed to:", value);
+    setSelectedBarangay(value);
   };
-
-  const fetchCityGroups = async (districtId) => {
-    try {
-      const response = await axios.get(
-        `https://psgc.gitlab.io/api/districts/${districtId}/cities/`
-      );
-      setCityGroups(response.data || []);
-      // console.log("Fetch Cities: ", response.data);
-    } catch (error) {
-      // console.error("Error fetching city groups:", error);
-      setCityGroups([]);
-    }
-  };
-
   const handleClear = () => {
     reset();
-    setRegionGroups([]);
-    setProvinceGroups([]);
-    setDistrictGroups([]);
-    setCityGroups([]);
-    setMunicipalityGroups([]);
+    setSelectedRegion("");
+    setSelectedProvince("");
+    setSelectedCityMun("");
+    setSelectedBarangay("");
   };
-
   const handleAlert = () => {
     setAlert(true);
     setTimeout(() => {
       setAlert(false);
     }, 3000);
   };
-
-  const fetchMunicipalities = async (provinceId) => {
-    try {
-      const response = await axios.get(
-        `https://psgc.gitlab.io/api/provinces/${provinceId}/municipalities/`
-      );
-      setMunicipalityGroups(response.data || []);
-    } catch (error) {
-      // console.error("Error fetching municipalities:", error);
-      setMunicipalityGroups([]);
-    }
+  const handleWarningAlert = () => {
+    setWarningAlert(true);
+    setTimeout(() => {
+      setWarningAlert(false);
+    }, 3000);
   };
-
-  const fetchBarangays = async (municipalityId, cityId) => {
-    try {
-      const endpoint = municipalityId
-        ? `https://psgc.gitlab.io/api/municipalities/${municipalityId}/barangays/`
-        : `https://psgc.gitlab.io/api/cities/${cityId}/barangays/`;
-
-      const response = await axios.get(endpoint);
-      setBarangayGroups(response.data || []);
-    } catch (error) {
-      // console.error("Error fetching barangays:", error);
-      setBarangayGroups([]);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchIslandGroups();
-  }, []);
-
-  const handleIslandChange = (islandId) => {
-    setSelectedIsland(islandId);
-    setSelectedRegion(null);
-    setSelectedProvince(null);
-    setSelectedDistrict(null);
-    setSelectedMunicipality(null);
-    setSelectedCity(null);
-    setBarangayGroups([]);
-    setStreetAddressGroups([]);
-    fetchRegionGroups(islandId);
-  };
-
-  const handleRegionChange = (regionId) => {
-    setSelectedRegion(regionId);
-    setSelectedProvince(null);
-    setSelectedDistrict(null);
-    setSelectedMunicipality(null);
-    setSelectedCity(null);
-    setBarangayGroups([]);
-    setStreetAddressGroups([]);
-    fetchProvincesGroups(regionId);
-    fetchDistrictGroups(regionId);
-  };
-
-  const handleProvinceChange = (provinceId) => {
-    setSelectedProvince(provinceId);
-    setSelectedDistrict(null);
-    setSelectedMunicipality(null);
-    setSelectedCity(null);
-    setBarangayGroups([]);
-    setStreetAddressGroups([]);
-    fetchMunicipalities(provinceId);
-    fetchCitiesForProvince(provinceId);
-  };
-
-  const handleDistrictChange = (districtId) => {
-    setSelectedDistrict(districtId);
-    setSelectedMunicipality(null);
-    setSelectedCity(null);
-    setBarangayGroups([]);
-    setStreetAddressGroups([]);
-    fetchCityGroups(districtId);
-  };
-
-  const handleMunicipalityChange = (municipalityId) => {
-    setSelectedMunicipality(municipalityId);
-    fetchBarangays(municipalityId, null);
-    setStreetAddressGroups([]);
-  };
-  const handleCityChange = (cityId) => {
-    setSelectedCity(cityId);
-    setStreetAddressGroups([]);
-    fetchBarangays(null, cityId);
-  };
-
-  const fetchCitiesForProvince = async (provinceId) => {
-    try {
-      const response = await axios.get(
-        `https://psgc.gitlab.io/api/provinces/${provinceId}/cities/`
-      );
-      setCityGroups(response.data || []);
-    } catch (error) {
-      // console.error("Error fetching cities for province:", error);
-      setCityGroups([]);
-    }
-  };
-
+  
   const submitForm = async (data) => {
     try {
-      const response = await local_axios.post("/api/supplier", data);
-      // console.log("Supplier Created Successfully", response.data);
+      const response = await axios.post("/api/supplier", data);
       handleAlert();
-      reset(); // This clears your form; ensure this function is defined in your code
+      reset();
       setState({ ...state, right: false });
-      // toggleDrawer("right", false);
     } catch (error) {
-      if (error.response) {
-        // Backend errors (like validation errors)
-        // console.error("Error response:", error.response.data);
+      if (error.response.status == 409) {
+        handleWarningAlert(true);
+        setState({ ...state, right: false });
       } else {
-        // Other errors (like network issues)
-        // console.error("Error submitting the form:", error.message);
+        console.error("Submission error:", error.message);
       }
     }
   };
 
-  const toggleDrawer = (anchor, open) => (event) => {
+  const toggleDrawer = (anchor, open) => async (event) => {
     setState({ ...state, [anchor]: open });
+    if (open) {
+      await fetchData();
+    }
   };
 
   const formList = (anchor) => (
@@ -357,59 +196,63 @@ const StoreSupplierDrawer = () => {
                     component: "input",
                   },
                   {
-                    name: "island",
-                    label: "Island",
-                    icon: <TerrainIcon fontSize="lg" />,
+                    name: "department",
+                    label: "Department",
+                    icon: <WorkspacesIcon fontSize="lg" />,
+                    type: "text",
                     component: "select",
-                    options: islandGroups,
-                    onChange: handleIslandChange,
+                    options: (departmentData?.department || []).map((dept) => ({
+                      code: Number(dept.id), 
+                      name: dept.name,
+                    })),
                   },
                   {
-                    name: "region_id",
+                    name: "region",
                     label: "Region",
                     icon: <MapsHomeWorkIcon fontSize="lg" />,
                     component: "select",
-                    options: regionGroups,
-                    onChange: handleRegionChange,
+                    onChange: (value) => handleRegionChange(value),
+                    options: (regionData?.region || []).map((reg) => ({
+                      id: reg.id,
+                      code: reg.regCode,
+                      name: reg.regDesc,
+                    })),
                   },
                   {
-                    name: "province_id",
+                    name: "province",
                     label: "Province",
                     icon: <ForestIcon fontSize="lg" />,
                     component: "select",
-                    options: provinceGroups,
-                    onChange: handleProvinceChange,
+                    onChange: (value) => handleProvinceChange(value),
+                    options: filteredProvinces.map((prov) => ({
+                      id: prov.id,
+                      code: prov.provCode,
+                      name: prov.provDesc,
+                    })),
                   },
                   {
-                    name: "district_id",
-                    label: "District",
-                    icon: <LocationCityIcon fontSize="lg" />,
-                    component: "select",
-                    options: districtGroups,
-                    onChange: handleDistrictChange,
-                  },
-                  {
-                    name: "city_id",
-                    label: "City",
-                    icon: <LocationCityIcon fontSize="lg" />,
-                    component: "select",
-                    options: cityGroups,
-                    onChange: handleCityChange,
-                  },
-                  {
-                    name: "municipality_id",
+                    name: "citymun",
                     label: "Municipality",
                     icon: <LocationCityIcon fontSize="lg" />,
                     component: "select",
-                    options: municipalityGroups,
-                    onChange: handleMunicipalityChange,
+                    onChange: (value) => handleCityMunChange(value),
+                    options: filteredCitymun.map((cm) => ({
+                      id: cm.id,
+                      code: cm.citymunCode,
+                      name: cm.citymunDesc,
+                    })),
                   },
                   {
-                    name: "brgy_id",
+                    name: "brgy",
                     label: "Barangay",
                     icon: <GroupsIcon fontSize="lg" />,
                     component: "select",
-                    options: barangayGroups,
+                    onChange: (value) => handleBarangayChange(value),
+                    options: filteredBrgy.map((brgy) => ({
+                      id: brgy.id,
+                      code: brgy.brgyCode,
+                      name: brgy.brgyDesc,
+                    })),
                   },
                   {
                     name: "street_address",
@@ -438,7 +281,7 @@ const StoreSupplierDrawer = () => {
                               {component === "input" ? (
                                 <input
                                   type={type}
-                                  className="w-full h-8 cursor-pointer hover:bg-[#f8f4f4] px-3"
+                                  className="w-full h-8 cursor-pointer hover:bg-[#f8f4f4] px-3 text-sm"
                                   placeholder="Empty"
                                   {...field}
                                 />
@@ -447,6 +290,26 @@ const StoreSupplierDrawer = () => {
                                   <Select
                                     {...field}
                                     value={field.value || ""}
+                                    displayEmpty
+                                    renderValue={(selected) => {
+                                      if (selected === "") {
+                                        return (
+                                          <span className="text-gray-400">
+                                            Empty
+                                          </span>
+                                        );
+                                      }
+                                      const selectedOption = options.find(
+                                        (option) => option.code === selected
+                                      );
+                                      return selectedOption ? (
+                                        selectedOption.name
+                                      ) : (
+                                        <span className="text-gray-400">
+                                          Empty
+                                        </span>
+                                      );
+                                    }}
                                     sx={{
                                       paddingX: "0px",
                                       fontSize: "14px",
@@ -455,9 +318,10 @@ const StoreSupplierDrawer = () => {
                                       "& fieldset": { border: "none" },
                                       "&:hover": { backgroundColor: "#f8f4f4" },
                                       "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                        { border: "2px solid #000" },
+                                        {
+                                          border: "2px solid #000",
+                                        },
                                     }}
-                                    displayEmpty
                                     error={!!fieldState.error}
                                     IconComponent={() => null}
                                     onChange={(e) => {
@@ -472,7 +336,7 @@ const StoreSupplierDrawer = () => {
                                         Empty
                                       </span>
                                     </MenuItem>
-                                    {options &&
+                                    {Array.isArray(options) ? (
                                       options.map((group) => (
                                         <MenuItem
                                           key={group.code}
@@ -480,7 +344,12 @@ const StoreSupplierDrawer = () => {
                                         >
                                           {group.name}
                                         </MenuItem>
-                                      ))}
+                                      ))
+                                    ) : (
+                                      <MenuItem disabled>
+                                        No options available
+                                      </MenuItem>
+                                    )}
                                   </Select>
                                 </FormControl>
                               )}
@@ -552,16 +421,23 @@ const StoreSupplierDrawer = () => {
         anchor="right"
         open={state["right"]}
         onClose={toggleDrawer("right", false)}
-      > 
+      >
         {formList("right")}
       </Drawer>
-      {alert ? (
+      {alert && (
         <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
-            <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-              Successfully Added
-            </Alert>
+          <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
+            Successfully Added
+          </Alert>
         </div>
-      ) : null}
+      )}
+      {warningAlert && (
+        <div className="fixed inset-x-0 bottom-[7rem] flex justify-center z-50">
+          <Alert icon={<ReportIcon fontSize="inherit" />} severity="warning">
+            Supplier Already Exist
+          </Alert>
+        </div>
+      )}
     </div>
   );
 };
