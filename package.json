@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/ios": "^7.2.0",
     "@edgestore/react": "^0.2.2",
     "@edgestore/server": "^0.2.2",
     "@emotion/react": "^11.13.5",
@@ -70,6 +73,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.2.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.2",
     "laravel-echo": "^1.16.1",
